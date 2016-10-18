@@ -1,0 +1,85 @@
+Sub DoppeltePermanenteIDSuchen
+	'Letzte Änderung: 14.10.16, Erasmus Bieri
+
+	'Dieser Makro bestimmt die permanenten IDs, welche doppelt vorkommen.
+	'Das Ergebnis wird im Ordner, welcher die Datei "aufgdbphys.odb" enthält,
+	'unter dem Namen "doppeltePermaneteIDs.dat" gespeichert.
+
+	'Ruft folgende Funktionen auf:
+	' -> aIDUndPermanenteIDInArraySchreiben()
+
+	Dim aArrayMitDoppeltVorkommendenIDs(0)
+	aIDPermanenteID = aIDUndPermanenteIDInArraySchreiben("Aufgaben")
+	for i = 0 to ubound(aIDPermanenteID(),2)
+		for j = i+1 to ubound(aIDPermanenteID(),2)
+			if aIDPermanenteID(1,i) = aIDPermanenteID(1,j) then
+				Redim Preserve aArrayMitDoppeltVorkommendenIDs(ubound(aArrayMitDoppeltVorkommendenIDs) + 1)
+				aArrayMitDoppeltVorkommendenIDs(ubound(aArrayMitDoppeltVorkommendenIDs)) = aIDPermanenteID(1,i)
+			end if
+		next j
+	next i
+	
+	sPrint = ""
+	for i = 0 to ubound(aArrayMitDoppeltVorkommendenIDs)
+		'print aArrayMitDoppeltVorkommendenIDs(i)
+		sPrint = sPrint & aArrayMitDoppeltVorkommendenIDs(i) & chr(13)
+	next i
+	
+	'Ergebnis in Datei schreiben:
+	sWorkingDirectory = sfWorkingDirectory("aufgdbphys.odb")
+	print sWorkingDirectory
+	oSFA = createUnoService("com.sun.star.ucb.SimpleFileAccess")
+	oOutputStream = createUnoService("com.sun.star.io.TextOutputStream")
+	oDatei = oSFA.OpenFileReadWrite(sWorkingDirectory & "doppeltePermaneteIDs.dat")
+	oOutputStream.SetOutputStream(oDatei.getOutputStream)
+	oOutputStream.writeString(sPrint)
+	oOutputStream.closeOutput()
+End Sub
+
+
+Function aIDUndPermanenteIDInArraySchreiben(sTabellenname as String)
+	'Letzte Änderung: 14.10.16, Erasmus Bieri
+
+	'Diese Funktion lässt sich sinnvoll nur auf die Tabelle "Aufgaben" anwenden.
+	'Aus dieser liest er die Spalten 1 (ID) und 22 (permanente ID) aus und gibt
+	'diese Werte in einem Array zurück.
+
+	Dim DatabaseContext As Object
+	Dim DataSource As Object
+	Dim Connection As Object
+	Dim InteractionHandler as Object
+	Dim Statement As Object
+	DatabaseContext = createUnoService("com.sun.star.sdb.DatabaseContext")
+	DataSource = DatabaseContext.getByName("aufgdbphys")
+    If Not DataSource.IsPasswordRequired Then
+       Connection = DataSource.GetConnection("","")
+    Else
+       InteractionHandler = createUnoService("com.sun.star.sdb.InteractionHandler")
+       Connection = DataSource.ConnectWithCompletion(InteractionHandler)
+    End If
+    Statement = Connection.createStatement()
+	
+	sSelect = "SELECT * FROM """ & sTabellenname & """"
+	MsgBox sSelect
+	ResultSet = Statement.executeQuery(sSelect)	
+	
+	j = 0
+	If Not IsNull(ResultSet) Then
+   		While ResultSet.next
+   			'for i = 1 to ResultSet.columns.count
+				Redim Preserve aDatenTabelle(1,j)
+				aDatenTabelle(0,j) = ResultSet.getString(1)
+				aDatenTabelle(1,j) = ResultSet.getString(22)
+			'next
+			
+			'if j mod 550 = 0 then
+			'	print aDatenTabelle(0,j) & " " & aDatenTabelle(1,j)
+			'end if
+			
+			j = j + 1
+		Wend
+	End If
+	
+	aIDUndPermanenteIDInArraySchreiben = aDatenTabelle
+	
+End Function

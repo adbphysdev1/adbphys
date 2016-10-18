@@ -1,0 +1,19 @@
+}
+
+\newlength\foo
+\setlength\foo{0.5\linewidth}
+\addtolength\foo{-0.2pt}
+\newcommand*\foobar[1][\empty]{%
+  \ifx#1\empty
+    \noindent\rule{\foo}{0.4pt}%
+    \rule{0.4pt}{5pt}%
+    \rule{\foo}{0.4pt}%
+  \else
+    \noindent\rule{\foo}{0.4pt}%
+    \raisebox{-4.6pt}{\rule{0.4pt}{5pt}}%
+    \rule{\foo}{0.4pt}%
+  \fi
+}
+
+
+%\begin{document}
