@@ -2,6 +2,4 @@ Copyright (c) 2010-2016 Erasmus Bieri, Michael Oettli
 
 Makros zur Physikaufgabendatenbank, Stand Oktober 2016.
 
-Change Log:
-* 1.2.13 -> 2016.10.0:
-Umbennung Versionen: Vorteil Alter direkt ersichtlich
+Change Log befindet sich im Verzeichnis pkg-desc/changelog.txt
