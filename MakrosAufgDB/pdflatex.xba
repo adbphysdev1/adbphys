@@ -1,0 +1,178 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE script:module PUBLIC "-//OpenOffice.org//DTD OfficeDocument 1.0//EN" "module.dtd">
+<script:module xmlns:script="http://openoffice.org/2000/script" script:name="pdflatex" script:language="StarBasic">REM  *****  BASIC  *****
+
+Sub Main
+
+End Sub
+
+Sub PdflatexKompilieren(sPfadZurTexDatei, sTexDatei As String)
+	sUrlPfadAktuellerOrdner = convertfromurl(sPfadZurTexDatei)
+	&apos;--- neu START 9.8.13
+	sUrlTexDatei = convertfromurl(sPfadZurTexDatei &amp; &quot;/&quot; &amp; sTexDatei &amp; &quot;.tex&quot;)
+	sUrlPdfDatei = convertfromurl(sPfadZurTexDatei &amp; &quot;/&quot; &amp; sTexDatei &amp; &quot;.pdf&quot;)
+	sUrlLogDatei = convertfromurl(sPfadZurTexDatei &amp; &quot;/&quot; &amp; sTexDatei &amp; &quot;.log&quot;)
+	&apos;--- neu END 9.8.13
+	&apos;Kompilieren
+	if afSystemeinstellungen(1) = 1 then
+		&apos;bestehende pdf-Datei löschen
+		shell(&quot;rm &quot; &amp; sUrlPdfDatei)
+		
+		shilfPdfErstellen = &quot;pdflatex --halt-on-error --output-directory=&quot;&amp; sUrlPfadAktuellerOrdner &amp; &quot; &quot; &amp; sUrlTexDatei
+		&apos;msgbox shilfPdfErstellen
+		&apos;Shellbefehlausführen: pdflatex
+		shell(shilfPdfErstellen,0,,true)
+		
+		&apos;Testen, ob eine pdf-Datei erstellt wurde (falls nicht: Fehler! -&gt; Fehlermeldung auslesen!)
+		if FileExists(sUrlPdfDatei) then
+			&apos;msgbox &quot;pdflatex war für die Datei&quot; &amp; chr(13) &amp; chr(13) &amp; sUrlTexDatei &amp; chr(13) &amp; chr(13) &amp; &quot;erfolgreich.&quot;
+		else
+			msgbox &quot;ACHTUNG: pdflatex war für die Datei&quot; &amp; chr(13) &amp; chr(13) &amp; sUrlTexDatei &amp; chr(13) &amp; chr(13) &amp; &quot;NICHT erfolgreich.&quot; &amp; chr(13) &amp;_
+			&quot;Eine Fehlermeldung wird ausgegeben.&quot;
+			sLogDatei = sTextAuslesenString(sUrlLogDatei)
+			if InStr(sLogDatei,&quot;! &quot;) &gt; 0 then
+				s2 = Mid(sLogDatei,InStr(sLogDatei,&quot;! &quot;),600)
+				msgbox(&quot;pdflatex-Fehlermeldung:&quot; &amp; chr(13)&amp;  chr(13) &amp; s2)
+			end if
+		end if
+	elseif afSystemeinstellungen(1) = 2 then 
+			&apos;bestehende pdf-Datei löschen
+			shell(&quot;rm &quot; &amp; convertfromurl(sPfadZurTexDatei) &amp; &quot;/&quot; &amp; sTexDatei &amp; &quot;.pdf&quot;) 
+			
+			shilf1 = &quot;/bin/bash -lc &quot; &amp; Chr$(34) &amp; &quot;/usr/texbin/pdflatex --halt-on-error --output-directory=&quot;&amp; sUrlPfadAktuellerOrdner &amp;_
+			&quot; &quot; &amp; sUrlTexDatei &amp; Chr$(34) 
+			&apos;msgbox shilf1
+			shell(shilf1,0,,true)
+			
+
+		&apos;Testen, ob eine pdf-Datei erstellt wurde (falls nicht: Fehler! -&gt; Fehlermeldung auslesen!)
+		if FileExists(sUrlPdfDatei) then
+			&apos;msgbox &quot;pdflatex war für die Datei&quot; &amp; chr(13) &amp; chr(13) &amp; sUrlTexDatei &amp; chr(13) &amp; chr(13) &amp; &quot;erfolgreich.&quot;
+		else
+			msgbox &quot;ACHTUNG: pdflatex war für die Datei&quot; &amp; chr(13) &amp; chr(13) &amp; sUrlTexDatei &amp; chr(13) &amp; chr(13) &amp; &quot;NICHT erfolgreich.&quot; &amp; chr(13) &amp;_
+			&quot;Eine Fehlermeldung wird ausgegeben.&quot;
+			sLogDatei = sTextAuslesenString(sUrlLogDatei)
+			if InStr(sLogDatei,&quot;! &quot;) &gt; 0 then
+				s2 = Mid(sLogDatei,InStr(sLogDatei,&quot;! &quot;),600)
+				msgbox(&quot;pdflatex-Fehlermeldung:&quot; &amp; chr(13)&amp;  chr(13) &amp; s2)
+			end if
+		end if
+			
+	&apos;neu START 9.8.13
+	elseif afSystemeinstellungen(1) = 3 then
+		&apos;bestehende pdf-Datei löschen
+		if FileExists(sUrlPdfDatei) then
+			On Error GoTo ErrorHandlerPdf
+			Kill(sUrlPdfDatei)
+			
+			ErrorHandlerPdf:
+				Resume Next
+		end if
+		
+		&apos;&apos;Shellbefehlausführen: pdflatex
+		&apos;shilfPdfErstellen = &quot;C:\texlive\2013\bin\win32\pdflatex.exe --halt-on-error --output-directory=&quot; &amp; chr(34) &amp; sUrlPfadAktuellerOrdner &amp; chr(34) &amp; &quot; &quot; &amp; sUrlTexDatei
+		&apos;shilfPdfErstellen = ConvertToUrl(&quot;C:\texlive\2013\bin\win32\pdflatex.exe&quot;) &apos;&amp; --halt-on-error --output-directory=&quot;&quot;&quot; &amp; sUrlPfadAktuellerOrdner &amp; &quot;&quot;&quot; &quot; &amp; sUrlTexDatei)
+		&apos;shilfPdfErstellen = &quot;C:\texlive\2013\bin\win32\pdflatex --halt-on-error --output-directory=&quot;&amp; sUrlPfadAktuellerOrdner &amp; &quot; &quot; &amp; sTexDatei
+		&apos;shilfPdfErstellen = &quot;C:/texlive/2013/bin/win32/pdflatex.exe --halt-on-error --output-directory=C:/Users/bieri/Desktop/&quot; &amp; sfAufgabenverzeichnis &amp; &quot;/1 C:/Users/bieri/Desktop/&quot; &amp; sfAufgabenverzeichnis &amp; &quot;/1/aufgabe.tex&quot;
+		&apos;msgbox shilfPdfErstellen
+		&apos;shell(shilfPdfErstellen,6,&quot;&quot;,true)
+		&apos;wait(2000)
+		
+		sPfadPdflatex = sfPfadPdflatex
+		&apos;msgbox sPfadPdflatex
+		oShell = createUNOService(&quot;com.sun.star.system.SystemShellExecute&quot;)
+		oshell.execute(chr(34) &amp; sPfadPdflatex &amp; chr(34), &quot;--halt-on-error --output-directory=&quot;&amp; chr(34) &amp; sUrlPfadAktuellerOrdner &amp; chr(34) &amp; &quot; &quot; &amp; chr(34) &amp; sUrlTexDatei  &amp; chr(34), 1)
+		&apos;oshell.execute(&quot;C:\texlive\2013\bin\win32\pdflatex.exe&quot; , &quot;--halt-on-error --output-directory=&quot;&amp; sUrlPfadAktuellerOrdner &amp; &quot; &quot; &amp; sUrlTexDatei, 1)
+		wait(afWaitingTimeWindows())
+		
+		&apos;Testen, ob eine pdf-Datei erstellt wurde (falls nicht: Fehler! -&gt; Fehlermeldung auslesen!)
+		&apos;if FileExists(sUrlPdfDatei) then
+			&apos;msgbox &quot;pdflatex war für die Datei&quot; &amp; chr(13) &amp; chr(13) &amp; sUrlTexDatei &amp; chr(13) &amp; chr(13) &amp; &quot;erfolgreich.&quot;
+		&apos;else
+		sLogDatei = sTextAuslesenString(sUrlLogDatei)
+		if InStr(sLogDatei,&quot;! &quot;) &gt; 0 then
+			s2 = Mid(sLogDatei,InStr(sLogDatei,&quot;! &quot;),600)
+			msgbox &quot;ACHTUNG: pdflatex war für die Datei&quot; &amp; chr(13) &amp; chr(13) &amp; sUrlTexDatei &amp; chr(13) &amp; chr(13) &amp; &quot;NICHT erfolgreich.&quot; &amp; chr(13) &amp;_
+			&quot;pdflatex-Fehlermeldung:&quot; &amp; chr(13)&amp;  chr(13) &amp; s2
+		end if
+		&apos;end if		
+	&apos;neu END 9.8.13 
+	end if
+End Sub
+
+Sub PdfAnzeigen(sPfadZurTexDatei, sTexDatei As String)
+	Dim oShell as object
+	oShell = createUnoService(&quot;com.sun.star.system.SystemShellExecute&quot;)
+	
+	sUrlPdfDatei = convertfromurl(sPfadZurTexDatei) &amp; &quot;/&quot; &amp; sTexDatei &amp; &quot;.pdf&quot;
+
+	&apos; Anzeigen
+	if afSystemeinstellungen(1) = 1 then
+		if FileExists(sUrlPdfDatei) then
+			&apos;shell(&quot;evince &quot; &amp; sUrlPdfDatei)
+			oShell.execute(ConvertToUrl(sUrlPdfDatei), &quot;&quot;, 0)
+		end if
+	elseif afSystemeinstellungen(1) = 2 then
+		if FileExists(sUrlPdfDatei) then
+			&apos;shell(&quot;open &quot; &amp; sUrlPdfDatei)
+			oShell.execute(ConvertToUrl(sUrlPdfDatei), &quot;&quot;, 0)
+		end if
+	&apos;neu START 9.8.13
+	elseif afSystemeinstellungen(1) = 3 then
+		if FileExists(sUrlPdfDatei) then
+			&apos;shell(&quot;open &quot; &amp; sUrlPdfDatei)
+			oShell.execute(ConvertToUrl(sUrlPdfDatei), &quot;&quot;, 0)
+		end if
+	&apos;neu END 9.8.13
+	end if
+End Sub
+
+Sub PdfToPng(sPfadZurPdfDatei, sPdfDatei As String)
+	if afSystemeinstellungen(1) = 1 then
+		shilf3 = &quot;/bin/bash -lc &quot; &amp; Chr$(34) &amp; &quot;convert -density 300 &quot; &amp; convertfromurl(sPfadZurPdfDatei) &amp; &quot;/&quot; &amp; sPdfDatei &amp; &quot;.pdf &quot;&amp; convertfromurl(sPfadZurPdfDatei) &amp; &quot;/&quot; &amp; sPdfDatei &amp; &quot;.jpg&quot; &amp; Chr$(34)
+		&apos;MsgBox shilf3
+		shell(shilf3,,,true)
+	elseif afSystemeinstellungen(1) = 2 then
+		shilf3 = &quot;/bin/bash -lc &quot; &amp; Chr$(34) &amp; &quot;convert -density 300 &quot; &amp; convertfromurl(sPfadZurPdfDatei) &amp; &quot;/&quot; &amp; sPdfDatei &amp; &quot;.pdf &quot;&amp; convertfromurl(sPfadZurPdfDatei) &amp; &quot;/&quot; &amp; sPdfDatei &amp; &quot;.jpg&quot; &amp; Chr$(34)
+		&apos;MsgBox shilf3
+		shell(shilf3,0,,true)
+	&apos;neu START 9.8.13
+	elseif afSystemeinstellungen(1) = 3 then
+		oShell = createUnoService(&quot;com.sun.star.system.SystemShellExecute&quot;)
+		sPfadConvert = sfPfadConvert
+		&apos;msgbox sPfadConvert
+		shilf3a = chr(34) &amp; sPfadConvert &amp; chr(34)
+		&apos;msgbox shilf3a
+		shilf3b = &quot;-density 300 &quot; &amp; chr(34) &amp; convertfromurl(sPfadZurPdfDatei) &amp; &quot;\&quot; &amp; sPdfDatei &amp; &quot;.pdf&quot; &amp; chr(34) &amp; &quot; &quot; &amp; chr(34) &amp; convertfromurl(sPfadZurPdfDatei) &amp; &quot;\&quot; &amp; sPdfDatei &amp; &quot;.jpg&quot; &amp; chr(34)
+		&apos;msgbox shilf3b
+		oshell.execute(shilf3a, shilf3b, 1)
+	&apos;neu END 9.8.13
+	end if
+End Sub
+
+Sub PdflatexHilfsdateienLoeschen(sPfadZurTexDatei, sTexDatei As String)
+	&apos; Hilfsdateien löschen
+	if afSystemeinstellungen(1) = 1 then
+		shell(&quot;rm &quot; &amp; convertfromurl(sPfadZurTexDatei) &amp; &quot;/&quot; &amp; sTexDatei &amp; &quot;.aux&quot;)
+		shell(&quot;rm &quot; &amp; convertfromurl(sPfadZurTexDatei) &amp; &quot;/&quot; &amp; sTexDatei &amp; &quot;.log&quot;)
+		shell(&quot;rm &quot; &amp; convertfromurl(sPfadZurTexDatei) &amp; &quot;/&quot; &amp; sTexDatei &amp; &quot;.out&quot;)
+	elseif afSystemeinstellungen(1) = 2 then
+		shell(&quot;rm &quot; &amp; convertfromurl(sPfadZurTexDatei) &amp; &quot;/&quot; &amp; sTexDatei &amp; &quot;.aux&quot;)
+		shell(&quot;rm &quot; &amp; convertfromurl(sPfadZurTexDatei) &amp; &quot;/&quot; &amp; sTexDatei &amp; &quot;.log&quot;)
+		shell(&quot;rm &quot; &amp; convertfromurl(sPfadZurTexDatei) &amp; &quot;/&quot; &amp; sTexDatei &amp; &quot;.out&quot;)
+		shell(&quot;rm &quot; &amp; convertfromurl(sPfadZurTexDatei) &amp;  &quot;/&quot; &amp; sTexDatei &amp; &quot;_error.txt&quot;)
+	&apos;neu START 9.8.13
+	elseif afSystemeinstellungen(1) = 3 then
+		&apos;if FileExists(converttourl(convertfromurl(sPfadZurTexDatei) &amp; &quot;\&quot; &amp; sTexDatei &amp; &quot;.aux&quot;)) then
+		&apos;	Kill(converttourl(convertfromurl(sPfadZurTexDatei) &amp; &quot;\&quot; &amp; sTexDatei &amp; &quot;.aux&quot;))
+		&apos;end if
+		&apos;if FileExists(converttourl(convertfromurl(sPfadZurTexDatei) &amp; &quot;\&quot; &amp; sTexDatei &amp; &quot;.log&quot;)) then
+		&apos;	Kill(converttourl(convertfromurl(sPfadZurTexDatei) &amp; &quot;\&quot; &amp; sTexDatei &amp; &quot;.log&quot;))
+		&apos;end if
+		&apos;if FileExists(converttourl(convertfromurl(sPfadZurTexDatei) &amp; &quot;\&quot; &amp; sTexDatei &amp; &quot;.out&quot;)) then
+		&apos;	Kill(converttourl(convertfromurl(sPfadZurTexDatei) &amp; &quot;\&quot; &amp; sTexDatei &amp; &quot;.out&quot;))
+		&apos;end if
+	&apos;neu END 9.8.13
+	end if
+End Sub
+</script:module>

@@ -1,0 +1,164 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE script:module PUBLIC "-//OpenOffice.org//DTD OfficeDocument 1.0//EN" "module.dtd">
+<script:module xmlns:script="http://openoffice.org/2000/script" script:name="MakrosAufgDB" script:language="StarBasic">REM  *****  BASIC  *****
+
+Sub Main
+	TexDateiErstellen()
+End Sub
+
+Sub TexDateiErstellen
+	Dim DatabaseContext As Object
+	Dim DataSource As Object
+	Dim Connection As Object
+	Dim InteractionHandler as Object
+	Dim Statement As Object
+    Dim ResultSet, ResultSet2 As Object
+
+	Dim	sTexDatei As String
+	Dim	sTexHeader As String
+	Dim	sTexFooter As String
+	Dim sTexDateienVerzeichnis As String
+ 	Dim sAufgabenDateiName As String
+	Dim sHeaderDateiName As String
+	Dim sFooterDateiName As String
+	Dim sWorkingDirectory As String
+
+	Dim iAufgabenDateiNummer As Integer
+	Dim iHeaderDateiNummer As Integer
+	Dim iFooterDateiNummer As Integer
+    iAufgabenDateiNummer = FreeFile
+    iHeaderDateiNummer = FreeFile
+    iFooterDateiNummer = FreeFile
+    
+    &apos;DatenbankKontext erstellen
+    DatabaseContext = createUnoService(&quot;com.sun.star.sdb.DatabaseContext&quot;)
+    &apos;Datenbank kontaktieren
+    DataSource = DatabaseContext.getByName(&quot;aufgdbphys&quot;)
+    &apos;Testen, ob Passwort benötigt wird
+    If Not DataSource.IsPasswordRequired Then
+    	Connection = DataSource.GetConnection(&quot;&quot;,&quot;&quot;)
+    Else	
+    	InteractionHandler = createUnoService(&quot;com.sun.star.sdb.InteractionHandler&quot;)
+    	Connection = DataSource.ConnectWithCompletion(InteractionHandler)
+    End If
+    &apos;Abfrage erstellen
+    Statement = Connection.createStatement()
+   &apos;ResultSet = Statement.executeQuery(&quot; SELECT `aufgaben`.`Aufg_ID` AS `Aufg_ID`, `aufgaben`.`AutorID` AS `AutorID`, `aufgaben`.`SchwierigkeitsgradID` AS `SchwierigkeitsgradID`, `aufgaben`.`Untergebiet` AS `Untergebiet`, `aufgaben`.`Aufgabentext` AS `Aufgabentext`, `aufgaben`.`Lösung` AS `Lösung`, `aufgaben`.`LinkBild` AS `LinkBild`, `aufgaben`.`AuswahlDruck` AS `AuswahlDruck`, `aufgaben`.`Position` AS `Position` FROM `ph_aufg_db`.`aufgaben` `aufgaben` WHERE ( aufgaben.AuswahlDruck = true ) ORDER BY `position`&quot;)
+    ResultSet = Statement.executeQuery(&quot;SELECT `Aufgaben`.`AufgID` AS `AufgID`, `Aufgaben`.`Fachgebiet` AS `Fachgebiet`, `Aufgaben`.`Author` AS `Author`, `Aufgaben`.`Schwierigkeitsgrad` AS `Schwierigkeitsgrad`, `Aufgaben`.`LetzteAenderung` AS `LetzteAenderung`, `Aufgaben`.`AufgabenText` AS `AufgabenText`, `Aufgaben`.`LinkZuBild` AS `LinkZuBild`, `Aufgaben`.`MC2` AS `MC2`, `Aufgaben`.`MC3` AS `MC3`, `Aufgaben`.`MC4` AS `MC4`, `Aufgaben`.`MC5` AS `MC5`, `Aufgaben`.`MC6` AS `MC6`, `Aufgaben`.`Loesung` AS `Loesung`, `Aufgaben`.`Auswahl` AS `Auswahl`, `Aufgaben`.`Position` AS `Position` FROM `Aufgaben` `Aufgaben` WHERE ( `Aufgaben`.`Auswahl` = True ) ORDER BY `Aufgaben`.`Position`, `Aufgaben`.`Fachgebiet`, `Aufgaben`.`Schwierigkeitsgrad`&quot;)
+    
+	sWorkingDirectory=sfWorkingDirectory(&quot;aufgdbphys.odb&quot;)
+
+	sTexDatei = &quot;data&quot;
+	sTexHeader = &quot;headerfooter/header2&quot;
+	sTexFooter = &quot;headerfooter/footer&quot;
+	sTexDateienVerzeichnis = sfAufgabenverzeichnis
+
+	&apos;MsgBox sWorkingDirectory
+	sAufgabenDateiName = sWorkingDirectory &amp; sTexDateienVerzeichnis &amp; &quot;/&quot; &amp; sTexDatei &amp; &quot;.tex&quot;            &apos; Define file name
+	sHeaderDateiName = sWorkingDirectory &amp; sTexDateienVerzeichnis &amp; &quot;/&quot; &amp; sTexHeader &amp; &quot;.txt&quot;            &apos; Define file name
+	sFooterDateiName = sWorkingDirectory &amp; sTexDateienVerzeichnis &amp; &quot;/&quot; &amp; sTexFooter &amp; &quot;.txt&quot; &apos; Define file name
+	
+	
+	&apos;msgbox sHeaderDateiName
+	&apos;msgbox iHeaderDateiNummer
+	
+	&apos;Headerdatei in String auslesen
+	TexHeader = sfDateiInhalt(sHeaderDateiName,iHeaderDateiNummer)
+	&apos;Footerdatei in String auslesen
+	TexFooter = sfDateiInhalt(sFooterDateiName,iFooterDateiNummer)
+	        
+   If Not IsNull(ResultSet) Then
+       &apos; Latexdatei beginnen
+        Open sAufgabenDateiName For Output As #iAufgabenDateiNummer
+	   	Print #iAufgabenDateiNummer, TexHeader &amp; chr(13) &amp; chr(13)      &apos; Save line
+		Close #iAufgabenDateiNummer
+
+		While ResultSet.next
+			sID =  ResultSet.getString(1)
+			&apos;MsgBox sID
+			Open sAufgabenDateiName For Append As #iAufgabenDateiNummer         &apos; Open file (writing mode)
+			&apos;	Open Filename For Output As #FileNo         &apos; Open file (writing mode)
+			Print #iAufgabenDateiNummer, &quot;\item &quot; &amp; ResultSet.getString(6) &amp; chr(13) &amp; chr(13)       &apos; Save line getSTring(7) besagt, dass die Aufgabe an 7. Stelle im Array gespeichert ist
+			Close #iAufgabenDateiNummer
+			sStringTexDatei = sTextAuslesenString(sAufgabenDateiName)
+			&apos;MsgBox sStringTexDatei
+			&apos;MsgBox ResultSet.getString(1)
+			sAngepassterString = PosUndReplaceVonMystringInSearchstring(sStringTexDatei, &quot;\includegraphics&quot;, sWorkingDirectory &amp; sTexDateienVerzeichnis &amp; &quot;/&quot; &amp; sID &amp; &quot;/&quot;)
+			sTextEinlesenString(sAufgabenDateiName, sAngepassterString)
+		Wend
+	    &apos; Latex-datei beenden  
+		Open sAufgabenDateiName For Append As #iAufgabenDateiNummer
+		Print #iAufgabenDateiNummer, chr(13) &amp; chr(13) &amp; TexFooter     &apos; Save line
+		Close #iAufgabenDateiNummer
+    End If    
+    
+        
+    &apos;Erstellen der PDF-Datei aus der TeX-Datei
+	&apos;msgbox convertfromurl(sWorkingDirectory &amp; sTexDateienVerzeichnis)
+	PdflatexKompilieren(sWorkingDirectory &amp; sTexDateienVerzeichnis, sTexDatei)
+	PdfAnzeigen(sWorkingDirectory &amp; sTexDateienVerzeichnis, sTexDatei)
+	PdflatexHilfsdateienLoeschen(sWorkingDirectory &amp; sTexDateienVerzeichnis, sTexDatei)
+	PdfToPng(sWorkingDirectory &amp; sTexDateienVerzeichnis, sTexDatei)
+	
+End Sub
+
+
+
+Function sfDateiInhalt(sDateiName As String, iDateiNummer As Integer)
+	&apos;Liest den Inhalt der Datei sDateiName in den String sfDateiInhalt aus
+	&apos;Datei öffnen
+	Open sDateiName For Input As iDateiNummer
+	&apos;Prüfen, ob Dateiende erreicht ist.
+	Do While not eof(iDateiNummer)
+	&apos;Zeile lesen
+	Line Input #iDateiNummer, CurrentLine
+		If CurrentLine &lt;&gt;&quot;&quot; then
+    		sfDateiInhalt = sfDateiInhalt &amp; CurrentLine &amp; Chr(13)
+    	end if
+    Loop
+    &apos;Datei schließen
+    Close #iDateiNummer
+    &apos;Msgbox sDateiInhalt
+End Function
+
+Function GetSourceCodeDir(Optional useDoc) As String
+	Dim oDoc &apos;The document on which to work.
+	Dim s$
+	&apos;Temporary string variable.
+	If NOT IsMissing(useDoc) Then
+		oDoc = useDoc
+	End If
+	If IsEmpty(oDoc) OR IsNull(oDoc) Then
+		oDoc = ThisComponent
+	End If
+	If oDoc.hasLocation() Then
+		GlobalScope.BasicLibraries.LoadLibrary(&quot;Tools&quot;)
+		REM This is assumed to be in URL notation!
+		s = DirectoryNameoutofPath(oDoc.getLocation(), &quot;/&quot;)
+		GetSourceCodeDir() = s &amp; &quot;/&quot;
+	Else
+		MsgBox &quot;Warning, current document has no location&quot;
+	End If
+End Function
+
+Function sfWorkingDirectory(sDatenbankinclExt As String)
+	oComponents = StarDesktop.getComponents()
+	oDocs = oComponents.createEnumeration()
+	Do While oDocs.hasMoreElements()
+		oDoc = oDocs.nextElement()
+		datei=odoc.geturl()
+		&apos;msgbox datei
+		If datei = &quot;&quot; Then
+		Else
+			GlobalScope.BasicLibraries.LoadLibrary(&quot;Tools&quot;)
+			FileN = FileNameoutofPath(datei, &quot;/&quot;)
+			&apos;MsgBox FileN
+		End If	
+		If FileN=sDatenbankinclExt Then
+			&apos;Auslesen Aktuelles Arbeitsverzeichnis
+			sfWorkingDirectory = DirectoryNameoutofPath(datei, &quot;/&quot;) &amp; &quot;/&quot;
+			&apos;MsgBox sWorkingDirectory
+		End If
+	Loop
+End Function
+</script:module>

@@ -1,0 +1,203 @@
+Copyright (c) 2010-2015 Erasmus Bieri, Michael Oettli 
+
+Makros zur Physikaufgabendatenbank, Stand August 2015.
+
+Change Log:
+*1.2.13 (25.9.15)
+ABGEÄNDERT (bi)
+im Modul einzelneAufgabe
+- Sub AktuelleAufgabeKopieren (Maskierung Hochkommas (Apostroph))
+
+*1.2.12 (24.9.15)
+ABGEÄNDERT (bi)
+im Modul diverse
+- Sub PermanenteIDsetzen (Berücksichtigung 2-Stelliger AutorenIDs)
+
+*1.2.11 (12.8.15)
+NEU (bi)
+im Modul ImExport:
+- Sub DatenbankInitialisierenAufgaben (dadurch kann die Initialisierung per Dialog gestartet werden)
+ABGEÄNDERT (bi)
+im Modul MakrosDialog:
+- Sub DialogEintraegeLoeschenAnzeigen
+im Modul ImExport
+- Sub DatenImportieren02 (Problem mit Statusbar behoben)
+sowie der Dialog DialogEintrageInDBLoeschen (Button eingefügt)
+
+Change Log:
+*1.2.10 (13.10.14)
+NEU (bi) -> Export- und Importmöglichkeit von Prüfungen
+im Modul ImExport:
+- Sub aDatensatzInTabelleGespeicherteAuswahlenEinlesen()
+- Sub PruefungenExportieren02
+- Sub PruefungenAusDateiImportieren()
+im Modul MakrosDialog
+- Sub ImportPruefungenStarten
+- Sub ImportDateiPruefungenAuswaehlen
+Dialog DialogImExport wurde um die Möglichkeit erweitert, die Datei mit den exportierten Prüfungen, auswählen zu können.
+Neuer Menüeintrag "Export -> Alle Prüfungen exportieren" im Menü Makros AufgDB
+
+*1.2.9 (7.10.14)
+NEU (bi)
+- Function sfAufgabenverzeichnis im Module AEinstellungen hinzugefügt
+(diese Funktion gibt einfach einen String mit dem Ordner zurück, in welchem
+Die Aufgabendateien gespeichert werden)
+- Dazu musste in den Modulen AEinstellungen, diverse, einzelneAufgabe,
+ImExport, MakrosAufgDB, MakrosDialog, pdflatex, Style der
+String "aufgdbphys_dateien" durch sfAufgabenverzeichnis oder
+& sfAufgabenverzeichnis & ersetzt werden.
+
+*1.2.8 (28.9.14)
+ABGEÄNDERT (bi)
+- Sub PermanenteIDsetzen im Modul diverse:
+1. Die markierten Aufgaben werden nicht mehr zurückgesetzt.
+2. Der Makro kann abgebrochen werden.
+3. Rückmeldung, wenn Makro fertig.
+
+*1.2.7 (30.8.14) (IRON TEACHER)
+ABGEÄNDERT (bi)
+- kleine Änderungen in den Modulen ImExport und diverse
+
+*1.2.6 (29.8.14)
+NEU (bi) im Modul ImExport
+- Sub DatenImportieren02(sOrdnerpfad As String, sNameTabelle As String)
+- Sub aDatensatzInTabelleEinlesenV03(sTabellenname as String, aDatensatz())
+ABGEÄNDERT (bi)
+- Dialog DialogImExport.xdl 
+
+
+*1.2.5 (29.8.14)
+NEU (bi) im Modul ImExport
+	Makro DatenExportieren02: Ersetzt DatenExportieren 
+ABGEÄNDERT (bi):
+	Im Menü wird bei Exportieren der Daten neu DatenExportieren02 anstatt DatenExportieren aufgerufen.
+
+*1.2.4 (29.8.14)
+Dialog Systemeinstellungen auf 1.2.2 rückgängig gemacht.
+Im Dialog Systemeinstellungen Hinweise zu den Nummern Betriebssystem und Autoren hinzgefügt.
+
+*1.2.3 (14.4.14)
+Systemeinstellungen anzeigen im Menü eingefügt.
+DialogSystemeinstellungen angepasst.
+
+* 1.2.2 (13.4.14)
+ABGEÄNDERT (ot) im Modul Style
+- Sub PositionenZurueckschreiben
+- ParallelSerieErstellen
+Bei der Parallelserie war das Problem, dass die PermanenteID nun ein String ist und keine Zahl mehr. Deshalb musste ich im SQL-Befehl das = durch ein LIKE ersetzen.
+
+ABGEÄNDERT (bi) Damit die Waitingtime beim Pdflatex für Windows über ein Formular eingegeben werden kann:
+Im Modul MakrosDialog
+- Sub EinstellungenEinlesen
+- Sub EinstellungenSchreiben
+Im Modul AEinstellungen
+- Sub afWaitingTimeWindows
+Im Module pdflatex
+-Sub PdflatexKompilieren
+Dialog SystemEinstellungen wurde angepasst.
+
+* 1.2.1 (26.3.14)
+Achtung: neues Formular! 
+ABGEÄNDERT (durch ot) im Modul Style
+1. StyleForm ergänzt um TopHeader und Auswahlfelder DeckblattYN, AbstandYN, AusfLoesYN, ZwischentitelYN, LoesSchlussYN
+2. Tabelle Styles um die entsprechenden Spalten erweitert (neu 69 Spalten)
+3. Makros StyleForm auslesen und ausfüllen entsprechend erweitert, damit die zusätzlichen Felder ausgelesen werden
+4. Tabelle Aufgaben ergänzt um Spalte AbstNachAufg, Typ Integer, Länge 10, Default 0
+5. AbstNachAufgabe als zusätzliches Textfeld auf AufgabenAdministration-Form (Angabe in mm)
+6. TexHeaderErstellen angepasst, um mit fancyhdr arbeiten zu können:
+a. \usepackage{fancydr} in Header3a
+b. \begin{document} rausgeschnitten in Header3b
+c. Seite als Schlüsselwort definiert. Dort kommen die Seitenzahlen hin. Weiterhin funktionieren Vorgabe und Auswahl
+7. Text aus der Datei deckblatt.tex wird direkt nach dem \begin{document} eingelesen, falls die Checkbox aktiviert ist. Der Button daneben oeffnet die Datei direkt. Verbunden mit Sub DeckblattOeffnen
+8. Falls Zwischentitel aktiviert sind, wird vor jeder Aufgabe gefragt, ob dort ein Titel hin soll. Dieser ist per Default in 12pt und serifenlos dargestellt.
+
+* 1.1.13 (23.3.14)
+NEU:
+- Sub AktuelleAufgabeKopieren() (Modul einzelne Aufgabe)
+- Sub aDatensatzInTabelleEinlesen_V02() (Modul ImExport)
+	(AktuelleAufgabeKopieren() ruft aDatensatzInTabelleEinlesen_V02() auf.)
+
+* 1.1.12 (17.3.14)
+NEU:
+Im Menu neuer Eintrag: Permanente ID Setzen: Alle "eigenen" Aufgaben erhalten eine permanente ID.
+
+* 1.1.11 (16.3.14) 
+NEU:
+- Sub DatenbankAktualisierenStyle (Modul diverse)
+- Function DeleteStr() (Modul diverse)
+ABGEAENDERT:
+- Diverse kleine Änderungen (Module Style)
+- Menue: "Prüfung (PDF) aus gespeicherter Auswahl erstellen" neu verlinkt mit Makro StylesFormOeffnen (anstatt mit Makro TexDateiErstellenAusPruefung)
+- In der Tabelle "Position" wurde beim 4. Eintrag der Feldname in PermanenteID und der Feldtyp in Text[VARCHAR] umbenannt.
+- Die Headerdateien wurden wegen dem Styleformular angepasst.
+
+* 1.1.10 (27.2.14)
+Bugfix: DialogSystemeinstellungen wird jetzt angezeigt. (Muss in dialog.xlb eingetragen sein!)
+
+* 1.1.9: (25.2.14)
+NEU:
+- Sub AlteIDinPermanenteIDkopieren
+
+* 1.1.8: (25.2.14)
+NEU:
+- Dialog DialogSystemeinstellungen
+- Sub DialogSystemeinstellungenAnzeigen (Modul MakroDialog)
+- Function saEinstellungen (Modul MakroDialog)
+- Sub EinstellungenEinlesen (Modul MakroDialog)
+- Sub EinstellungenSchreiben (Modul MakroDialog)
+ABGEAENDERT:
+- Function afDateiInArrayEinstellungen (Modul AEinstellungen)
+- Function afSystemeinstellungen (Modul AEinstellungen)
+- Function AusgwAufgIDBestimmen (Modul diverse)
+- Sub AuswahlPruefungAuslesen (Modul diverse)
+
+* 1.1.7:
+- Function sfAutor (Modul AEinstellungen)
+	NEU: Gibt den in der 3. Zeile der Datei /Einstellungen/EinstellungenAufgabenDB.txt
+	gespeicherten Autor zurück
+
+- Makro PermanenteIDsetzen (Modul diverse)
+
+- Makro AlteIDAendern (Modul diverse)
+
+* 1.1.6:
+- Makro DatenExportieren (Modul ImExport):
+	* Abfrage optimiert: ResultSet = Statement.executeQuery("SELECT * FROM `Aufgaben` WHERE ( `Aufgaben`.`Auswahl` = True )")
+	* Automatische BEstimmung der Aanzahl Felder in Datensatz:
+	ResultSet2.columns.count
+* Auskommentierung von Speicherung von Prüfungen ("Auswahlen")
+
+-Makro ExportOrdnerFuerImportKonvertieren (Modul ImExport)
+	* Automatische Bestimmung der Länge eines Datensatzes und entsprechende Anpassung:
+		Redim aDatensatz(iLaengeDatensatz)
+		for i = 0 to iLaengeDatensatz - 1
+	* Auskommentierung von Speicherung von Prüfungen ("Auswahlen)
+
+- Makro LoescheAlleAufgaben (Modul ImExport)
+	Primary Key wird nun auf 1 zurückgesetzt
+
+- Makro DatenbankInitialisieren (Modul ImExport)
+	NEU!
+	Einmal verwenden, um Datenbank komplett zurückzusetzen
+
+- Function LaengeDatensatzTabelleAufgaben (Modul ImExport)
+	NEU!
+	Gibt die Anzahl Felder der Tabelle "Aufgaben" zurück
+
+* 1.1.5:
+- Makro MarkierteAufgabenZuruecksetzen (Modul diverse):
+Einfügen von "AufgabeSpeichern()" zu Beginn und "DatenbankAktualisieren()" am Ende: Aufgabe wird zuerst gespeichert, dann alle Markierungen entfernt, dann wird das Formular aktualisiert.
+- Makro DatenbankAktualisieren (Modul diverse):
+Nun springt Formular nach Aktualisieren nicht wieder zum ersten Datensatz zurück
+
+* 1.1.4:
+In der Tabelle Aufgaben wurde ein 21. Eintrag (MCja/nein)
+hinzugefügt -> Anpassungen in Module ImExport in folgenden Makros:
+- KopiereTabelleneintrag: Zeile 26
+- aDatensatzInTabelleEinlesen: Zeile 39
+- DatenExportieren: Zeile 89
+- ExportOrdnerFuerImportKonvertieren: Zeile 66/67
+
+* 1.1.3:
+Modul pdflatex, Sub PdflatexKompilieren:
+Verbesserung Fehlermeldung für OS X
