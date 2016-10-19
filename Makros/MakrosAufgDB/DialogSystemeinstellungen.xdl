@@ -22,6 +22,6 @@
   <dlg:text dlg:id="Label5" dlg:tab-index="10" dlg:left="147" dlg:top="5" dlg:width="65" dlg:height="10" dlg:value="Waiting time pdf (ms)"/>
   <dlg:textfield dlg:id="WaitingTimeNachPdflatex" dlg:tab-index="11" dlg:left="147" dlg:top="21" dlg:width="115" dlg:height="10" dlg:value="Waiting Time noch nicht definiert!"/>
   <dlg:text dlg:style-id="0" dlg:id="Label6" dlg:tab-index="12" dlg:left="296" dlg:top="4" dlg:width="91" dlg:height="36" dlg:value="Nummern Betriebssysteme:&#x0a;1: Linux&#x0a;2: OS X&#x0a;3: Windows"/>
-  <dlg:text dlg:style-id="0" dlg:id="Label7" dlg:tab-index="13" dlg:left="296" dlg:top="46" dlg:width="91" dlg:height="93" dlg:value="Nummern Autoren:&#x0a;1: Erasmus Bieri (bi)&#x0a;2: Michael Oettli (ot)&#x0a;3: Max Schmid (sd)&#x0a;4: Stefan Schäublin (si)&#x0a;5: Claude Walter ()&#x0a;6: Urs Müller (ms)&#x0a;7: Unbekannt&#x0a;8: Matias Meier (Mt)&#x0a;9: Lukas Morf (mf)&#x0a;10: Manuel Bischof (mb)&#x0a;11: Martina Egloff (egma)"/>
+  <dlg:text dlg:style-id="0" dlg:id="Label7" dlg:tab-index="13" dlg:left="296" dlg:top="46" dlg:width="91" dlg:height="127" dlg:value="Nummern Autoren:&#x0a;1: Erasmus Bieri (Bi)&#x0a;2: Michael Oettli (Ot)&#x0a;3: Max Schmid (Sd)&#x0a;4: Stefan Schäublin (Si)&#x0a;5: Claude Walter ()&#x0a;6: Urs Müller (Ms)&#x0a;7: Unbekannt&#x0a;8: Matias Meier (Mt)&#x0a;9: Lukas Morf (Mf)&#x0a;10: Manuel Bischof (Mb)&#x0a;11: Martina Egloff (EgMa)"/>
  </dlg:bulletinboard>
 </dlg:window>
