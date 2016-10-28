@@ -1040,6 +1040,67 @@ Sub DatenExportieren02
 	&apos;&quot;bzw. in der gleichnamigen Archivdatei.&quot; 
 End Sub
 
+Sub DatenExportieren02NurAufgabenText
+	&apos;Letzte Änderung: 27.10.16, Erasmus Bieri
+
+	&apos;Dieser Makro exportiert nur die Aufgabentexte der augewählten Aufgaben
+	&apos;in Textdateien im Ordner sfAufgabenverzeichnis &amp; &quot;/ImportExport&quot;
+	
+	&apos;Ordner erstellen
+	sExportOrdner = sImportExportVerzeichnisErstellen()
+	&apos;MsgBox &quot;Der Exportordner ist &quot; &amp; sExportOrdner
+	sWorkingDirectory = sfWorkingDirectory(&quot;aufgdbphys.odb&quot;)
+	sAufgabenVerzeichnis = sfAufgabenverzeichnis
+	
+	oSFA = createUnoService(&quot;com.sun.star.ucb.SimpleFileAccess&quot;)
+	oOutputStream = createUnoService(&quot;com.sun.star.io.TextOutputStream&quot;)
+
+	Dim DatabaseContext, DataSource, Connection, InteractionHandler, Statement, ResultSet As Object
+	Dim iZaehler01 As Integer	
+	
+	&apos;DatenbankKontext erstellen
+    DatabaseContext = createUnoService(&quot;com.sun.star.sdb.DatabaseContext&quot;)
+    &apos;Datenbank kontaktieren
+    DataSource = DatabaseContext.getByName(&quot;aufgdbphys&quot;)
+    &apos;Testen, ob Passwort benötigt wird
+    If Not DataSource.IsPasswordRequired Then
+    	Connection = DataSource.GetConnection(&quot;&quot;,&quot;&quot;)
+    Else	
+    	InteractionHandler = createUnoService(&quot;com.sun.star.sdb.InteractionHandler&quot;)
+    	Connection = DataSource.ConnectWithCompletion(InteractionHandler)
+    End If
+    &apos;Abfrage erstellen
+    Statement = Connection.createStatement()
+	ResultSet = Statement.executeQuery(&quot;SELECT * FROM `Aufgaben` WHERE ( `Aufgaben`.`Auswahl` = True )&quot;)
+	
+	&apos;iZaehler01 = 0
+   	If Not IsNull(ResultSet) Then
+   		While ResultSet.next
+			&apos;iZaehler01 = iZaehler01 + 1
+			sPrint = &quot;-----&quot;
+			&apos;for i = 1 to ResultSet.columns.count
+			sAufgabenText = ResultSet.getString(6)
+			sPermanenteID = ResultSet.getString(22)
+
+			oDatei = oSFA.OpenFileReadWrite(sExportOrdner &amp; sPermanenteID &amp; &quot;.dat&quot;)
+			oOutputStream.SetOutputStream(oDatei.getOutputStream)
+			sPrint = sPermanenteID &amp; chr(13) &amp; sAufgabenText
+			
+			&apos;Print sPrint
+			oOutputStream.writeString(sPrint)
+			oOutputStream.closeOutput()
+		Wend
+		&apos;MsgBox &quot;Es wurden &quot; &amp; iZaehler01 &amp; &quot; Aufgaben ausgewählt und ihre ID in der Umrechungstabelle gespeichert.&quot;
+	Else
+		MsgBox &quot;Es wurden keine Aufgaben ausgewählt.&quot;
+   		Exit Sub
+	End If
+	
+	MsgBox &quot;Die Exportfunktion ist beendet.&quot; &amp; chr(13) &amp; &quot;Sie finden die Daten im Verzeichnis &quot; &amp; chr(13) &amp; chr(13) &amp; _
+	convertfromurl(sExportOrdner) &amp; &quot;.&quot; &apos;&amp; chr(13) &apos;&amp; chr(13) &amp; _
+	&apos;&quot;bzw. in der gleichnamigen Archivdatei.&quot; 
+End Sub
+
 Sub PruefungenExportieren02
 	&apos;Letzte Änderung: 9.10.14, Erasmus Bieri
 
