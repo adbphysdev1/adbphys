@@ -296,7 +296,7 @@ Sub PermanenteIDsetzen
 End Sub
 
 sub AuswahlGemaessFilter
-	&apos;Letzte Änderung: 12.9.13, Erasmus Bieri
+	&apos;Letzte Änderung: 15.2.17, Erasmus Bieri
 
 	&apos;Dieser Makro setzt den Boolean &quot;Auswahl&quot; in der Tabelle &quot;Aufgaben&quot; für die im
 	&apos;aktuellen Filter ausgewaehlten Aufgaben auf true, für die restlichen Aufgaben auf false
@@ -330,7 +330,8 @@ sub AuswahlGemaessFilter
  	Statement.executeUpdate(&quot;UPDATE &quot;&quot;Aufgaben&quot;&quot; SET &quot;&quot;Aufgaben&quot;&quot;.&quot;&quot;Auswahl&quot;&quot; = False WHERE &quot;&quot;Aufgaben&quot;&quot;.&quot;&quot;Auswahl&quot;&quot; = True&quot;)
  	
 	&apos;SQL-Update-Befehl ausführen
-	sUpdateString = &quot;UPDATE &quot;&quot;Aufgaben&quot;&quot; SET &quot;&quot;Aufgaben&quot;&quot;.&quot;&quot;Auswahl&quot;&quot; = True WHERE &quot;&quot;Aufgaben&quot;&quot;.&quot; &amp; sFilterMitte
+	&apos; Folgende Zeile am 15.2.17 geändert (damit Klammern hinter WHERE richtig gesetzt werden)
+	sUpdateString = &quot;UPDATE &quot;&quot;Aufgaben&quot;&quot; SET &quot;&quot;Aufgaben&quot;&quot;.&quot;&quot;Auswahl&quot;&quot; = True WHERE (&quot; &amp; sFilterMitte &amp; &quot;)&quot;
 	MsgBox sUpdateString
   	Statement.executeUpdate(sUpdateString)
 end sub
