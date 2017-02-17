@@ -42,6 +42,8 @@ End Sub
 
 Sub DoppeltePermanenteIDSuchen
 	&apos;Letzte Änderung: 14.10.16, Erasmus Bieri
+	&apos;Zusatz 17.02.17: Entsprechende Aufgaben lassen sich auch auswählen,
+	&apos;sofern Variable iDoppelteAufgaben auf 1 gesetzt wird
 
 	&apos;Dieser Makro bestimmt die permanenten IDs, welche doppelt vorkommen.
 	&apos;Das Ergebnis wird im Ordner, welcher die Datei &quot;aufgdbphys.odb&quot; enthält,
@@ -49,7 +51,23 @@ Sub DoppeltePermanenteIDSuchen
 
 	&apos;Ruft folgende Funktionen auf:
 	&apos; -&gt; afIDUndPermanenteIDAusTabelleAufgabenInArraySchreiben()
-
+	Dim iDoppelteAufgaben As Integer
+	iDoppelteAufgaben = 1
+	
+	Dim DatabaseContext, DataSource, Connection, Statement, ResultSet As Object	
+	&apos;DatenbankKontext erstellen
+    DatabaseContext = createUnoService(&quot;com.sun.star.sdb.DatabaseContext&quot;)
+    &apos;Datenbank kontaktieren
+    DataSource = DatabaseContext.getByName(&quot;aufgdbphys&quot;)
+    &apos;Testen, ob Passwort benötigt wird
+    If Not DataSource.IsPasswordRequired Then
+    	Connection = DataSource.GetConnection(&quot;&quot;,&quot;&quot;)
+    Else	
+    	InteractionHandler = createUnoService(&quot;com.sun.star.sdb.InteractionHandler&quot;)
+    	Connection = DataSource.ConnectWithCompletion(InteractionHandler)
+    End If
+    Statement = Connection.createStatement()
+	
 	Dim aArrayMitDoppeltVorkommendenIDs(0)
 	aIDPermanenteID = afIDUndPermanenteIDAusTabelleAufgabenInArraySchreiben()
 	Print ubound(aIDPermanenteID(),1) &amp; &quot; &quot; &amp; ubound(aIDPermanenteID(),2)
@@ -78,6 +96,18 @@ Sub DoppeltePermanenteIDSuchen
 	oOutputStream.SetOutputStream(oDatei.getOutputStream)
 	oOutputStream.writeString(sPrint)
 	oOutputStream.closeOutput()
+	
+	if iDoppelteAufgaben = 1 then
+		for i = 0 to ubound(aArrayMitDoppeltVorkommendenIDs)
+		&apos;for i = 0 to 3 
+			if Len(Trim(aArrayMitDoppeltVorkommendenIDs(i))) &gt; 0 then
+				sSQL = &quot;UPDATE &quot;&quot;Aufgaben&quot;&quot; SET &quot;&quot;Aufgaben&quot;&quot;.&quot;&quot;Auswahl&quot;&quot; = &apos;true&apos; WHERE (&quot;&quot;Aufgaben&quot;&quot;.&quot;&quot;PermanenteID&quot;&quot; = &apos;&quot; &amp; aArrayMitDoppeltVorkommendenIDs(i) &amp; &quot;&apos;) &quot;
+	 			&apos;MsgBox sSQL
+	 			Statement.executeUpdate(sSQL)
+	 		end if
+		next i
+	end if
+	
 	Print &quot;Makro beendet.&quot;
 End Sub
 

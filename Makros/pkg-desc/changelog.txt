@@ -1,4 +1,7 @@
 Change Log:
+
+17.2.2017 --> Siehe Github
+
 * 1.2.13 -> 2016.10.0/1 (18.10.16):
 Umbennung Versionen: Vorteil Alter direkt ersichtlich
 
