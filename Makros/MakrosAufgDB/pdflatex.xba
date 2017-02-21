@@ -39,7 +39,8 @@ Sub PdflatexKompilieren(sPfadZurTexDatei, sTexDatei As String)
 			&apos;bestehende pdf-Datei löschen
 			shell(&quot;rm &quot; &amp; convertfromurl(sPfadZurTexDatei) &amp; &quot;/&quot; &amp; sTexDatei &amp; &quot;.pdf&quot;) 
 			
-			shilf1 = &quot;/bin/bash -lc &quot; &amp; Chr$(34) &amp; &quot;/usr/texbin/pdflatex --halt-on-error --output-directory=&quot;&amp; sUrlPfadAktuellerOrdner &amp;_
+			&apos;shilf1 = &quot;/bin/bash -lc &quot; &amp; Chr$(34) &amp; &quot;/usr/texbin/pdflatex --halt-on-error --output-directory=&quot;&amp; sUrlPfadAktuellerOrdner &amp;_
+			shilf1 = &quot;/bin/bash -lc &quot; &amp; Chr$(34) &amp; &quot;/Library/TeX/texbin/pdflatex --halt-on-error --output-directory=&quot;&amp; sUrlPfadAktuellerOrdner &amp;_
 			&quot; &quot; &amp; sUrlTexDatei &amp; Chr$(34) 
 			&apos;msgbox shilf1
 			shell(shilf1,0,,true)
