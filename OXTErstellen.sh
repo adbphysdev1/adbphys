@@ -9,8 +9,14 @@ NAME=$(cat description.xml | grep '<version value="' | cut -d '"' -f 2)
 NAMEMakros="MakrosAufgDB."$NAME".oxt"
 PfadZuMakrosammlung="../../"$NAMEMakros
 zip -qr $PfadZuMakrosammlung *
-echo "Die neu erstellte Makrosammlung hat den Namen:"
-echo $NAMEMakros
+echo ""
+echo "------- OXT-Erstellen: -------"
+echo ""
+echo "Die neu erstellte Makrosammlung hat den Namen: -->"$NAMEMakros"<--"
+echo "                                               ------------------------------"
 echo "... und befindet sich im Verzeichnis:"
 cd ../..
 pwd
+echo ""
+echo "------- OXT-Erstellen beendet -------"
+echo ""
