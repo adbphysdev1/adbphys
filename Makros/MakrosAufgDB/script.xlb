@@ -11,4 +11,5 @@
  <library:element library:name="pdflatex"/>
  <library:element library:name="Style"/>
  <library:element library:name="Analyse"/>
+ <library:element library:name="TypeTests"/>
 </library:library>
