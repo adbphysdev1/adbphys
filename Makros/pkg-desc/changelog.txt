@@ -1,5 +1,10 @@
 Change Log:
 
+2017.05.11:
+ABGEÄNDERT (bi):
+im Modul einzelneAufgabe:
+- Sub TexDateiErstellenAuswahl: PermanenteID wird angezeigt
+
 17.2.2017 --> Siehe Github
 
 * 1.2.13 -> 2016.10.0/1 (18.10.16):
