@@ -1,4 +1,14 @@
 Change Log:
+2017.09.09.1:
+ABGEÄNDERT (bi):
+im Dialog DialogSystemeinstellungen.xdl
+- Nummern Autoren angepasst
+im Modul diverse:
+- Sub PermanenteIDsetzen
+NEU (bi):
+im Modul diverse:
+- Function afPermanenteIDsetzen
+- ifHoechsteIDbestimmen
 
 2017.05.11:
 ABGEÄNDERT (bi):
