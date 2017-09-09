@@ -1,4 +1,15 @@
 Change Log:
+
+2017.09.09.2:
+ABGEÄNDERT (bi):
+im Modul MakrosAufgDB/einzelneAufgabe.xba
+- Sub FileManagerOeffnen: Filemanager Linux von nemo auf xdg-open angepasst
+im Modul MakrosAufgDB/pdflatex.xba
+- Sub PdfToPng: 
+Befehl angepasst:
+alt: convert -density 300 aufgabe.pdf aufgabe.png 
+neu: convert -density 300 aufgabe.pdf -quality 90 -background white -flatten aufgabe.png 
+
 2017.09.09.1:
 ABGEÄNDERT (bi):
 im Dialog DialogSystemeinstellungen.xdl

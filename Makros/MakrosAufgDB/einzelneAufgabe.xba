@@ -838,7 +838,7 @@ Sub FileManagerOeffnen(sVerzeichnis As String)
 	&apos;MsgBox convertfromurl(sVerzeichnis)
 	&apos;Testen, welches Betriebssystem (in Function afSystemeinstellungen eingestellt!):
 	if afSystemeinstellungen(1) = 1 then
-		shell(&quot;nemo &quot; &amp; convertfromurl(sVerzeichnis),10)
+		shell(&quot;xdg-open &quot; &amp; convertfromurl(sVerzeichnis),10)
 	elseif afSystemeinstellungen(1) = 2 then
 		shell(&quot;open &quot; &amp; convertfromurl(sVerzeichnis),10)
 	&apos;neu START 9.8.13
