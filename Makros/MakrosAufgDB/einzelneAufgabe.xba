@@ -273,17 +273,23 @@ Sub TexDateiErstellenAuswahl
    	&apos;Bei Aufgabenstring korrekten Pfad einfügen:
    	for i = 0 to iZaehler02 - 1
    		&apos;String mit korrektem Pfad
-   		sAngepassterString = PosUndReplaceVonMystringInSearchstring(sArrayDaten(i,1), &quot;\includegraphics&quot;, sWorkingDirectory &amp; sTexDateienVerzeichnis &amp; &quot;/&quot; &amp; sArrayDaten(i,0) &amp; &quot;/&quot;)
+   		&apos;sAngepassterString = PosUndReplaceVonMystringInSearchstring(sArrayDaten(i,1), &quot;\includegraphics&quot;, sWorkingDirectory &amp; sTexDateienVerzeichnis &amp; &quot;/&quot; &amp; sArrayDaten(i,0) &amp; &quot;/&quot;)
+   		sAngepassterString = sfAbsPfadBildDatei(sArrayDaten(i,1), sWorkingDirectory &amp; sTexDateienVerzeichnis &amp; &quot;/&quot; &amp; sArrayDaten(i,0) &amp; &quot;/&quot;, &quot;\includegraphics&quot;)
+   		
    		&apos;In Array schreiben:
    		sArrayDaten(i,2) = sAngepassterString
    		&apos;MsgBox sArrayDaten(i,0) &amp; chr(13) &amp; chr(13) &amp; sArrayDaten(i,1) &amp; chr(13) &amp; chr(13) &amp; sArrayDaten(i,2) 
    		
    		&apos;Das gleiche für die Lösungen (nur schreibe ich es nicht mehr in eine neue Spalte des Arrays):
-   		sAngepassterString2 = PosUndReplaceVonMystringInSearchstring(sArrayDaten(i,3), &quot;\includegraphics&quot;, sWorkingDirectory &amp; sTexDateienVerzeichnis &amp; &quot;/&quot; &amp; sArrayDaten(i,0) &amp; &quot;/&quot;)
+   		&apos;sAngepassterString2 = PosUndReplaceVonMystringInSearchstring(sArrayDaten(i,3), &quot;\includegraphics&quot;, sWorkingDirectory &amp; sTexDateienVerzeichnis &amp; &quot;/&quot; &amp; sArrayDaten(i,0) &amp; &quot;/&quot;)
+   		sAngepassterString2 = sfAbsPfadBildDatei(sArrayDaten(i,3), sWorkingDirectory &amp; sTexDateienVerzeichnis &amp; &quot;/&quot; &amp; sArrayDaten(i,0) &amp; &quot;/&quot;, &quot;\includegraphics&quot;)
+   		
    		sArrayDaten(i,3) = sAngepassterString2
    		
    		&apos;Das gleiche für die Kurzlösungen (nur schreibe ich es nicht mehr in eine neue Spalte des Arrays):
-   		sAngepassterStringKL = PosUndReplaceVonMystringInSearchstring(sArrayDaten(i,4), &quot;\includegraphics&quot;, sWorkingDirectory &amp; sTexDateienVerzeichnis &amp; &quot;/&quot; &amp; sArrayDaten(i,0) &amp; &quot;/&quot;)
+   		&apos;sAngepassterStringKL = PosUndReplaceVonMystringInSearchstring(sArrayDaten(i,4), &quot;\includegraphics&quot;, sWorkingDirectory &amp; sTexDateienVerzeichnis &amp; &quot;/&quot; &amp; sArrayDaten(i,0) &amp; &quot;/&quot;)
+   		sAngepassterStringKL = sfAbsPfadBildDatei(sArrayDaten(i,4), sWorkingDirectory &amp; sTexDateienVerzeichnis &amp; &quot;/&quot; &amp; sArrayDaten(i,0) &amp; &quot;/&quot;, &quot;\includegraphics&quot;)
+   		
    		sArrayDaten(i,4) = sAngepassterStringKL
    	next i
    	   
@@ -326,6 +332,7 @@ End Sub
 
 
 Sub TexDateiErstellenAusPruefung
+	&apos;Anmerkung Bi 11.9.2017: Wir dieser Makro überhaupt noch verwendet?
 	MsgBox &quot;Die Prüfung wird erstellt.&quot;
 	&apos;MarkierteAufgabenZuruecksetzen()
 	&apos;Aktuell ausgewählte Prüfung: Aufgaben markieren
@@ -421,13 +428,16 @@ Sub TexDateiErstellenAusPruefung
    	&apos;Bei Aufgabenstring korrekten Pfad einfügen:
    	for i = 0 to iZaehler02 - 1
    		&apos;String mit korrektem Pfad
-   		sAngepassterString = PosUndReplaceVonMystringInSearchstring(sArrayDaten(i,1), &quot;\includegraphics&quot;, sWorkingDirectory &amp; sTexDateienVerzeichnis &amp; &quot;/&quot; &amp; sArrayDaten(i,0) &amp; &quot;/&quot;)
+   		&apos;sAngepassterString = PosUndReplaceVonMystringInSearchstring(sArrayDaten(i,1), &quot;\includegraphics&quot;, sWorkingDirectory &amp; sTexDateienVerzeichnis &amp; &quot;/&quot; &amp; sArrayDaten(i,0) &amp; &quot;/&quot;)
+   		sAngepassterString = sfAbsPfadBildDatei(sArrayDaten(i,1), sWorkingDirectory &amp; sTexDateienVerzeichnis &amp; &quot;/&quot; &amp; sArrayDaten(i,0) &amp; &quot;/&quot;, &quot;\includegraphics&quot;)
+   		
    		&apos;In Array schreiben:
    		sArrayDaten(i,2) = sAngepassterString
    		&apos;MsgBox sArrayDaten(i,0) &amp; chr(13) &amp; chr(13) &amp; sArrayDaten(i,1) &amp; chr(13) &amp; chr(13) &amp; sArrayDaten(i,2) 
    		
    		&apos;Das gleiche für die Lösungen (nur schreibe ich es nicht mehr in eine neue Spalte des Arrays):
-   		sAngepassterString2 = PosUndReplaceVonMystringInSearchstring(sArrayDaten(i,3), &quot;\includegraphics&quot;, sWorkingDirectory &amp; sTexDateienVerzeichnis &amp; &quot;/&quot; &amp; sArrayDaten(i,0) &amp; &quot;/&quot;)
+   		&apos;sAngepassterString2 = PosUndReplaceVonMystringInSearchstring(sArrayDaten(i,3), &quot;\includegraphics&quot;, sWorkingDirectory &amp; sTexDateienVerzeichnis &amp; &quot;/&quot; &amp; sArrayDaten(i,0) &amp; &quot;/&quot;)
+   		sAngepassterString2 = sfAbsPfadBildDatei(sArrayDaten(i,3), sWorkingDirectory &amp; sTexDateienVerzeichnis &amp; &quot;/&quot; &amp; sArrayDaten(i,0) &amp; &quot;/&quot;, &quot;\includegraphics&quot;)
    		sArrayDaten(i,3) = sAngepassterString2
    	next i
    	   
@@ -471,6 +481,8 @@ Sub TexDateiErstellenAktuelleIDv2
 End Sub
 
 Sub TexDateiErstellenAktuelleIDAufgabe
+	AufgabeSpeichern()
+	
 	&apos;Aktuelle ID bestimmen:
 	sID = sfAusgabeID() &apos; Aufruf von Funktion sfAusgabeID()
 	&apos;Aufgabeninhaltauslesen
@@ -491,9 +503,11 @@ Sub TexDateiErstellenAktuelleIDAufgabe
 	&apos;TeX-Datei in String auslesen
 	
 	sStringTexDatei = sTextAuslesenString(sAufgabenDateiName)
-		
+			
 	&apos;Pfad zur Graphik anpassen
-	sAngepassterString = PosUndReplaceVonMystringInSearchstring(sStringTexDatei, &quot;\includegraphics&quot;, sWorkingDirectory &amp; sTexDateienVerzeichnis &amp; &quot;/&quot; &amp; sID &amp; &quot;/&quot;)
+	&apos;sAngepassterString = PosUndReplaceVonMystringInSearchstring(sStringTexDatei, &quot;\includegraphics&quot;, sWorkingDirectory &amp; sTexDateienVerzeichnis &amp; &quot;/&quot; &amp; sID &amp; &quot;/&quot;)
+	&apos;Function sfAbsPfadBildDatei(sTextAufgabe As String, sPfadRumpf As String, sTrenner As String) As String
+	sAngepassterString = sfAbsPfadBildDatei(sStringTexDatei, sWorkingDirectory &amp; sTexDateienVerzeichnis &amp; &quot;/&quot; &amp; sID &amp; &quot;/&quot;, &quot;\includegraphics&quot;)
 		
 	&apos;Umlaute ersetzen (unicode vs. ascii-Problematik)
 	sAngepassterString = Replace(sAngepassterString, &quot;ö&quot;, &quot;\&quot;&quot;o&quot;)
@@ -524,6 +538,8 @@ Sub TexDateiErstellenAktuelleIDAufgabe
 End Sub
 
 Sub TexDateiErstellenAktuelleIDLoesung
+	AufgabeSpeichern()
+	
 	&apos;Aktuelle ID bestimmen:
 	sID = sfAusgabeID() &apos; Aufruf von Funktion sfAusgabeID()
 	&apos;Aufgabeninhaltauslesen
@@ -547,7 +563,9 @@ Sub TexDateiErstellenAktuelleIDLoesung
 	&apos;MsgBox sStringTexDatei
 	
 	&apos;Pfad zur Graphik anpassen
-	sAngepassterString = PosUndReplaceVonMystringInSearchstring(sStringTexDatei, &quot;\includegraphics&quot;, sWorkingDirectory &amp; sTexDateienVerzeichnis &amp; &quot;/&quot; &amp; sID &amp; &quot;/&quot;)
+	&apos;sAngepassterString = PosUndReplaceVonMystringInSearchstring(sStringTexDatei, &quot;\includegraphics&quot;, sWorkingDirectory &amp; sTexDateienVerzeichnis &amp; &quot;/&quot; &amp; sID &amp; &quot;/&quot;)
+	&apos;Function sfAbsPfadBildDatei(sTextAufgabe As String, sPfadRumpf As String, sTrenner As String) As String
+	sAngepassterString = sfAbsPfadBildDatei(sStringTexDatei, sWorkingDirectory &amp; sTexDateienVerzeichnis &amp; &quot;/&quot; &amp; sID &amp; &quot;/&quot;, &quot;\includegraphics&quot;)
 	
 	&apos;Umlaute ersetzen (unicode vs. acsii-Problematik)
 	sAngepassterString = Replace(sAngepassterString, &quot;ö&quot;, &quot;\&quot;&quot;o&quot;)
@@ -566,6 +584,8 @@ Sub TexDateiErstellenAktuelleIDLoesung
 End Sub
 
 Sub TexDateiErstellenAktuelleIDKurzLoesung
+	AufgabeSpeichern()
+	
 	&apos;Aktuelle ID bestimmen:
 	sID = sfAusgabeID() &apos; Aufruf von Funktion sfAusgabeID()
 	&apos;Aufgabeninhaltauslesen
@@ -590,7 +610,9 @@ Sub TexDateiErstellenAktuelleIDKurzLoesung
 	&apos;MsgBox sStringTexDatei
 	
 	&apos;Pfad zur Graphik anpassen
-	sAngepassterString = PosUndReplaceVonMystringInSearchstring(sStringTexDatei, &quot;\includegraphics&quot;, sWorkingDirectory &amp; sTexDateienVerzeichnis &amp; &quot;/&quot; &amp; sID &amp; &quot;/&quot;)
+	&apos;sAngepassterString = PosUndReplaceVonMystringInSearchstring(sStringTexDatei, &quot;\includegraphics&quot;, sWorkingDirectory &amp; sTexDateienVerzeichnis &amp; &quot;/&quot; &amp; sID &amp; &quot;/&quot;)
+	&apos;Function sfAbsPfadBildDatei(sTextAufgabe As String, sPfadRumpf As String, sTrenner As String) As String
+	sAngepassterString = sfAbsPfadBildDatei(sStringTexDatei, sWorkingDirectory &amp; sTexDateienVerzeichnis &amp; &quot;/&quot; &amp; sID &amp; &quot;/&quot;, &quot;\includegraphics&quot;)
 	
 	&apos;Umlaute ersetzen (unicode vs. acsii-Problematik)
 	sAngepassterString = Replace(sAngepassterString, &quot;ö&quot;, &quot;\&quot;&quot;o&quot;)
@@ -615,7 +637,35 @@ Sub TexDateiErstellenAktuelleID
 	TexDateiErstellenAktuelleIDKurzLoesung
 End Sub
 
+Function sfAbsPfadBildDatei(sTextAufgabe As String, sPfadRumpf As String, sTrenner As String) As String
+	&apos;Spaltet sTextAufgabe an den Stellen sTrenner auf und
+	&apos;fügt dort sPfadRumpf ein
+
+	&apos;Falls sTrenner gar nicht vorkommt: Nichts machen und sTextAufgabe zurückgeben
+	If Instr(sTextAufgabe, sTrenner) &lt;&gt; 0 then
+		Unterteilung = split(sTextAufgabe,sTrenner)
+		
+		for i = 1 to ubound(Unterteilung)
+			&apos;msgbox i &amp; &quot; &quot; &amp; Unterteilung(i)
+			PosKlammerAuf = Instr(Unterteilung(i),&quot;{&quot;)
+			sTextBisUndMitKlammer = Left(Unterteilung(i), PosKlammerAuf)
+			sTextNachKlammer = Mid(Unterteilung(i), PosKlammerAuf + 1, len(Unterteilung(i))
+			&apos;msgbox &quot;sTextBisUndMitKlammer: &quot; &amp; sTextBisUndMitKlammer
+			&apos;msgbox &quot;sTextNachKlammer: &quot; &amp; sTextNachKlammer
+			Unterteilung(i) = sTextBisUndMitKlammer &amp; convertfromurl(sPfadRumpf) &amp; sTextNachKlammer
+		next i
+		
+		&apos;sTextAufgabe zusammensetzen:
+		sfAbsPfadBildDatei = Join(Unterteilung,sTrenner)
+	Else
+		sfAbsPfadBildDatei = sTextAufgabe
+		Exit Function
+	End If
+End Function
+
 Function PosUndReplaceVonMystringInSearchstring(sMystring, sSearchstring, sDateiPfad As String)
+	&apos; Anmerkung Bi 11.9.2017: Dieser Makro wird nicht mehr benötigt, da von keinem anderen
+	&apos; Makro mehr aufgerufen
 	sZwischenspeicher = sMystring
 	dim iArrayPosition(20) As Integer
 	dim sBildName(20) As String

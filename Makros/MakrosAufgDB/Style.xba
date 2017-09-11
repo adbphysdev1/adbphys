@@ -627,13 +627,17 @@ Sub TexDateiErstellenAusPruefungOt
    	&apos;Bei Aufgabenstring korrekten Pfad einfügen:
    	for i = 0 to iZaehler02 - 1
    		&apos;String mit korrektem Pfad
-   		sAngepassterString = PosUndReplaceVonMystringInSearchstring(sArrayDaten(i,1), &quot;\includegraphics&quot;, sWorkingDirectory &amp; sTexDateienVerzeichnis &amp; &quot;/&quot; &amp; sArrayDaten(i,0) &amp; &quot;/&quot;)
+   		&apos;sAngepassterString = PosUndReplaceVonMystringInSearchstring(sArrayDaten(i,1), &quot;\includegraphics&quot;, sWorkingDirectory &amp; sTexDateienVerzeichnis &amp; &quot;/&quot; &amp; sArrayDaten(i,0) &amp; &quot;/&quot;)
+   		sAngepassterString = sfAbsPfadBildDatei(sArrayDaten(i,1), sWorkingDirectory &amp; sTexDateienVerzeichnis &amp; &quot;/&quot; &amp; sArrayDaten(i,0) &amp; &quot;/&quot;, &quot;\includegraphics&quot;)
+   		
    		&apos;In Array schreiben:
    		sArrayDaten(i,2) = sAngepassterString
    		&apos;MsgBox sArrayDaten(i,0) &amp; chr(13) &amp; chr(13) &amp; sArrayDaten(i,1) &amp; chr(13) &amp; chr(13) &amp; sArrayDaten(i,2) 
    		
    		&apos;Das gleiche für die Lösungen (nur schreibe ich es nicht mehr in eine neue Spalte des Arrays):
-   		sAngepassterString2 = PosUndReplaceVonMystringInSearchstring(sArrayDaten(i,3), &quot;\includegraphics&quot;, sWorkingDirectory &amp; sTexDateienVerzeichnis &amp; &quot;/&quot; &amp; sArrayDaten(i,0) &amp; &quot;/&quot;)
+   		&apos;sAngepassterString2 = PosUndReplaceVonMystringInSearchstring(sArrayDaten(i,3), &quot;\includegraphics&quot;, sWorkingDirectory &amp; sTexDateienVerzeichnis &amp; &quot;/&quot; &amp; sArrayDaten(i,0) &amp; &quot;/&quot;)
+   		sAngepassterString2 = sfAbsPfadBildDatei(sArrayDaten(i,3), sWorkingDirectory &amp; sTexDateienVerzeichnis &amp; &quot;/&quot; &amp; sArrayDaten(i,0) &amp; &quot;/&quot;, &quot;\includegraphics&quot;)
+   		
    		sArrayDaten(i,3) = sAngepassterString2
    	next i
    	   

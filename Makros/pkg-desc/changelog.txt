@@ -1,5 +1,21 @@
 Change Log:
 
+2017.09.11.1:
+NEU (bi):
+- in Modul einzelneAufgabe:
+Function sfAbsPfadBildDatei(sTextAufgabe As String, sPfadRumpf As String, sTrenner As String) As String 
+
+ABGEÄNDERT (bi):
+In folgenden Makros den Aufruf von Makro 'PosUndReplaceVonMystringInSearchstring'
+ersetzt durch den Aufruf von Makro 'sfAbsPfadBildDatei':
+* TexDateiErstellen aus Modul MakrosAufgDB
+* TexDateiErstellenAusPruefungOt aus Modul Style
+* TexDateiErstellenAuswahl aus Modul einzelneAufgabe
+* TexDateiErstellenAusPruefung aus Modul einzelneAufgabe
+* TexDateiErstellenAktuelleIDAufgabe aus Modul einzelneAufgabe
+* TexDateiErstellenAktuelleIDLoesung aus Modul einzelneAufgabe
+* TexDateiErstellenAktuelleIDKurzLoesung aus Modul einzelneAufgabe
+
 2017.09.09.2:
 ABGEÄNDERT (bi):
 im Modul MakrosAufgDB/einzelneAufgabe.xba

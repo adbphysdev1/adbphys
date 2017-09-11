@@ -83,7 +83,12 @@ Sub TexDateiErstellen
 			sStringTexDatei = sTextAuslesenString(sAufgabenDateiName)
 			&apos;MsgBox sStringTexDatei
 			&apos;MsgBox ResultSet.getString(1)
-			sAngepassterString = PosUndReplaceVonMystringInSearchstring(sStringTexDatei, &quot;\includegraphics&quot;, sWorkingDirectory &amp; sTexDateienVerzeichnis &amp; &quot;/&quot; &amp; sID &amp; &quot;/&quot;)
+			
+			&apos;Pfad zur Graphik anpassen
+			&apos;sAngepassterString = PosUndReplaceVonMystringInSearchstring(sStringTexDatei, &quot;\includegraphics&quot;, sWorkingDirectory &amp; sTexDateienVerzeichnis &amp; &quot;/&quot; &amp; sID &amp; &quot;/&quot;)
+			&apos;Function sfAbsPfadBildDatei(sTextAufgabe As String, sPfadRumpf As String, sTrenner As String) As String
+			sAngepassterString = sfAbsPfadBildDatei(sStringTexDatei, sWorkingDirectory &amp; sTexDateienVerzeichnis &amp; &quot;/&quot; &amp; sID &amp; &quot;/&quot;, &quot;\includegraphics&quot;)
+			
 			sTextEinlesenString(sAufgabenDateiName, sAngepassterString)
 		Wend
 	    &apos; Latex-datei beenden  
