@@ -1,5 +1,14 @@
 Change Log:
 
+2017.09.17.1:
+NEU (bi):
+- in Modul einzelneAufgabe:
+Sub TexDateiErstellenUndMitExternemEditorAnzeigen
+
+ABGEÄNDERT (bi):
+- in Modul einzelneAufgabe:
+Function ErstelleTexDatei(sHeaderDateiName,sFooterDateiName,sAufgabenDateiName,sID,sAufgabe As String)
+
 2017.09.11.1:
 NEU (bi):
 - in Modul einzelneAufgabe:

@@ -476,8 +476,58 @@ Sub TexDateiErstellenAusPruefung
 	PdflatexHilfsdateienLoeschen(sWorkingDirectory &amp; sTexDateienVerzeichnis, sTexDatei)
 End Sub
 
-Sub TexDateiErstellenAktuelleIDv2
-	&apos;&apos;wie TexDateiErstellenAktuelleID aber zuerst Aufgabenstring anpassen und dann Datei erstellen
+Sub TexDateiErstellenUndMitExternemEditorAnzeigen
+	&apos;Neu: 17.9.17
+
+	&apos;Ist eine Workaraound, welcher auf
+	&apos; TexDateiErstellenAktuelleIDAufgabe basiert
+	&apos;Könnte man schöner programmieren!
+	
+	AufgabeSpeichern()
+	
+	&apos;Aktuelle ID bestimmen:
+	sID = sfAusgabeID() &apos; Aufruf von Funktion sfAusgabeID()
+	&apos;Aufgabeninhaltauslesen
+	sAufgabe = sfAusgabeAufgabe()
+	sLoesung = sfAusgabeLoesung()
+	&apos;&apos;Loesungen anzeigen: J/N
+	&apos;oForm = ThisComponent.drawpage.getForms.GetByName(&quot;MainForm&quot;)
+	&apos;oLsgJN = oForm.getbyName(&quot;LoesungenJN&quot;)
+	
+	&apos;MsgBox sID &amp; &quot; &quot; &amp; sAufgabe
+	sWorkingDirectory=sfWorkingDirectory(&quot;aufgdbphys.odb&quot;)
+	sTexDateienVerzeichnis = sfAufgabenverzeichnis
+	sHeaderDateiName = sWorkingDirectory &amp; sTexDateienVerzeichnis &amp; &quot;/headerfooter/headereinzelneaufgabe01.tex&quot;
+	sFooterDateiName = sWorkingDirectory &amp; sTexDateienVerzeichnis &amp; &quot;/headerfooter/footer.tex&quot;
+	sAufgabenDateiName = sWorkingDirectory &amp; sTexDateienVerzeichnis &amp; &quot;/&quot; &amp; sID &amp; &quot;/aufgabe.tex&quot;
+	&apos;TexDatei im ID Ordner erstellen
+	ErstelleTexDatei(sHeaderDateiName,sFooterDateiName,sAufgabenDateiName,sID,sAufgabe)
+	&apos;TeX-Datei in String auslesen
+	
+	sStringTexDatei = sTextAuslesenString(sAufgabenDateiName)
+			
+	&apos;Pfad zur Graphik anpassen
+	&apos;sAngepassterString = PosUndReplaceVonMystringInSearchstring(sStringTexDatei, &quot;\includegraphics&quot;, sWorkingDirectory &amp; sTexDateienVerzeichnis &amp; &quot;/&quot; &amp; sID &amp; &quot;/&quot;)
+	&apos;Function sfAbsPfadBildDatei(sTextAufgabe As String, sPfadRumpf As String, sTrenner As String) As String
+	&apos;sAngepassterString = sfAbsPfadBildDatei(sStringTexDatei, sWorkingDirectory &amp; sTexDateienVerzeichnis &amp; &quot;/&quot; &amp; sID &amp; &quot;/&quot;, &quot;\includegraphics&quot;)
+
+	sAngepassterString = sStringTexDatei
+		
+	&apos;Umlaute ersetzen (unicode vs. ascii-Problematik)
+	sAngepassterString = Replace(sAngepassterString, &quot;ö&quot;, &quot;\&quot;&quot;o&quot;)
+	sAngepassterString = Replace(sAngepassterString, &quot;Ö&quot;, &quot;\&quot;&quot;O&quot;)
+	sAngepassterString = Replace(sAngepassterString, &quot;ä&quot;, &quot;\&quot;&quot;a&quot;)
+	sAngepassterString = Replace(sAngepassterString, &quot;Ä&quot;, &quot;\&quot;&quot;A&quot;)
+	sAngepassterString = Replace(sAngepassterString, &quot;ü&quot;, &quot;\&quot;&quot;u&quot;)
+	sAngepassterString = Replace(sAngepassterString, &quot;Ü&quot;, &quot;\&quot;&quot;U&quot;)
+		
+	sTextEinlesenString(sAufgabenDateiName, sAngepassterString)
+	
+	&apos; Texmaker (o.ä.) öffnen:
+	oShell = createUnoService(&quot;com.sun.star.system.SystemShellExecute&quot;)
+	if FileExists(convertfromurl(sAufgabenDateiName)) then
+		oShell.execute(sAufgabenDateiName, &quot;&quot;, 0)
+	end if
 End Sub
 
 Sub TexDateiErstellenAktuelleIDAufgabe
@@ -820,6 +870,8 @@ Sub PfadZuBildSetzen(sPfadZuBild As String, iAufgabenID As Integer)
 End Sub
 
 Function ErstelleTexDatei(sHeaderDateiName,sFooterDateiName,sAufgabenDateiName,sID,sAufgabe As String)
+	&apos;Abgeändert: 17.9.17
+
 	Dim iAufgabenDateiNummer,iHeaderDateiNummer,iFooterDateiNummer As Integer
     iAufgabenDateiNummer = FreeFile
     iHeaderDateiNummer = FreeFile
@@ -833,6 +885,7 @@ Function ErstelleTexDatei(sHeaderDateiName,sFooterDateiName,sAufgabenDateiName,s
        &apos; Latexdatei beginnen
         Open sAufgabenDateiName For Output As #iAufgabenDateiNummer
 	   	Print #iAufgabenDateiNummer, TexHeader &amp; chr(13) &amp; chr(13)      &apos; Save line
+	   	Print #iAufgabenDateiNummer, &quot;%------------------- BEGINN AUFGABE -------------------&quot; &amp; chr(13) &amp; chr(13)
 		Close #iAufgabenDateiNummer
 
 	&apos;	While ResultSet.next
@@ -844,6 +897,7 @@ Function ErstelleTexDatei(sHeaderDateiName,sFooterDateiName,sAufgabenDateiName,s
 	&apos;	Wend
 	    &apos; Latex-datei beenden  
 		Open sAufgabenDateiName For Append As #iAufgabenDateiNummer
+		Print #iAufgabenDateiNummer, &quot;%------------------- ENDE AUFGABE -------------------&quot; &amp; chr(13) &amp; chr(13)
 		Print #iAufgabenDateiNummer, chr(13) &amp; chr(13) &amp; TexFooter     &apos; Save line
 		Close #iAufgabenDateiNummer
     End If    
