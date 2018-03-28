@@ -702,7 +702,12 @@ Function sfAbsPfadBildDatei(sTextAufgabe As String, sPfadRumpf As String, sTrenn
 			sTextNachKlammer = Mid(Unterteilung(i), PosKlammerAuf + 1, len(Unterteilung(i))
 			&apos;msgbox &quot;sTextBisUndMitKlammer: &quot; &amp; sTextBisUndMitKlammer
 			&apos;msgbox &quot;sTextNachKlammer: &quot; &amp; sTextNachKlammer
-			Unterteilung(i) = sTextBisUndMitKlammer &amp; convertfromurl(sPfadRumpf) &amp; sTextNachKlammer
+			
+			&apos;Problem: LaTeX verlangt auch in Windows Pfadangaben mit / und nicht mit \.
+			&apos;Deshalb wird ein \ ersetzt (bei Linux und OS X passiert nichts.
+			sPfadRumpfAngepasst = Replace(convertfromurl(sPfadRumpf), &quot;\&quot;, &quot;/&quot;)
+			
+			Unterteilung(i) = sTextBisUndMitKlammer &amp; sPfadRumpfAngepasst &amp; sTextNachKlammer
 		next i
 		
 		&apos;sTextAufgabe zusammensetzen:

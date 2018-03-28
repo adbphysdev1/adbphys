@@ -1,5 +1,15 @@
 Change Log:
 
+2018.03.28:
+ABGEÄNDERT (bi):
+- in Modul einzelneAufgabe:
+Function sfAbsPfadBildDatei(sTextAufgabe As String, sPfadRumpf As String, sTrenner As String) As String
+folgende Zeilen hinzugefügt:
+'Problem: LaTeX verlangt auch in Windows Pfadangaben mit / und nicht mit \.
+'Deshalb wird ein \ ersetzt (bei Linux und OS X passiert nichts.
+sPfadRumpfAngepasst = Replace(convertfromurl(sPfadRumpf), "\", "/")
+Unterteilung(i) = sTextBisUndMitKlammer & sPfadRumpfAngepasst & sTextNachKlammer
+
 2017.09.17.1:
 NEU (bi):
 - in Modul einzelneAufgabe:
