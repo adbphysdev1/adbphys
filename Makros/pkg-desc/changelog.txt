@@ -1,5 +1,66 @@
 Change Log:
 
+2018.03.28:
+ABGEÄNDERT (bi):
+- in Modul einzelneAufgabe:
+Function sfAbsPfadBildDatei(sTextAufgabe As String, sPfadRumpf As String, sTrenner As String) As String
+folgende Zeilen hinzugefügt:
+'Problem: LaTeX verlangt auch in Windows Pfadangaben mit / und nicht mit \.
+'Deshalb wird ein \ ersetzt (bei Linux und OS X passiert nichts.
+sPfadRumpfAngepasst = Replace(convertfromurl(sPfadRumpf), "\", "/")
+Unterteilung(i) = sTextBisUndMitKlammer & sPfadRumpfAngepasst & sTextNachKlammer
+
+2017.09.17.1:
+NEU (bi):
+- in Modul einzelneAufgabe:
+Sub TexDateiErstellenUndMitExternemEditorAnzeigen
+
+ABGEÄNDERT (bi):
+- in Modul einzelneAufgabe:
+Function ErstelleTexDatei(sHeaderDateiName,sFooterDateiName,sAufgabenDateiName,sID,sAufgabe As String)
+
+2017.09.11.1:
+NEU (bi):
+- in Modul einzelneAufgabe:
+Function sfAbsPfadBildDatei(sTextAufgabe As String, sPfadRumpf As String, sTrenner As String) As String 
+
+ABGEÄNDERT (bi):
+In folgenden Makros den Aufruf von Makro 'PosUndReplaceVonMystringInSearchstring'
+ersetzt durch den Aufruf von Makro 'sfAbsPfadBildDatei':
+* TexDateiErstellen aus Modul MakrosAufgDB
+* TexDateiErstellenAusPruefungOt aus Modul Style
+* TexDateiErstellenAuswahl aus Modul einzelneAufgabe
+* TexDateiErstellenAusPruefung aus Modul einzelneAufgabe
+* TexDateiErstellenAktuelleIDAufgabe aus Modul einzelneAufgabe
+* TexDateiErstellenAktuelleIDLoesung aus Modul einzelneAufgabe
+* TexDateiErstellenAktuelleIDKurzLoesung aus Modul einzelneAufgabe
+
+2017.09.09.2:
+ABGEÄNDERT (bi):
+im Modul MakrosAufgDB/einzelneAufgabe.xba
+- Sub FileManagerOeffnen: Filemanager Linux von nemo auf xdg-open angepasst
+im Modul MakrosAufgDB/pdflatex.xba
+- Sub PdfToPng: 
+Befehl angepasst:
+alt: convert -density 300 aufgabe.pdf aufgabe.png 
+neu: convert -density 300 aufgabe.pdf -quality 90 -background white -flatten aufgabe.png 
+
+2017.09.09.1:
+ABGEÄNDERT (bi):
+im Dialog DialogSystemeinstellungen.xdl
+- Nummern Autoren angepasst
+im Modul diverse:
+- Sub PermanenteIDsetzen
+NEU (bi):
+im Modul diverse:
+- Function afPermanenteIDsetzen
+- ifHoechsteIDbestimmen
+
+2017.05.11:
+ABGEÄNDERT (bi):
+im Modul einzelneAufgabe:
+- Sub TexDateiErstellenAuswahl: PermanenteID wird angezeigt
+
 17.2.2017 --> Siehe Github
 
 * 1.2.13 -> 2016.10.0/1 (18.10.16):

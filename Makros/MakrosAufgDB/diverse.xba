@@ -200,30 +200,85 @@ Sub AlteIDAendern
 	
 End Sub
 
-Sub PermanenteIDsetzen
-	Dim iHoechsteID As Integer 
-	Dim iLaufendeID As Integer 
+Function ifHoechsteIDbestimmen(iIDAutorInEinstellungen As Integer, ResultSet As Object, Statement As Object) As Integer
+	&apos;Bestimmt für angegebenen Autor, die ID der letzen Aufgabe
 	iHoechsteID = 0
-	iLaufendeID = 0
 	
+	If Not IsNull(ResultSet) Then
+		While ResultSet.next
+			iIDAutorAufgabe = cint(trim(ResultSet.getString(3))
+			sIDAufgabe = trim(ResultSet.getString(22))
+			salteID = trim(ResultSet.getString(20))
+			&apos;print iIDAutorAufgabe &amp; &quot; &quot; &amp; sIDAufgabe &amp; &quot; &quot; &amp; salteID
+			if salteID = &quot;&quot; then
+				if cint(iIDAutorInEinstellungen) = cint(iIDAutorAufgabe) then
+					&apos;print iIDAutorAufgabe &amp; &quot; &quot; &amp; sIDAufgabe &amp; &quot; &quot; &amp; salteID &amp; &quot; &quot; &amp; iIDAutorInEinstellungen
+					if sIDAufgabe &lt;&gt; &quot;&quot; then
+						iIDAufgabeTeil2 = cint(split(sIDAufgabe,&quot;-&quot;)(1))
+						&apos;print iIDAufgabeTeil2
+						if iIDAufgabeTeil2 &gt; iHoechsteID then
+							iHoechsteID = iIDAufgabeTeil2
+						end if
+					end if
+				end if
+			end if
+		Wend
+	End If
+	
+	ifHoechsteIDbestimmen = iHoechsteID
+End Function
+
+Function afPermanenteIDsetzen(iIDAutorInEinstellungen As Integer,sHoechsteID  As String, ResultSet As Object)
+	Dim iIDArray(0) As Integer
+	&apos;print ubound(iIDArray)
+	If Not IsNull(ResultSet) Then
+		While ResultSet.next
+			iIDNichtPermanent = cint(trim(ResultSet.getString(1))
+			iIDAutorAufgabe = cint(trim(ResultSet.getString(3))
+			sIDAufgabe = trim(ResultSet.getString(22))
+			salteID = trim(ResultSet.getString(20))
+			&apos;print iIDAutorAufgabe &amp; &quot; &quot; &amp; sIDAufgabe &amp; &quot; &quot; &amp; salteID &amp; &quot; &quot; &amp; iIDNichtPermanent
+			if salteID = &quot;&quot; then
+				if cint(iIDAutorInEinstellungen) = cint(iIDAutorAufgabe) then
+					&apos;print iIDAutorAufgabe &amp; &quot; &quot; &amp; sIDAufgabe &amp; &quot; &quot; &amp; salteID &amp; &quot; &quot; &amp; iIDAutorInEinstellungen
+					if sIDAufgabe = &quot;&quot; then
+						Redim Preserve iIDArray(ubound(iIDArray)+1)
+						&apos;print ubound(iIDArray)
+						&apos;Print iIDNichtPermanent
+						iIDArray(ubound(iIDArray)-1) = iIDNichtPermanent
+					end if
+				end if
+			end if	
+		Wend
+	End If
+	&apos;Letzen Eintrag einfernen, das nur einen 0:
+	if ubound(iIDArray) &gt; 0 then
+		Redim Preserve iIDArray(ubound(iIDArray)-1)
+	else
+		msgbox &quot;Es gibt keine neuen Aufgaben der Autors &quot; &amp; iIDAutorInEinstellungen &amp; &quot; ohne permanente ID. ENDE.&quot;
+		stop
+	end if
+	afPermanenteIDsetzen = iIDArray
+End Function
+
+Sub PermanenteIDsetzen
 	&apos;Autor in Einstellungen auslesen:
-	sIDAutorInEinstellungen = sfAutor()
-	MsgBox &quot;Der in den Einstellungen gewählte Autor: &quot; &amp; sIDAutorInEinstellungen
-	
+	sIDAutorInEinstellungen = Trim(sfAutor())
+	&apos;In Interger umwandeln:
+	iIDAutorInEinstellungen = cint(sIDAutorInEinstellungen)
+	&apos;print iIDAutorInEinstellungen
+	&apos;print &quot;Der in den Einstellungen gewählte Autor: &quot; &amp; sIDAutorInEinstellungen
 	&apos;Möglichkeit, den Makro abzubrechen:
 	rueckgabe = MsgBox(&quot;Willst Du wirklich für alle Aufgaben des Autors &quot; &amp; sIDAutorInEinstellungen &amp; &quot; eine permanente ID setzen?&quot;,1)
 	if rueckgabe = 2 then
 		MsgBox &quot;Abbruch! Es wird keine permanente ID gesetzt.&quot;
 		exit sub
 	end if
-
-	&apos;Alle markierten Aufgaben zuruecksetzen:
-	&apos;MarkierteAufgabenZuruecksetzen
 	
 	&apos;Alle Aufgaben in Resultset auslesen:
 	Dim DatabaseContext, DataSource, Connection, InteractionHandler, Statement, ResultSet As Object	
 	&apos;DatenbankKontext erstellen
-    DatabaseContext = createUnoService(&quot;com.sun.star.sdb.DatabaseContext&quot;)
+	DatabaseContext = createUnoService(&quot;com.sun.star.sdb.DatabaseContext&quot;)
     &apos;Datenbank kontaktieren
     DataSource = DatabaseContext.getByName(&quot;aufgdbphys&quot;)
     &apos;Testen, ob Passwort benötigt wird
@@ -237,62 +292,27 @@ Sub PermanenteIDsetzen
     Statement = Connection.createStatement()
     StatementUpdate = Connection.createStatement()
 	ResultSet = Statement.executeQuery(&quot;SELECT * FROM `Aufgaben`&quot;)
+
+	&apos;Höchste ID des betreffenden Autors bestimmen:
+	iHoechsteID = ifHoechsteIDbestimmen(iIDAutorInEinstellungen, ResultSet)
+	print &quot;Die Aufgabe mit der höchsten ID ist: &quot; &amp; iIDAutorInEinstellungen &amp; &quot;-&quot; &amp; iHoechsteID
+	sHoechsteID = iIDAutorInEinstellungen &amp; &quot;-&quot; &amp; iHoechsteID
 	
-	&apos;Falls PermanenteID mit -1- anfängt, -1- enfernen, höchste iLaufendeID in iHoechsteID zwischen speichern
-	&apos;So wird die höchste ID bestimmt.
-	If Not IsNull(ResultSet) Then
-   		While ResultSet.next
-			sID = ResultSet.getString(22)
-			&apos;MsgBox sID
-			if left(sID,2) = sIDAutorInEinstellungen &amp;&quot;-&quot; then
-				iLaufendeID = cint(Mid(sID,3,len(sID)-2))
-				if iHoechsteID &lt; iLaufendeID then
-					iHoechsteID = iLaufendeID
-				end if
-			end if
-			&apos;Neu 24.9.15 (Bi): Ab Bischoff sind die IDs der Benutzer 2stellig!
-			if left(sID,3) = sIDAutorInEinstellungen &amp;&quot;-&quot; then
-				iLaufendeID = cint(Mid(sID,4,len(sID)-2))
-				if iHoechsteID &lt; iLaufendeID then
-					iHoechsteID = iLaufendeID
-				end if
-			end if
-			&apos;ENDE Neu 24.9.15
-		Wend
-		MsgBox &quot;Höchste ID: &quot; &amp; iHoechsteID
-	Else
-		MsgBox &quot;Es gibt keine Aufgaben.&quot;
-   		Exit Sub
-	End If
-	
-	&apos;Alle Aufgaben durchgehen, welche 1- als Autor, aber keine Permanente ID haben&apos;
-	&apos;ID setzen ab iHoechsteID + 1
 	ResultSet = Statement.executeQuery(&quot;SELECT * FROM `Aufgaben`&quot;)
-	iHoechsteID = iHoechsteID + 1
-	If Not IsNull(ResultSet) Then
-  		While ResultSet.next
-			sIDAutor = ResultSet.getString(3)
-			sID = ResultSet.getString(22)
-			salteID = ResultSet.getString(20)
-			&apos;MsgBox sIDAutor &amp; &quot; &quot; &amp; sID
-			if salteID = &quot;&quot; then
-				if cint(sIDAutorInEinstellungen) = cint(sIDAutor) then
-					if left(sID,2) &lt;&gt; sIDAutorInEinstellungen &amp;&quot;-&quot; then
-&apos;					sAbfrage = &quot;UPDATE &quot;&quot;Aufgaben&quot;&quot; SET &quot;&quot;LinkZuBild&quot;&quot; = &apos;&quot; &amp; sPfadZuBild &amp; &quot;&apos; WHERE  (&quot;&quot;AufgID&quot;&quot; = &quot; &amp; iAufgabenID &amp; &quot;) &quot;
-						sSQL = &quot;UPDATE &quot;&quot;Aufgaben&quot;&quot; SET &quot;&quot;Aufgaben&quot;&quot;.&quot;&quot;PermanenteID&quot;&quot; = &apos;&quot; &amp; sIDAutorInEinstellungen &amp;&quot;-&quot; &amp; iHoechsteID &amp; &quot;&apos; WHERE (&quot;&quot;Aufgaben&quot;&quot;.&quot;&quot;AufgID&quot;&quot; = &quot; &amp;ResultSet.getString(1) &amp; &quot;) &quot;
-	 					&apos;MsgBox sSQL
-	 					StatementUpdate.executeUpdate(sSQL)
-	 					iHoechsteID = iHoechsteID + 1
-					end if
-				end if
-			end if
-		Wend
-	Else
-		MsgBox &quot;Es gibt keine Aufgaben.&quot;
-  		Exit Sub
-	End If
+	aArrayIDsNichtPermanent = afPermanenteIDsetzen(iIDAutorInEinstellungen,sHoechsteID, ResultSet) &apos;Gibt Array mit (nichtpermanenten) IDs zurück, welche eine Perm. ID brauchen
 	
-	MsgBox &quot;Alle Aufgaben des Autors &quot; &amp; sIDAutorInEinstellungen &amp; &quot; haben eine permanente ID erhalten.&quot; &amp; chr(13) &amp; &quot;Evtl. Datenbank aktualisieren.&quot;
+	&apos;for i = 0 to ubound(aArrayIDsNichtPermanent)
+	&apos;	print &quot;Eintrag &quot; &amp; i &amp; &quot;:&quot; &amp; aArrayIDsNichtPermanent(i)
+	&apos;next i
+	
+	&apos;Setzen einer PermanentenID
+	for i = 0 to ubound(aArrayIDsNichtPermanent)
+		sSQL = &quot;UPDATE &quot;&quot;Aufgaben&quot;&quot; SET &quot;&quot;Aufgaben&quot;&quot;.&quot;&quot;PermanenteID&quot;&quot; = &apos;&quot; &amp; iIDAutorInEinstellungen &amp;&quot;-&quot; &amp; iHoechsteID + i + 1 &amp; &quot;&apos; WHERE (&quot;&quot;Aufgaben&quot;&quot;.&quot;&quot;AufgID&quot;&quot; = &quot; &amp; aArrayIDsNichtPermanent(i) &amp; &quot;) &quot;
+		&apos;print sSQL
+		StatementUpdate.executeUpdate(sSQL)
+	next i
+	MsgBox &quot;Alle Aufgaben des Autors &quot; &amp; iIDAutorInEinstellungen &amp; &quot; haben eine permanente ID erhalten.&quot; &amp; chr(13) &amp; &quot;Evtl. Datenbank aktualisieren. ENDE&quot;
+
 End Sub
 
 sub AuswahlGemaessFilter

@@ -130,11 +130,11 @@ End Sub
 
 Sub PdfToPng(sPfadZurPdfDatei, sPdfDatei As String)
 	if afSystemeinstellungen(1) = 1 then
-		shilf3 = &quot;/bin/bash -lc &quot; &amp; Chr$(34) &amp; &quot;convert -density 300 &quot; &amp; convertfromurl(sPfadZurPdfDatei) &amp; &quot;/&quot; &amp; sPdfDatei &amp; &quot;.pdf &quot;&amp; convertfromurl(sPfadZurPdfDatei) &amp; &quot;/&quot; &amp; sPdfDatei &amp; &quot;.jpg&quot; &amp; Chr$(34)
+		shilf3 = &quot;/bin/bash -lc &quot; &amp; Chr$(34) &amp; &quot;convert -density 300 &quot; &amp; convertfromurl(sPfadZurPdfDatei) &amp; &quot;/&quot; &amp; sPdfDatei &amp; &quot;.pdf -quality 90 -background white -flatten &quot;&amp; convertfromurl(sPfadZurPdfDatei) &amp; &quot;/&quot; &amp; sPdfDatei &amp; &quot;.jpg&quot; &amp; Chr$(34)
 		&apos;MsgBox shilf3
 		shell(shilf3,,,true)
 	elseif afSystemeinstellungen(1) = 2 then
-		shilf3 = &quot;/bin/bash -lc &quot; &amp; Chr$(34) &amp; &quot;convert -density 300 &quot; &amp; convertfromurl(sPfadZurPdfDatei) &amp; &quot;/&quot; &amp; sPdfDatei &amp; &quot;.pdf &quot;&amp; convertfromurl(sPfadZurPdfDatei) &amp; &quot;/&quot; &amp; sPdfDatei &amp; &quot;.jpg&quot; &amp; Chr$(34)
+		shilf3 = &quot;/bin/bash -lc &quot; &amp; Chr$(34) &amp; &quot;convert -density 300 &quot; &amp; convertfromurl(sPfadZurPdfDatei) &amp; &quot;/&quot; &amp; sPdfDatei &amp; &quot;.pdf -quality 90 -background white -flatten &quot;&amp; convertfromurl(sPfadZurPdfDatei) &amp; &quot;/&quot; &amp; sPdfDatei &amp; &quot;.jpg&quot; &amp; Chr$(34)
 		&apos;MsgBox shilf3
 		shell(shilf3,0,,true)
 	&apos;neu START 9.8.13
@@ -144,7 +144,7 @@ Sub PdfToPng(sPfadZurPdfDatei, sPdfDatei As String)
 		&apos;msgbox sPfadConvert
 		shilf3a = chr(34) &amp; sPfadConvert &amp; chr(34)
 		&apos;msgbox shilf3a
-		shilf3b = &quot;-density 300 &quot; &amp; chr(34) &amp; convertfromurl(sPfadZurPdfDatei) &amp; &quot;\&quot; &amp; sPdfDatei &amp; &quot;.pdf&quot; &amp; chr(34) &amp; &quot; &quot; &amp; chr(34) &amp; convertfromurl(sPfadZurPdfDatei) &amp; &quot;\&quot; &amp; sPdfDatei &amp; &quot;.jpg&quot; &amp; chr(34)
+		shilf3b = &quot;-density 300 &quot; &amp; chr(34) &amp; convertfromurl(sPfadZurPdfDatei) &amp; &quot;\&quot; &amp; sPdfDatei &amp; &quot;.pdf&quot; &amp; chr(34) &amp; &quot; -quality 90 -background white -flatten &quot; &amp; chr(34) &amp; convertfromurl(sPfadZurPdfDatei) &amp; &quot;\&quot; &amp; sPdfDatei &amp; &quot;.jpg&quot; &amp; chr(34)
 		&apos;msgbox shilf3b
 		oshell.execute(shilf3a, shilf3b, 1)
 	&apos;neu END 9.8.13

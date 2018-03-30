@@ -223,10 +223,10 @@ Sub TexDateiErstellenAuswahl
    		Exit Sub
    	End if	
    	&apos;Array Dimensionieren:
-   	Dim sArrayDaten(iZaehler01 - 1,4) As String
+   	Dim sArrayDaten(iZaehler01 - 1,5) As String
    	
     &apos;ResultSet = Statement.executeQuery(&quot;SELECT `Aufgaben`.`AufgID` AS `AufgID`, `Aufgaben`.`Fachgebiet` AS `Fachgebiet`, `Aufgaben`.`Author` AS `Author`, `Aufgaben`.`Schwierigkeitsgrad` AS `Schwierigkeitsgrad`, `Aufgaben`.`LetzteAenderung` AS `LetzteAenderung`, `Aufgaben`.`AufgabenText` AS `AufgabenText`, `Aufgaben`.`LinkZuBild` AS `LinkZuBild`, `Aufgaben`.`MC2` AS `MC2`, `Aufgaben`.`MC3` AS `MC3`, `Aufgaben`.`MC4` AS `MC4`, `Aufgaben`.`MC5` AS `MC5`, `Aufgaben`.`MC6` AS `MC6`, `Aufgaben`.`Loesung` AS `Loesung`, `Aufgaben`.`Auswahl` AS `Auswahl`, `Aufgaben`.`Position` AS `Position`, `Aufgaben`.`LoesungJN` AS `LoesungJN`, `Aufgaben`.`IDVarianten` AS `IDVarianten`, `Aufgaben`.`Kurzloesung` AS `Kurzloesung`, `Aufgaben`.`KurzloesungJN` AS `KurzloesungJN` FROM `Aufgaben` `Aufgaben` WHERE ( `Aufgaben`.`Auswahl` = True )&quot;)
-    ResultSet = Statement.executeQuery(&quot;SELECT `Aufgaben`.`AufgID` AS `AufgID`, `Aufgaben`.`Fachgebiet` AS `Fachgebiet`, `Aufgaben`.`Author` AS `Author`, `Aufgaben`.`Schwierigkeitsgrad` AS `Schwierigkeitsgrad`, `Aufgaben`.`LetzteAenderung` AS `LetzteAenderung`, `Aufgaben`.`AufgabenText` AS `AufgabenText`, `Aufgaben`.`LinkZuBild` AS `LinkZuBild`, `Aufgaben`.`MC2` AS `MC2`, `Aufgaben`.`MC3` AS `MC3`, `Aufgaben`.`MC4` AS `MC4`, `Aufgaben`.`MC5` AS `MC5`, `Aufgaben`.`MC6` AS `MC6`, `Aufgaben`.`Loesung` AS `Loesung`, `Aufgaben`.`Auswahl` AS `Auswahl`, `Aufgaben`.`Position` AS `Position`, `Aufgaben`.`LoesungJN` AS `LoesungJN`, `Aufgaben`.`IDVarianten` AS `IDVarianten`, `Aufgaben`.`Kurzloesung` AS `Kurzloesung`, `Aufgaben`.`KurzloesungJN` AS `KurzloesungJN` FROM `Aufgaben` `Aufgaben` WHERE ( `Aufgaben`.`Auswahl` = True ) ORDER BY `Aufgaben`.`Position`, `Aufgaben`.`Fachgebiet`, `Aufgaben`.`Schwierigkeitsgrad`&quot;)   
+    ResultSet = Statement.executeQuery(&quot;SELECT `Aufgaben`.`AufgID` AS `AufgID`, `Aufgaben`.`Fachgebiet` AS `Fachgebiet`, `Aufgaben`.`Author` AS `Author`, `Aufgaben`.`Schwierigkeitsgrad` AS `Schwierigkeitsgrad`, `Aufgaben`.`LetzteAenderung` AS `LetzteAenderung`, `Aufgaben`.`AufgabenText` AS `AufgabenText`, `Aufgaben`.`LinkZuBild` AS `LinkZuBild`, `Aufgaben`.`MC2` AS `MC2`, `Aufgaben`.`MC3` AS `MC3`, `Aufgaben`.`MC4` AS `MC4`, `Aufgaben`.`MC5` AS `MC5`, `Aufgaben`.`MC6` AS `MC6`, `Aufgaben`.`Loesung` AS `Loesung`, `Aufgaben`.`Auswahl` AS `Auswahl`, `Aufgaben`.`Position` AS `Position`, `Aufgaben`.`LoesungJN` AS `LoesungJN`, `Aufgaben`.`IDVarianten` AS `IDVarianten`, `Aufgaben`.`Kurzloesung` AS `Kurzloesung`, `Aufgaben`.`KurzloesungJN` AS `KurzloesungJN`,`Aufgaben`.`PermanenteID` AS `PermanenteID` FROM `Aufgaben` `Aufgaben` WHERE ( `Aufgaben`.`Auswahl` = True ) ORDER BY `Aufgaben`.`Position`, `Aufgaben`.`Fachgebiet`, `Aufgaben`.`Schwierigkeitsgrad`&quot;)   
    	iZaehler02 = 0
    	If Not IsNull(ResultSet) Then
    		While ResultSet.next
@@ -257,6 +257,8 @@ Sub TexDateiErstellenAuswahl
 			sKurzLoesung = Replace(sKurzLoesung, &quot;Ä&quot;, &quot;\&quot;&quot;A&quot;)
 			sKurzLoesung = Replace(sKurzLoesung, &quot;ü&quot;, &quot;\&quot;&quot;u&quot;)
 			sKurzLoesung = Replace(sKurzLoesung, &quot;Ü&quot;, &quot;\&quot;&quot;U&quot;)
+			
+			sPermanenteID = ResultSet.getString(20)
 
 			&apos;MsgBox sID &amp; chr(13) &amp; sAufgabe
 			&apos;In Array schreiben:
@@ -264,23 +266,30 @@ Sub TexDateiErstellenAuswahl
 			sArrayDaten(iZaehler02 - 1,1) = sAufgabe
 			sArrayDaten(iZaehler02 - 1,3) = sLoesung
 			sArrayDaten(iZaehler02 - 1,4) = sKurzLoesung
+			sArrayDaten(iZaehler02 - 1,5) = sPermanenteID
 		Wend
    	End If
    	
    	&apos;Bei Aufgabenstring korrekten Pfad einfügen:
    	for i = 0 to iZaehler02 - 1
    		&apos;String mit korrektem Pfad
-   		sAngepassterString = PosUndReplaceVonMystringInSearchstring(sArrayDaten(i,1), &quot;\includegraphics&quot;, sWorkingDirectory &amp; sTexDateienVerzeichnis &amp; &quot;/&quot; &amp; sArrayDaten(i,0) &amp; &quot;/&quot;)
+   		&apos;sAngepassterString = PosUndReplaceVonMystringInSearchstring(sArrayDaten(i,1), &quot;\includegraphics&quot;, sWorkingDirectory &amp; sTexDateienVerzeichnis &amp; &quot;/&quot; &amp; sArrayDaten(i,0) &amp; &quot;/&quot;)
+   		sAngepassterString = sfAbsPfadBildDatei(sArrayDaten(i,1), sWorkingDirectory &amp; sTexDateienVerzeichnis &amp; &quot;/&quot; &amp; sArrayDaten(i,0) &amp; &quot;/&quot;, &quot;\includegraphics&quot;)
+   		
    		&apos;In Array schreiben:
    		sArrayDaten(i,2) = sAngepassterString
    		&apos;MsgBox sArrayDaten(i,0) &amp; chr(13) &amp; chr(13) &amp; sArrayDaten(i,1) &amp; chr(13) &amp; chr(13) &amp; sArrayDaten(i,2) 
    		
    		&apos;Das gleiche für die Lösungen (nur schreibe ich es nicht mehr in eine neue Spalte des Arrays):
-   		sAngepassterString2 = PosUndReplaceVonMystringInSearchstring(sArrayDaten(i,3), &quot;\includegraphics&quot;, sWorkingDirectory &amp; sTexDateienVerzeichnis &amp; &quot;/&quot; &amp; sArrayDaten(i,0) &amp; &quot;/&quot;)
+   		&apos;sAngepassterString2 = PosUndReplaceVonMystringInSearchstring(sArrayDaten(i,3), &quot;\includegraphics&quot;, sWorkingDirectory &amp; sTexDateienVerzeichnis &amp; &quot;/&quot; &amp; sArrayDaten(i,0) &amp; &quot;/&quot;)
+   		sAngepassterString2 = sfAbsPfadBildDatei(sArrayDaten(i,3), sWorkingDirectory &amp; sTexDateienVerzeichnis &amp; &quot;/&quot; &amp; sArrayDaten(i,0) &amp; &quot;/&quot;, &quot;\includegraphics&quot;)
+   		
    		sArrayDaten(i,3) = sAngepassterString2
    		
    		&apos;Das gleiche für die Kurzlösungen (nur schreibe ich es nicht mehr in eine neue Spalte des Arrays):
-   		sAngepassterStringKL = PosUndReplaceVonMystringInSearchstring(sArrayDaten(i,4), &quot;\includegraphics&quot;, sWorkingDirectory &amp; sTexDateienVerzeichnis &amp; &quot;/&quot; &amp; sArrayDaten(i,0) &amp; &quot;/&quot;)
+   		&apos;sAngepassterStringKL = PosUndReplaceVonMystringInSearchstring(sArrayDaten(i,4), &quot;\includegraphics&quot;, sWorkingDirectory &amp; sTexDateienVerzeichnis &amp; &quot;/&quot; &amp; sArrayDaten(i,0) &amp; &quot;/&quot;)
+   		sAngepassterStringKL = sfAbsPfadBildDatei(sArrayDaten(i,4), sWorkingDirectory &amp; sTexDateienVerzeichnis &amp; &quot;/&quot; &amp; sArrayDaten(i,0) &amp; &quot;/&quot;, &quot;\includegraphics&quot;)
+   		
    		sArrayDaten(i,4) = sAngepassterStringKL
    	next i
    	   
@@ -301,15 +310,15 @@ Sub TexDateiErstellenAuswahl
 	   		&apos;String mit korrektem Pfad
 	   			if oLsgJN.State = 1 then
 	   				if oKurzLsgJN.State = 1 then
-	   					Print #iAufgabenDateiNummer, &quot;\item &quot; &amp; sArrayDaten(i,2) &amp; chr(13) &amp; chr(13)  &amp; &quot;\textbf{L\&quot;&quot;osung:}\\&quot; &amp; chr(13) &amp; sArrayDaten(i,3) &amp; chr(13) &amp; chr(13) &amp; chr(13)  &amp; &quot;\textbf{Kurzl\&quot;&quot;osung:}\\&quot; &amp; chr(13) &amp; sArrayDaten(i,4) &amp; chr(13)&apos;MsgBox &quot;Lösungen werden angezeigt&quot;
+	   					Print #iAufgabenDateiNummer, &quot;\item &quot; &amp; sArrayDaten(i,5) &amp; chr(13) &amp; chr(13) &amp; sArrayDaten(i,2) &amp; chr(13) &amp; chr(13)  &amp; &quot;\textbf{L\&quot;&quot;osung:}\\&quot; &amp; chr(13) &amp; sArrayDaten(i,3) &amp; chr(13) &amp; chr(13) &amp; chr(13)  &amp; &quot;\textbf{Kurzl\&quot;&quot;osung:}\\&quot; &amp; chr(13) &amp; sArrayDaten(i,4) &amp; chr(13)&apos;MsgBox &quot;Lösungen werden angezeigt&quot;
 	   				else
-						Print #iAufgabenDateiNummer, &quot;\item &quot; &amp; sArrayDaten(i,2) &amp; chr(13) &amp; chr(13)  &amp; &quot;\textbf{L\&quot;&quot;osung:}\\&quot; &amp; chr(13) &amp; sArrayDaten(i,3) &amp; chr(13)&apos;MsgBox &quot;Lösungen werden angezeigt&quot;
+						Print #iAufgabenDateiNummer, &quot;\item &quot; &amp; sArrayDaten(i,5) &amp; chr(13) &amp; chr(13) &amp; sArrayDaten(i,2) &amp; chr(13) &amp; chr(13)  &amp; &quot;\textbf{L\&quot;&quot;osung:}\\&quot; &amp; chr(13) &amp; sArrayDaten(i,3) &amp; chr(13)&apos;MsgBox &quot;Lösungen werden angezeigt&quot;
 					end if	
 				else
 					if oKurzLsgJN.State = 1 then
-						Print #iAufgabenDateiNummer, &quot;\item &quot; &amp; sArrayDaten(i,2) &amp; chr(13) &amp; chr(13)  &amp; &quot;\textbf{Kurzl\&quot;&quot;osung:}\\&quot; &amp; chr(13) &amp; sArrayDaten(i,4) &amp; chr(13)&apos;MsgBox &quot;Lösungen werden angezeigt&quot;
+						Print #iAufgabenDateiNummer, &quot;\item &quot; &amp; sArrayDaten(i,5) &amp; chr(13) &amp; chr(13) &amp; sArrayDaten(i,2) &amp; chr(13) &amp; chr(13)  &amp; &quot;\textbf{Kurzl\&quot;&quot;osung:}\\&quot; &amp; chr(13) &amp; sArrayDaten(i,4) &amp; chr(13)&apos;MsgBox &quot;Lösungen werden angezeigt&quot;
 					else
-						Print #iAufgabenDateiNummer, &quot;\item &quot; &amp; sArrayDaten(i,2) &amp; chr(13) &amp; chr(13)
+						Print #iAufgabenDateiNummer, &quot;\item &quot; &amp; sArrayDaten(i,5) &amp; chr(13) &amp; chr(13) &amp; sArrayDaten(i,2) &amp; chr(13) &amp; chr(13)
 					end if	
 				end if
    		next i
@@ -323,6 +332,7 @@ End Sub
 
 
 Sub TexDateiErstellenAusPruefung
+	&apos;Anmerkung Bi 11.9.2017: Wir dieser Makro überhaupt noch verwendet?
 	MsgBox &quot;Die Prüfung wird erstellt.&quot;
 	&apos;MarkierteAufgabenZuruecksetzen()
 	&apos;Aktuell ausgewählte Prüfung: Aufgaben markieren
@@ -418,13 +428,16 @@ Sub TexDateiErstellenAusPruefung
    	&apos;Bei Aufgabenstring korrekten Pfad einfügen:
    	for i = 0 to iZaehler02 - 1
    		&apos;String mit korrektem Pfad
-   		sAngepassterString = PosUndReplaceVonMystringInSearchstring(sArrayDaten(i,1), &quot;\includegraphics&quot;, sWorkingDirectory &amp; sTexDateienVerzeichnis &amp; &quot;/&quot; &amp; sArrayDaten(i,0) &amp; &quot;/&quot;)
+   		&apos;sAngepassterString = PosUndReplaceVonMystringInSearchstring(sArrayDaten(i,1), &quot;\includegraphics&quot;, sWorkingDirectory &amp; sTexDateienVerzeichnis &amp; &quot;/&quot; &amp; sArrayDaten(i,0) &amp; &quot;/&quot;)
+   		sAngepassterString = sfAbsPfadBildDatei(sArrayDaten(i,1), sWorkingDirectory &amp; sTexDateienVerzeichnis &amp; &quot;/&quot; &amp; sArrayDaten(i,0) &amp; &quot;/&quot;, &quot;\includegraphics&quot;)
+   		
    		&apos;In Array schreiben:
    		sArrayDaten(i,2) = sAngepassterString
    		&apos;MsgBox sArrayDaten(i,0) &amp; chr(13) &amp; chr(13) &amp; sArrayDaten(i,1) &amp; chr(13) &amp; chr(13) &amp; sArrayDaten(i,2) 
    		
    		&apos;Das gleiche für die Lösungen (nur schreibe ich es nicht mehr in eine neue Spalte des Arrays):
-   		sAngepassterString2 = PosUndReplaceVonMystringInSearchstring(sArrayDaten(i,3), &quot;\includegraphics&quot;, sWorkingDirectory &amp; sTexDateienVerzeichnis &amp; &quot;/&quot; &amp; sArrayDaten(i,0) &amp; &quot;/&quot;)
+   		&apos;sAngepassterString2 = PosUndReplaceVonMystringInSearchstring(sArrayDaten(i,3), &quot;\includegraphics&quot;, sWorkingDirectory &amp; sTexDateienVerzeichnis &amp; &quot;/&quot; &amp; sArrayDaten(i,0) &amp; &quot;/&quot;)
+   		sAngepassterString2 = sfAbsPfadBildDatei(sArrayDaten(i,3), sWorkingDirectory &amp; sTexDateienVerzeichnis &amp; &quot;/&quot; &amp; sArrayDaten(i,0) &amp; &quot;/&quot;, &quot;\includegraphics&quot;)
    		sArrayDaten(i,3) = sAngepassterString2
    	next i
    	   
@@ -463,11 +476,15 @@ Sub TexDateiErstellenAusPruefung
 	PdflatexHilfsdateienLoeschen(sWorkingDirectory &amp; sTexDateienVerzeichnis, sTexDatei)
 End Sub
 
-Sub TexDateiErstellenAktuelleIDv2
-	&apos;&apos;wie TexDateiErstellenAktuelleID aber zuerst Aufgabenstring anpassen und dann Datei erstellen
-End Sub
+Sub TexDateiErstellenUndMitExternemEditorAnzeigen
+	&apos;Neu: 17.9.17
 
-Sub TexDateiErstellenAktuelleIDAufgabe
+	&apos;Ist eine Workaraound, welcher auf
+	&apos; TexDateiErstellenAktuelleIDAufgabe basiert
+	&apos;Könnte man schöner programmieren!
+	
+	AufgabeSpeichern()
+	
 	&apos;Aktuelle ID bestimmen:
 	sID = sfAusgabeID() &apos; Aufruf von Funktion sfAusgabeID()
 	&apos;Aufgabeninhaltauslesen
@@ -488,9 +505,59 @@ Sub TexDateiErstellenAktuelleIDAufgabe
 	&apos;TeX-Datei in String auslesen
 	
 	sStringTexDatei = sTextAuslesenString(sAufgabenDateiName)
-		
+			
 	&apos;Pfad zur Graphik anpassen
-	sAngepassterString = PosUndReplaceVonMystringInSearchstring(sStringTexDatei, &quot;\includegraphics&quot;, sWorkingDirectory &amp; sTexDateienVerzeichnis &amp; &quot;/&quot; &amp; sID &amp; &quot;/&quot;)
+	&apos;sAngepassterString = PosUndReplaceVonMystringInSearchstring(sStringTexDatei, &quot;\includegraphics&quot;, sWorkingDirectory &amp; sTexDateienVerzeichnis &amp; &quot;/&quot; &amp; sID &amp; &quot;/&quot;)
+	&apos;Function sfAbsPfadBildDatei(sTextAufgabe As String, sPfadRumpf As String, sTrenner As String) As String
+	&apos;sAngepassterString = sfAbsPfadBildDatei(sStringTexDatei, sWorkingDirectory &amp; sTexDateienVerzeichnis &amp; &quot;/&quot; &amp; sID &amp; &quot;/&quot;, &quot;\includegraphics&quot;)
+
+	sAngepassterString = sStringTexDatei
+		
+	&apos;Umlaute ersetzen (unicode vs. ascii-Problematik)
+	sAngepassterString = Replace(sAngepassterString, &quot;ö&quot;, &quot;\&quot;&quot;o&quot;)
+	sAngepassterString = Replace(sAngepassterString, &quot;Ö&quot;, &quot;\&quot;&quot;O&quot;)
+	sAngepassterString = Replace(sAngepassterString, &quot;ä&quot;, &quot;\&quot;&quot;a&quot;)
+	sAngepassterString = Replace(sAngepassterString, &quot;Ä&quot;, &quot;\&quot;&quot;A&quot;)
+	sAngepassterString = Replace(sAngepassterString, &quot;ü&quot;, &quot;\&quot;&quot;u&quot;)
+	sAngepassterString = Replace(sAngepassterString, &quot;Ü&quot;, &quot;\&quot;&quot;U&quot;)
+		
+	sTextEinlesenString(sAufgabenDateiName, sAngepassterString)
+	
+	&apos; Texmaker (o.ä.) öffnen:
+	oShell = createUnoService(&quot;com.sun.star.system.SystemShellExecute&quot;)
+	if FileExists(convertfromurl(sAufgabenDateiName)) then
+		oShell.execute(sAufgabenDateiName, &quot;&quot;, 0)
+	end if
+End Sub
+
+Sub TexDateiErstellenAktuelleIDAufgabe
+	AufgabeSpeichern()
+	
+	&apos;Aktuelle ID bestimmen:
+	sID = sfAusgabeID() &apos; Aufruf von Funktion sfAusgabeID()
+	&apos;Aufgabeninhaltauslesen
+	sAufgabe = sfAusgabeAufgabe()
+	sLoesung = sfAusgabeLoesung()
+	&apos;&apos;Loesungen anzeigen: J/N
+	&apos;oForm = ThisComponent.drawpage.getForms.GetByName(&quot;MainForm&quot;)
+	&apos;oLsgJN = oForm.getbyName(&quot;LoesungenJN&quot;)
+	
+	&apos;MsgBox sID &amp; &quot; &quot; &amp; sAufgabe
+	sWorkingDirectory=sfWorkingDirectory(&quot;aufgdbphys.odb&quot;)
+	sTexDateienVerzeichnis = sfAufgabenverzeichnis
+	sHeaderDateiName = sWorkingDirectory &amp; sTexDateienVerzeichnis &amp; &quot;/headerfooter/headereinzelneaufgabe01.tex&quot;
+	sFooterDateiName = sWorkingDirectory &amp; sTexDateienVerzeichnis &amp; &quot;/headerfooter/footer.tex&quot;
+	sAufgabenDateiName = sWorkingDirectory &amp; sTexDateienVerzeichnis &amp; &quot;/&quot; &amp; sID &amp; &quot;/aufgabe.tex&quot;
+	&apos;TexDatei im ID Ordner erstellen
+	ErstelleTexDatei(sHeaderDateiName,sFooterDateiName,sAufgabenDateiName,sID,sAufgabe)
+	&apos;TeX-Datei in String auslesen
+	
+	sStringTexDatei = sTextAuslesenString(sAufgabenDateiName)
+			
+	&apos;Pfad zur Graphik anpassen
+	&apos;sAngepassterString = PosUndReplaceVonMystringInSearchstring(sStringTexDatei, &quot;\includegraphics&quot;, sWorkingDirectory &amp; sTexDateienVerzeichnis &amp; &quot;/&quot; &amp; sID &amp; &quot;/&quot;)
+	&apos;Function sfAbsPfadBildDatei(sTextAufgabe As String, sPfadRumpf As String, sTrenner As String) As String
+	sAngepassterString = sfAbsPfadBildDatei(sStringTexDatei, sWorkingDirectory &amp; sTexDateienVerzeichnis &amp; &quot;/&quot; &amp; sID &amp; &quot;/&quot;, &quot;\includegraphics&quot;)
 		
 	&apos;Umlaute ersetzen (unicode vs. ascii-Problematik)
 	sAngepassterString = Replace(sAngepassterString, &quot;ö&quot;, &quot;\&quot;&quot;o&quot;)
@@ -521,6 +588,8 @@ Sub TexDateiErstellenAktuelleIDAufgabe
 End Sub
 
 Sub TexDateiErstellenAktuelleIDLoesung
+	AufgabeSpeichern()
+	
 	&apos;Aktuelle ID bestimmen:
 	sID = sfAusgabeID() &apos; Aufruf von Funktion sfAusgabeID()
 	&apos;Aufgabeninhaltauslesen
@@ -544,7 +613,9 @@ Sub TexDateiErstellenAktuelleIDLoesung
 	&apos;MsgBox sStringTexDatei
 	
 	&apos;Pfad zur Graphik anpassen
-	sAngepassterString = PosUndReplaceVonMystringInSearchstring(sStringTexDatei, &quot;\includegraphics&quot;, sWorkingDirectory &amp; sTexDateienVerzeichnis &amp; &quot;/&quot; &amp; sID &amp; &quot;/&quot;)
+	&apos;sAngepassterString = PosUndReplaceVonMystringInSearchstring(sStringTexDatei, &quot;\includegraphics&quot;, sWorkingDirectory &amp; sTexDateienVerzeichnis &amp; &quot;/&quot; &amp; sID &amp; &quot;/&quot;)
+	&apos;Function sfAbsPfadBildDatei(sTextAufgabe As String, sPfadRumpf As String, sTrenner As String) As String
+	sAngepassterString = sfAbsPfadBildDatei(sStringTexDatei, sWorkingDirectory &amp; sTexDateienVerzeichnis &amp; &quot;/&quot; &amp; sID &amp; &quot;/&quot;, &quot;\includegraphics&quot;)
 	
 	&apos;Umlaute ersetzen (unicode vs. acsii-Problematik)
 	sAngepassterString = Replace(sAngepassterString, &quot;ö&quot;, &quot;\&quot;&quot;o&quot;)
@@ -563,6 +634,8 @@ Sub TexDateiErstellenAktuelleIDLoesung
 End Sub
 
 Sub TexDateiErstellenAktuelleIDKurzLoesung
+	AufgabeSpeichern()
+	
 	&apos;Aktuelle ID bestimmen:
 	sID = sfAusgabeID() &apos; Aufruf von Funktion sfAusgabeID()
 	&apos;Aufgabeninhaltauslesen
@@ -587,7 +660,9 @@ Sub TexDateiErstellenAktuelleIDKurzLoesung
 	&apos;MsgBox sStringTexDatei
 	
 	&apos;Pfad zur Graphik anpassen
-	sAngepassterString = PosUndReplaceVonMystringInSearchstring(sStringTexDatei, &quot;\includegraphics&quot;, sWorkingDirectory &amp; sTexDateienVerzeichnis &amp; &quot;/&quot; &amp; sID &amp; &quot;/&quot;)
+	&apos;sAngepassterString = PosUndReplaceVonMystringInSearchstring(sStringTexDatei, &quot;\includegraphics&quot;, sWorkingDirectory &amp; sTexDateienVerzeichnis &amp; &quot;/&quot; &amp; sID &amp; &quot;/&quot;)
+	&apos;Function sfAbsPfadBildDatei(sTextAufgabe As String, sPfadRumpf As String, sTrenner As String) As String
+	sAngepassterString = sfAbsPfadBildDatei(sStringTexDatei, sWorkingDirectory &amp; sTexDateienVerzeichnis &amp; &quot;/&quot; &amp; sID &amp; &quot;/&quot;, &quot;\includegraphics&quot;)
 	
 	&apos;Umlaute ersetzen (unicode vs. acsii-Problematik)
 	sAngepassterString = Replace(sAngepassterString, &quot;ö&quot;, &quot;\&quot;&quot;o&quot;)
@@ -612,7 +687,40 @@ Sub TexDateiErstellenAktuelleID
 	TexDateiErstellenAktuelleIDKurzLoesung
 End Sub
 
+Function sfAbsPfadBildDatei(sTextAufgabe As String, sPfadRumpf As String, sTrenner As String) As String
+	&apos;Spaltet sTextAufgabe an den Stellen sTrenner auf und
+	&apos;fügt dort sPfadRumpf ein
+
+	&apos;Falls sTrenner gar nicht vorkommt: Nichts machen und sTextAufgabe zurückgeben
+	If Instr(sTextAufgabe, sTrenner) &lt;&gt; 0 then
+		Unterteilung = split(sTextAufgabe,sTrenner)
+		
+		for i = 1 to ubound(Unterteilung)
+			&apos;msgbox i &amp; &quot; &quot; &amp; Unterteilung(i)
+			PosKlammerAuf = Instr(Unterteilung(i),&quot;{&quot;)
+			sTextBisUndMitKlammer = Left(Unterteilung(i), PosKlammerAuf)
+			sTextNachKlammer = Mid(Unterteilung(i), PosKlammerAuf + 1, len(Unterteilung(i))
+			&apos;msgbox &quot;sTextBisUndMitKlammer: &quot; &amp; sTextBisUndMitKlammer
+			&apos;msgbox &quot;sTextNachKlammer: &quot; &amp; sTextNachKlammer
+			
+			&apos;Problem: LaTeX verlangt auch in Windows Pfadangaben mit / und nicht mit \.
+			&apos;Deshalb wird ein \ ersetzt (bei Linux und OS X passiert nichts.
+			sPfadRumpfAngepasst = Replace(convertfromurl(sPfadRumpf), &quot;\&quot;, &quot;/&quot;)
+			
+			Unterteilung(i) = sTextBisUndMitKlammer &amp; sPfadRumpfAngepasst &amp; sTextNachKlammer
+		next i
+		
+		&apos;sTextAufgabe zusammensetzen:
+		sfAbsPfadBildDatei = Join(Unterteilung,sTrenner)
+	Else
+		sfAbsPfadBildDatei = sTextAufgabe
+		Exit Function
+	End If
+End Function
+
 Function PosUndReplaceVonMystringInSearchstring(sMystring, sSearchstring, sDateiPfad As String)
+	&apos; Anmerkung Bi 11.9.2017: Dieser Makro wird nicht mehr benötigt, da von keinem anderen
+	&apos; Makro mehr aufgerufen
 	sZwischenspeicher = sMystring
 	dim iArrayPosition(20) As Integer
 	dim sBildName(20) As String
@@ -767,6 +875,8 @@ Sub PfadZuBildSetzen(sPfadZuBild As String, iAufgabenID As Integer)
 End Sub
 
 Function ErstelleTexDatei(sHeaderDateiName,sFooterDateiName,sAufgabenDateiName,sID,sAufgabe As String)
+	&apos;Abgeändert: 17.9.17
+
 	Dim iAufgabenDateiNummer,iHeaderDateiNummer,iFooterDateiNummer As Integer
     iAufgabenDateiNummer = FreeFile
     iHeaderDateiNummer = FreeFile
@@ -780,6 +890,7 @@ Function ErstelleTexDatei(sHeaderDateiName,sFooterDateiName,sAufgabenDateiName,s
        &apos; Latexdatei beginnen
         Open sAufgabenDateiName For Output As #iAufgabenDateiNummer
 	   	Print #iAufgabenDateiNummer, TexHeader &amp; chr(13) &amp; chr(13)      &apos; Save line
+	   	Print #iAufgabenDateiNummer, &quot;%------------------- BEGINN AUFGABE -------------------&quot; &amp; chr(13) &amp; chr(13)
 		Close #iAufgabenDateiNummer
 
 	&apos;	While ResultSet.next
@@ -791,6 +902,7 @@ Function ErstelleTexDatei(sHeaderDateiName,sFooterDateiName,sAufgabenDateiName,s
 	&apos;	Wend
 	    &apos; Latex-datei beenden  
 		Open sAufgabenDateiName For Append As #iAufgabenDateiNummer
+		Print #iAufgabenDateiNummer, &quot;%------------------- ENDE AUFGABE -------------------&quot; &amp; chr(13) &amp; chr(13)
 		Print #iAufgabenDateiNummer, chr(13) &amp; chr(13) &amp; TexFooter     &apos; Save line
 		Close #iAufgabenDateiNummer
     End If    
@@ -835,7 +947,7 @@ Sub FileManagerOeffnen(sVerzeichnis As String)
 	&apos;MsgBox convertfromurl(sVerzeichnis)
 	&apos;Testen, welches Betriebssystem (in Function afSystemeinstellungen eingestellt!):
 	if afSystemeinstellungen(1) = 1 then
-		shell(&quot;nemo &quot; &amp; convertfromurl(sVerzeichnis),10)
+		shell(&quot;xdg-open &quot; &amp; convertfromurl(sVerzeichnis),10)
 	elseif afSystemeinstellungen(1) = 2 then
 		shell(&quot;open &quot; &amp; convertfromurl(sVerzeichnis),10)
 	&apos;neu START 9.8.13
