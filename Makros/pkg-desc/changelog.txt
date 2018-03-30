@@ -1,5 +1,10 @@
 Change Log:
 
+2018.03.30:
+NEU (bi):
+- in Modul einzelneAufgabe:
+Sub TexDateiErstellenUndMitExternemEditorAnzeigen_Loesung
+
 2018.03.28:
 ABGEÄNDERT (bi):
 - in Modul einzelneAufgabe:
