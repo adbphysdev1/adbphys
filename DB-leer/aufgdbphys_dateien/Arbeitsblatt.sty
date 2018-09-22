@@ -1,0 +1,134 @@
+\ProvidesPackage{Arbeitsblatt}
+
+\RequirePackage[german]{babel}
+\RequirePackage[utf8]{inputenc}
+%\RequirePackage{scrpage2}
+
+% for fancy headers and footers
+%\RequirePackage{fancyhdr}
+
+%for framed text(boxes)
+%\RequirePackage{framed}
+
+% for advanced underline options
+\RequirePackage{ulem}
+
+% normal mode for emphasize \emph
+\normalem
+
+\RequirePackage{hyperref} %url einfügen
+
+% fuer bessere Matheumgebungen
+\RequirePackage{amsmath}
+% für bestimmte mathematische Zeichen wie abs(x)...
+\RequirePackage{mathtools}
+
+
+%für Einheiten und weitere Symbole
+\RequirePackage{siunitx,amssymb}
+% damit z.B. in der SIlist die letzte Grösse mit "und" verknüpft wird
+\sisetup{
+list-final-separator = { \translate{und} },
+range-phrase = { \translate{bis} }}
+
+% so you can use \thetitle for referencing to the title to the document
+\RequirePackage{titling}
+
+% ??
+\DeclarePairedDelimiter\abs{\left \lvert}{\right \rvert}%
+\DeclarePairedDelimiter\norm{\lVert}{\rVert}%
+
+% für einfaches Umgehen mit Betragszeichen (auch verschachtelt)
+% http://tex.stackexchange.com/questions/59108/latex-nice-abs#59154
+\delimitershortfall-1sp
+\renewcommand\abs[1]{\left|#1\right|}
+
+% für variable Aufzählungen
+\RequirePackage{enumerate}
+
+
+
+% für variable Tabellen
+\RequirePackage{tabularx}
+
+% für Aufgaben, Teilaufgaben ...
+\RequirePackage{tasks}
+
+% für Graphiken
+\RequirePackage[pdftex]{graphicx}
+
+% Automatische Aufgabennumerierung
+\newcounter{problem}
+
+% für Längenberechnung
+\RequirePackage{etex}
+
+% neue Länge
+\newcommand\ex{\vspace{1ex}}
+
+% Befehl zur automatischen Aufgabenumerierung
+\newcommand\problem[2]{%
+	\stepcounter{problem}%
+	\textbf{\theproblem. (#1 P) }~#2 \vspace{3mm} %
+}
+% Aufgabe ohne Angabe der Punktzahl
+\newcommand\problemw[1]{%
+	\stepcounter{problem}%
+	\textbf{\theproblem. }~#1 \vspace{3mm} %
+}
+
+%%Numbered environment
+\newcounter{aufgabe}
+\newenvironment{aufgabe}[1][]{\refstepcounter{aufgabe}%\par\medskip\noindent 
+\textbf{\theaufgabe. \ifx\newenvironment#1\newenvironment\else (#1 P)\fi} }{\medskip\par\addvspace{\baselineskip}}
+
+
+
+
+
+% für die vertikale Linie
+%\RequirePackage{background}
+
+%\SetBgScale{1}
+%\SetBgAngle{0}
+%\SetBgColor{black}
+%\SetBgContents{\rule{.4pt}{.9\textheight}}
+%\SetBgHshift{3.1cm}
+%\SetBgVshift{-0.05\textheight}
+
+
+%für die karierten Felder
+\RequirePackage{pgf,tikz,pgfplots}
+\RequirePackage{mathrsfs}
+\usetikzlibrary{arrows,patterns}
+
+
+
+\newlength{\karosize}
+\setlength{\karosize}{4mm}
+\newlength{\karobreite}
+
+\newdimen\spaceleft
+
+%\setlength{\karobreite}{\dimexpr(\linewidth / karosize)}
+\newcommand{\karos}[2]{
+  
+  \spaceleft=\dimexpr\textheight-\pagetotal\relax
+  \setlength{\karobreite}{\dimexpr(\linewidth)/\karosize*\karosize}
+  \begin{tikzpicture}
+      \ifnum #2=0
+      \draw[step=\karosize,color=gray,dotted, very thin] (0,0) grid (#1 \karobreite , \spaceleft); 
+      \else
+      \draw[step=\karosize,color=gray,dotted, very thin] (0,0) grid (#1 \karobreite ,#2 \karosize); 
+      \fi
+  \end{tikzpicture}
+  \ifnum #2=0
+  \newpage
+  \fi
+}
+
+\setlength\parindent{0pt} %kein Einrücken
+
+\DeclareOption{draft}{\renewcommand{\karos}[2]{\vspace{-1em}}}
+\DeclareOption*{\PackageWarning{examplepackage}{Unknown ‘\CurrentOption’}}
+\ProcessOptions\relax
