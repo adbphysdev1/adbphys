@@ -1,0 +1,8 @@
+\end{questions}
+
+\clearpage
+\begin{center}
+\combinedgradetable[h][questions]
+\end{center}
+
+\end{document}

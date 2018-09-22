@@ -1,0 +1,86 @@
+
+
+\usepackage[final]{Arbeitsblatt}
+\usepackage{xfrac}
+%\usetikzlibrary{patterns}
+
+
+\pagestyle{head}
+
+%\coverheadrule
+\headrule
+%\footer{}{Seite \thepage\ von \numpages}{}
+
+
+% -----language customization-----------
+\pointpoints{P.}{P.}
+\bonuspointpoints{Bonuspunkt}{Bonuspunkte}
+
+\totalformat{Frage \thequestion: \totalpoints Punkte}
+
+\hqword{Frage}
+\hpgword{Seite}
+\hpword{Punkte}
+\hsword{Erreichte Punktzahl}
+\htword{Total}
+
+
+
+\renewcommand{\solutiontitle}{\noindent\textit{L\"osung: }}
+%-----------customize grid---------------
+\usepackage{color}
+\colorgrids
+
+\setlength{\gridlinewidth}{.05pt}
+\setlength{\gridsize}{4mm}
+\definecolor{GridColor}{gray}{.2}
+\usepackage{enumitem}
+\setlist[enumerate,1]{label=\alph*)}
+
+%---------customize page----------------
+\extraheadheight{-1em}
+\extrafootheight{-1em}
+\extrawidth{1cm}
+
+
+\begin{document}
+
+% Titel setzen und Titelseite einfügen.
+\begin{coverpages}
+
+\begin{center}
+\begin{minipage}{.90\linewidth}
+\vspace{2cm}
+
+{\Large \bf \thetitle}\\
+\rule{\textwidth}{.5pt}\\
+
+\textsc{Vor- und Nachname: \phantom{Rüdiger von Schlotterstein}\\ }
+\rule{\textwidth}{.5pt}\\
+
+\textbf{Hinweise:}
+\begin{tasks}[style=itemize](1)
+\task Bearbeitungszeit: 40 min.
+\task Hilfsmittel: Taschenrechner
+\task Der Lösungsweg muss ersichtlich und vollständig dokumentiert sein. Kennzeichne, wo der Taschenrechner verwendet wurde.
+\task Für die Bestnote ist nicht die volle Punktzahl nötig. Löse daher zunächst die Aufgaben, bei denen du dich sicher fühlst.
+\task Ergebnisse bitte \uuline{doppelt unterstreichen}.
+\end{tasks}
+\rule{\textwidth}{.5pt}
+
+\begin{center}
+  \gradetable[h][questions]
+\end{center}
+
+%\end{tasks}
+\end{minipage}
+\end{center}
+
+
+\end{coverpages}
+
+% -----------Prüfung beginnt hier--------------------------
+%----------------------------------------------------------
+%----------------------------------------------------------
+
+\begin{questions}
