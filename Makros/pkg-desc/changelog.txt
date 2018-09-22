@@ -1,5 +1,12 @@
 Change Log:
 
+2018.09.21:
+NEU (ot):
+- Formular angepasst, um das Style-Formular zu umgehen
+- Möglichkeit im Sortier-Dialog einzelne Aufgaben zu löschen
+- TeX-Code basiert nun auf dem exam-package
+- Frage: Soll das TeX- oder das pdf-File angezeigt werden? Überlegung: Es wird sowieso fast immer noch etwas Kleines zu ändern geben…
+
 2018.03.30:
 NEU (bi):
 - in Modul einzelneAufgabe:
