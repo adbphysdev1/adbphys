@@ -1,0 +1,58 @@
+
+
+\usepackage[final]{Arbeitsblatt}
+\usepackage{xfrac}
+%\usetikzlibrary{patterns}
+
+
+\pagestyle{head}
+
+%\coverheadrule
+\headrule
+%\footer{}{Seite \thepage\ von \numpages}{}
+
+
+% -----language customization-----------
+\pointpoints{P.}{P.}
+\bonuspointpoints{Bonuspunkt}{Bonuspunkte}
+
+\totalformat{Frage \thequestion: \totalpoints Punkte}
+
+\hqword{Frage}
+\hpgword{Seite}
+\hpword{Punkte}
+\hsword{Erreichte Punktzahl}
+\htword{Total}
+
+
+
+\renewcommand{\solutiontitle}{\noindent\textit{L\"osung: }}
+%-----------customize grid---------------
+\usepackage{color}
+\colorgrids
+
+\setlength{\gridlinewidth}{.05pt}
+\setlength{\gridsize}{4mm}
+\definecolor{GridColor}{gray}{.2}
+\usepackage{enumitem}
+\setlist[enumerate,1]{label=\alph*)}
+
+%---------customize page----------------
+\extraheadheight{-1em}
+\extrafootheight{-1em}
+\extrawidth{1cm}
+
+
+\begin{document}
+
+% Titel setzen und Titelseite einfügen.
+\begin{center}
+	{\Large \bf \thetitle}\\
+	\rule{\textwidth}{.5pt}
+\end{center}
+
+% -----------Prüfung beginnt hier--------------------------
+%----------------------------------------------------------
+%----------------------------------------------------------
+
+\begin{questions}

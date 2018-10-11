@@ -1,0 +1,94 @@
+
+\usepackage[utf8]{inputenc}
+\usepackage[final]{Arbeitsblatt}
+\usepackage{color}
+\colorgrids
+\usepackage{geometry}
+\geometry{a4paper}
+
+\pagestyle{head}
+\header{\thetitle}{P, 2eG, KRW}{Page \thepage\ of \numpages}
+\coverheader{}{P, 2eG, KRW}{24.9.2018}
+%\coverheadrule
+\headrule
+%\footer{}{Seite \thepage\ von \numpages}{}
+
+
+\SolutionEmphasis{\color{red}}
+
+%\boxedpoints
+
+%-----------customize grid---------------
+\usepackage{color}
+\colorgrids
+\setlength{\gridlinewidth}{.05pt}
+\setlength{\gridsize}{4mm}
+\definecolor{GridColor}{gray}{.2}
+
+%-----------customize enumeration inside questions a,b,c instead of 1,2,3
+\usepackage{enumitem}
+\setlist[enumerate,1]{label=\alph*)}
+
+\usepackage{pgf,tikz}
+\usetikzlibrary{arrows}
+\usepackage[]{german,graphicx}
+\usepackage[T1]{fontenc}
+\usepackage{amsthm}%für theoreme
+\usepackage{amsfonts}
+\usepackage{latexsym}
+\usepackage{multicol}
+\usepackage{url}
+\usepackage{enumitem}
+\setlist[enumerate,1]{label=\alph*)}
+
+%---------customize page----------------
+\extraheadheight{-1em}
+\extrafootheight{-1em}
+\extrawidth{1cm}
+
+
+\begin{document}
+
+
+
+%Titelseite einfügen.
+\begin{coverpages}
+
+
+\begin{center}
+\begin{minipage}{.90\linewidth}
+\vspace{2cm}
+
+{\Large \bf \thetitle}\\
+\rule{\textwidth}{.5pt}\\
+
+\textsc{First and Last name: \phantom{Rüdiger von Schlotterstein}\\ }
+\rule{\textwidth}{.5pt}\\
+
+\textbf{Notes:}
+\begin{tasks}[style=itemize](1)
+\task Time: 40 min.
+\task Aids: Formulary and Calculator
+\task Show your working clearly. Indicate when the calculator has been used.
+\task You may choose the order in which you solve the problems.
+\task Mark your solutions \uuline{clearly}.
+\end{tasks}
+\rule{\textwidth}{.5pt}
+
+\begin{center}
+  \gradetable[h][questions]
+\end{center}
+
+%\end{tasks}
+\end{minipage}
+\end{center}
+
+
+\end{coverpages}
+
+% -----------Prüfung beginnt hier--------------------------
+%----------------------------------------------------------
+%----------------------------------------------------------
+
+\begin{questions}
+

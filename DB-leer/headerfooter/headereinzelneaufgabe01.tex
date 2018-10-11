@@ -1,0 +1,49 @@
+\documentclass[12pt,
+%DIV20,
+a6paper,landscape]{scrartcl}
+%\usepackage[automark]{scrpage2}
+%\ohead[Name]{Name}
+\usepackage{pgf,tikz}
+\usetikzlibrary{arrows}
+\usepackage{geometry}
+\usepackage[]{german,graphicx}
+\usepackage[latin9]{inputenc}% Deutsche Sonderzeichen
+\usepackage[T1]{fontenc}
+\pagestyle{empty}
+\usepackage{amsmath}
+\usepackage{amssymb}
+\usepackage{amsthm}%für theoreme
+\usepackage{amsfonts}
+\usepackage{latexsym}
+\usepackage{multicol}
+\usepackage{url}
+
+% --- Start Pakete Rüdiger:
+\usepackage{siunitx}
+\sisetup{list-final-separator = { \translate{und} },range-phrase = { \translate{bis} }} %SCHEINT NOCH NICHT ZU FUNKTIONIEREN??
+\usepackage{tabularx}
+\usepackage{tasks}
+%\usetikzlibrary{patterns}
+%\usetikzlibrary{pgfplots} %wird auf für decorations benötigt 
+% --- Ende Pakete Rüdiger
+
+\usepackage{ifthen,xcolor}
+%\newcommand{\loesung}{}%DIESE ZEILE AUSKOMMENTIEREN FÜR EINE SCHÜLERVERSION!!!
+%\newcommand{\druck}{}%DIESE ZEILE AUSKOMMENTIEREN, WENN LEHRERVERSION ERWÜNSCHT, sonst Druckversion
+\providecommand{\luecke}[1]{%
+\ifthenelse{\isundefined{\loesung}}
+{\textcolor{white}{#1}}{\ifthenelse{\isundefined{\druck}}{{\scshape\textcolor{blue}{#1}}}{#1}}%
+}%
+
+%\newcommand{\showme}{1} %Auskommentieren wenn gewisse Bereiche nicht angezeigt werden sollen, z.B. Lösungen!
+\newcommand{\hideandshow}[1]{%
+ \ifthenelse{\isundefined{\showme}}{}{\\ \textbf{Lösung:} #1}}
+  
+\typearea[current]{last}
+\geometry{left=0.5cm,right=0.5cm,top=0.5cm,bottom=0.5cm,
+%showframe
+}
+
+\begin{document}
+\footnotesize
+

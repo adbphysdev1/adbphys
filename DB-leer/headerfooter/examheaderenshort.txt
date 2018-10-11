@@ -1,0 +1,63 @@
+
+\usepackage[utf8]{inputenc}
+\usepackage[final]{Arbeitsblatt}
+\usepackage{color}
+\colorgrids
+\usepackage{geometry}
+\geometry{a4paper}
+
+\pagestyle{head}
+%\coverheadrule
+\headrule
+%\footer{}{Seite \thepage\ von \numpages}{}
+
+
+\SolutionEmphasis{\color{red}}
+
+%\boxedpoints
+
+%-----------customize grid---------------
+\usepackage{color}
+\colorgrids
+\setlength{\gridlinewidth}{.05pt}
+\setlength{\gridsize}{4mm}
+\definecolor{GridColor}{gray}{.2}
+
+%-----------customize enumeration inside questions a,b,c instead of 1,2,3
+\usepackage{enumitem}
+\setlist[enumerate,1]{label=\alph*)}
+
+\usepackage{pgf,tikz}
+\usetikzlibrary{arrows}
+\usepackage[]{german,graphicx}
+\usepackage[T1]{fontenc}
+\usepackage{amsthm}%für theoreme
+\usepackage{amsfonts}
+\usepackage{latexsym}
+\usepackage{multicol}
+\usepackage{url}
+\usepackage{enumitem}
+\setlist[enumerate,1]{label=\alph*)}
+
+%---------customize page----------------
+\extraheadheight{-1em}
+\extrafootheight{-1em}
+\extrawidth{1cm}
+
+
+\begin{document}
+
+
+
+%Titelseite einfügen.
+\begin{center}
+	{\Large \bf \thetitle}\\
+	\rule{\textwidth}{.5pt}
+\end{center}
+
+% -----------Prüfung beginnt hier--------------------------
+%----------------------------------------------------------
+%----------------------------------------------------------
+
+\begin{questions}
+

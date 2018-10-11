@@ -1,0 +1,59 @@
+]{scrartcl}
+%\usepackage[automark]{scrpage2}
+%\ohead[Name]{Name}
+\usepackage{pgf,tikz}
+\usetikzlibrary{arrows}
+\usepackage{geometry}
+\usepackage[]{german,graphicx}
+\usepackage[latin9]{inputenc}% Deutsche Sonderzeichen
+\usepackage[T1]{fontenc}
+\pagestyle{empty}
+\usepackage{amsmath}
+\usepackage{hyperref}
+\usepackage{amssymb}
+\usepackage{amsthm}%f\"ur theoreme
+\usepackage{amsfonts}
+\usepackage{latexsym}
+\usepackage{multicol}
+\usepackage{url}
+%pstricks:
+\usepackage{pdftricks}
+\begin{psinputs}
+\usepackage[usenames,dvipsnames]{pstricks}
+\usepackage{epsfig}
+\usepackage{pst-grad} % For gradients
+\usepackage{pst-plot} % For axes
+\end{psinputs}
+\usepackage{graphicx}
+\usepackage{tabularx}
+\usepackage{ifthen,xcolor}
+  
+\typearea[current]{last}
+\geometry{margin=2cm}
+
+% --- Start Pakete Rüdiger:
+\usepackage{siunitx}
+\sisetup{list-final-separator = { \translate{und} },range-phrase = { \translate{bis} }} %SCHEINT NOCH NICHT ZU FUNKTIONIEREN??
+\usepackage{tabularx}
+\usepackage{tasks}
+%\usetikzlibrary{patterns}
+%\usetikzlibrary{pgfplots} %wird auf für decorations benötigt 
+% --- Ende Pakete Rüdiger
+
+\newlength\foo
+\setlength\foo{0.5\linewidth}
+\addtolength\foo{-0.2pt}
+\newcommand*\foobar[1][\empty]{%
+  \ifx#1\empty
+    \noindent\rule{\foo}{0.4pt}%
+    \rule{0.4pt}{5pt}%
+    \rule{\foo}{0.4pt}%
+  \else
+    \noindent\rule{\foo}{0.4pt}%
+    \raisebox{-4.6pt}{\rule{0.4pt}{5pt}}%
+    \rule{\foo}{0.4pt}%
+  \fi
+}
+
+
+\begin{document}
