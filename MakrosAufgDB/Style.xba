@@ -1,0 +1,933 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE script:module PUBLIC "-//OpenOffice.org//DTD OfficeDocument 1.0//EN" "module.dtd">
+<script:module xmlns:script="http://openoffice.org/2000/script" script:name="Style" script:language="StarBasic">REM  *****  BASIC  *****
+
+
+Sub Main
+
+End Sub
+
+Global aEintraege 
+Global maxiPos as Integer
+Global apositionen
+Global iAuswahl as Integer
+Global sDeckblattPfad as String
+Sub Help
+
+MsgBox &quot;Schlüsselwörter:&quot; &amp; chr(13) &amp; &quot;Seite: Fügt Seitenzahl in der Kopfzeile ein&quot; &amp; chr(13) &amp; &quot;Auslese: Bei der Erstellung öffnet ein Dialog, um die entsprechende Information anzugeben&quot; &amp; chr(13) &amp;_
+&quot;Vorgabe: Die abgespeicherten Werte (Thema, Datum, Klasse) werden aus der gespeicherten Prüfung ausgelesen&quot; &amp; chr(13) &amp;_
+&quot;Rand: Einheit nicht vergessen!&quot; &amp; chr(13) &amp; &quot;Beim Speichern kann der aktuell gewählte Stil nur als Temp abgespeichert werden,&quot;&amp;_
+&quot;einen Stil überschreiben oder als neuer Stil definiert werden&quot;,0,&quot;Anleitung zum Stilformular&quot;
+
+End Sub
+
+Function Textfeld_auslesen(textfeldname as String)
+
+Dim oDoc, oform, oController, oView, oTextField, oNumField2  as Object
+Dim sValue as String
+   oDoc = thisComponent
+   oController = oDoc.getCurrentController()
+   oform = odoc.drawpage.forms.getbyindex(0)
+   oTextField = oform.getByName(textfeldname)
+   oView = oController.getControl(oTextField)
+   Textfeld_auslesen = oView.Model.text
+End Function
+
+Sub Textfeld_ausfuellen(stextfeldname as String, sinhalt as String)
+
+Dim oDoc, oform, oController, oView, oTextField, oNumField2  as Object
+Dim sValue as String
+   oDoc = thisComponent
+   oController = oDoc.getCurrentController()
+   oform = odoc.drawpage.forms.getbyindex(0)
+   oTextField = oform.getByName(stextfeldname)
+   oView = oController.getControl(oTextField)
+   oView.Model.text = sinhalt
+End Sub
+
+
+Function Zahlfeld_auslesen(zahlfeldname as String)
+Dim oDoc, oForm, oController, oView, oNumberField as Object
+   oDoc = thisComponent
+   oController = oDoc.getCurrentController()
+   oForm = odoc.drawpage.forms.getbyindex(0)
+   oNumberField = oForm.getByName(zahlfeldname)
+   oView = oController.getControl(oNumberField)
+   Zahlfeld_auslesen = oView.Model.value
+End Function
+
+Sub Zahlfeld_ausfuellen(zahlfeldname as String, inhalt as Double)
+
+Dim oDoc, oForm, oController, oView, oNumberField as Object
+   oDoc = thisComponent
+   oController = oDoc.getCurrentController()
+   oForm = odoc.drawpage.forms.getbyindex(0)
+   oNumberField = oForm.getByName(zahlfeldname)
+   oView = oController.getControl(oNumberField)
+   oView.Model.value = inhalt
+End Sub
+
+Function BoolFeld_auslesen(boolfeldname as String)
+
+Dim oDoc, oForm, oController, oView, oBoolField as Object
+   oDoc = thisComponent
+   oController = oDoc.getCurrentController()
+   oForm = odoc.drawpage.forms.getbyindex(0)
+   oBoolField = oForm.getByName(boolfeldname)
+   oView = oController.getControl(oBoolField)
+   BoolFeld_auslesen = oView.Model.state
+End Function
+
+
+Sub BoolFeld_ausfuellen(boolfeldname as String, inhalt as Boolean)
+
+Dim oDoc, oForm, oController, oView, oBoolField as Object
+Dim ninhalt as Integer
+   if (inhalt = &quot;True&quot;) then
+   	ninhalt = 1
+   else
+   	ninhalt = 0
+   end if
+   oDoc = thisComponent
+   oController = oDoc.getCurrentController()
+   oForm = odoc.drawpage.forms.getbyindex(0)
+   oBoolField = oForm.getByName(boolfeldname)
+   oView = oController.getControl(oBoolField)
+   oView.Model.state = ninhalt
+End Sub
+
+Function Datumsfeld_auslesen(datumsfeld as String)
+
+   oDoc = thisComponent
+   oController = oDoc.getCurrentController()
+   oForm = odoc.drawpage.forms.getbyindex(0)
+   oNumberField = oForm.getByName(datumsfeld)
+   oView = oController.getControl(oNumberField)
+   inhalt = oView.Model.date
+   Datumsfeld_auslesen = inhalt
+
+End Function
+
+Sub Datumsfeld_ausfuellen(datumsfeld as String, inhalt as Date)
+Dim oDoc, oForm, oController, oView, oNumberField as Object
+   oDoc = thisComponent
+   oController = oDoc.getCurrentController()
+   oForm = odoc.drawpage.forms.getbyindex(0)
+   oNumberField = oForm.getByName(datumsfeld)
+   oView = oController.getControl(oNumberField)
+   oView.Model.date = inhalt
+End Sub
+
+Function Listbox_auslesen(listbox$)
+	Dim i%
+	Listbox_auslesen = thisComponent.getCurrentController().getControl(thiscomponent.drawpage.forms.getbyindex(0).getByName(listbox)).getSelectedItemPos()
+end Function
+
+
+Sub Listbox_ausfuellen(listbox$, position%)
+	Dim i%
+	Dim oListBox as Object
+	oListBox = thisComponent.getCurrentController().getControl(thiscomponent.drawpage.forms.getbyindex(0).getByName(listbox))
+	oListBox.selectItemPos(position, true)
+	oListBox.makeVisible(oListBox.getSelectedItemPos())
+end Sub
+
+Function sLine(wahr as Boolean, stil$)
+	If (wahr = true) then
+		if (stil = 1) then
+			sLine = &quot;~ \\ \parbox{\linewidth}{\dotfill}&quot;
+		else
+			sLine = &quot;~ \\ \parbox{\linewidth}{\rule{\linewidth}{0.1pt}}&quot;
+		end if
+	else
+		sLine = &quot;&quot;
+	end if
+End Function
+
+Sub ListboxFuellen(listbox$, aListe())
+&apos;	Dim oListBox as Object, aListe()
+	oListBox =thisComponent.getCurrentController().getControl(thiscomponent.drawpage.forms.getbyindex(0).getByName(listbox))
+	oListBox.removeItems(0, oListBox.getItemCount())            
+	oListBox.addItems(aListe, 0)
+end sub
+
+
+Sub StylesFormOeffnen
+	AuswahlPruefungAuslesen()
+	iAuswahl = CInt(thiscomponent.getcurrentcontroller().getcontrol(ThisComponent.drawpage.getForms.GetByName(&quot;GespAuswahl&quot;).getbyName(&quot;Textfeld 1&quot;)).text)
+	DatenbankFormularBearbeiten(&quot;StylesForm&quot;)
+	Wait(10)
+	Listbox_ausfuellen(&quot;Styles&quot;, 0)
+	ListboxFuellen(&quot;Papierformat&quot;, Array(&quot;A4&quot;, &quot;A5&quot;))
+	ListboxFuellen(&quot;Groesse&quot;, Array(&quot;10pt&quot;, &quot;11pt&quot;, &quot;12pt&quot;))
+	StyleForm_ausfuellen
+	PositionenAusfuellen
+
+End Sub
+
+
+Sub StyleForm_ausfuellen
+&apos;  On Error goto ErrorHandler
+  Dim nachname as String, vorname, sSQL as String, gesamtbetrag as Double
+  Dim DatabaseContext as Object, s as String
+  Dim oDatenquelle as Object, oHandler as Object, oDatVerb as Object
+  Dim oStatement as Object, oErgSet as Object, oErgSet2 as Object, oMetaData as Object, oFormData as Object
+  Dim i as Integer, j as Integer, iStyle as Integer
+  aKontrollfeldnamen = DimArray(69)
+  aKontrollfeldtypen = DimArray(69)
+  aEintraege = DimArray(69)
+
+  iStyle = thisComponent.getCurrentController().getControl(thiscomponent.drawpage.forms.getbyName(&quot;StylesForm&quot;).getByName(&quot;Styles&quot;)).getSelectedItemPos()
+
+  DatabaseContext = createUnoService(&quot;com.sun.star.sdb.DatabaseContext&quot;)
+  oDatenquelle = DatabaseContext.getByName(&quot;aufgdbphys&quot;)
+  If not oDatenquelle.IsPasswordRequired Then
+    oDatVerb = oDatenquelle.getConnection(&quot;&quot;,&quot;&quot;)
+  else
+    oHandler = oDatenquelle.createUnoService(&quot;com.sun.star.sdb.InteractionHandler&quot;)
+    oDatVerb = oDatenquelle.ConnectWithCompletion(oHandler)
+  End if
+  
+  oStatement = oDatVerb.createStatement()
+  
+  	sSQL = &quot;SELECT * FROM &quot;&quot;Styles&quot;&quot; WHERE &quot;&quot;StylePos&quot;&quot; = &quot; &amp; iStyle
+  	oErgSet = oStatement.executeQuery(sSQL)
+  	oMetaData = oErgSet.GetMetaData()
+  	
+	if not isNull(oErgSet) then
+	  Do while (oErgSet.next)
+    	j = 1
+	  	Do while (j&lt;70)
+	  		if (oMetaData.getColumnType(j)=4) then
+	  			aEintraege(j)=oErgSet.getInt(j)
+	  		elseif (oMetaData.getColumnType(j)=12) then
+	  			aEintraege(j)=oErgSet.getString(j)
+	  		else
+	  			aEintraege(j)=oErgSet.getBoolean(j)
+	  		end if
+			j=j+1
+		loop  
+	  loop
+    End if
+
+  aKontrollfeldnamen = Split(&quot;StyleID, StyleName, StylePos, Head1LiYN, Head1LiTxt, Head1LiSty, Head1LiSize, Head1MiYN, Head1MiTxt, Head1MiSty, Head1MiSize, Head1ReYN, Head1ReTxt, Head1ReSty, Head1ReSize, Head2LiYN, Head2LiTxt, Head2LiSty, Head2LiSize, Head2MiYN, Head2MiTxt, Head2MiSty, Head2MiSize, Head2ReYN, Head2ReTxt, Head2ReSty, Head2ReSize, Head3LiYN, Head3LiTxt, Head3LiSty, Head3LiSize, Head3MiYN, Head3MiTxt, Head3MiSty, Head3MiSize, Head3ReYN, Head3ReTxt, Head3ReSty, Head3ReSize, HeadLine, AufgYN, AufgSty, AufgSize, AufgLine, ResYN, ResSty, ResSize, ResLine, Papierformat, Groesse, Rand, LoesAnf, TopHeadLiYN, TopHeadLiTxt, TopHeadLiSty, TopHeadLiSize, TopHeadMiYN, TopHeadMiTxt, TopHeadMiSty, TopHeadMiSize, TopHeadReYN, TopHeadReTxt, TopHeadReSty, TopHeadReSize, DeckblattYN, AbstandYN, AusfLoesYN, ZwischentitelYN, LoesSchlussYN, &quot;,&quot;, &quot;)
+  aKontrollfeldtypen = Split(&quot;Int, Txt, Int, Bool, Txt, List, List, Bool, Txt, List, List, Bool, Txt, List, List, Bool, Txt, List, List, Bool, Txt, List, List, Bool, Txt, List, List, Bool, Txt, List, List, Bool, Txt, List, List, Bool, Txt, List, List, Bool, Bool, List, List, Bool, Bool, List, List, Bool, List, List, Txt, Txt, Bool, Txt, List, List, Bool, Txt, List, List, Bool, Txt, List, List, Bool, Bool, Bool, Bool, Bool, &quot;,&quot;, &quot;)
+
+  j = 0
+  Do while (j&lt;69) 
+  if (aKontrollfeldtypen(j) Like &quot;Int&quot;) then
+  	zahlfeld_ausfuellen(akontrollfeldnamen(j),CDbl(aEintraege(j+1)))
+  elseif (aKontrollfeldtypen(j) Like &quot;Bool&quot;) then
+  	boolfeld_ausfuellen(akontrollfeldnamen(j),aEintraege(j+1))
+  elseif (aKontrollfeldtypen(j) Like &quot;Txt&quot;) then
+  	textfeld_ausfuellen(akontrollfeldnamen(j),aEintraege(j+1))
+  elseif (aKontrollfeldtypen(j) Like &quot;List&quot;) then
+  	listbox_ausfuellen(akontrollfeldnamen(j),aEintraege(j+1))
+  else
+    goto ErrorHandler
+  end if
+  j=j+1
+  loop
+  Exit sub
+  ErrorHandler:
+  MsgBox &quot;Kein gültiger Datensatz gefunden!&quot;
+    
+End Sub
+
+
+
+Sub StyleForm_auslesen
+  &apos;On Error goto ErrorHandler
+  Dim nachname as String, vorname, sSQL as String, gesamtbetrag as Double
+  Dim DatabaseContext as Object, s as String, neuerStyle as String, StyleString as String
+  Dim oDatenquelle as Object, oHandler as Object, oDatVerb as Object
+  Dim Statement as Object, oErgSet as Object, oErgSet2 as Object
+  Dim i as Integer, j as Integer, iStyle, iSpeichern1, iSpeichern2 as Integer
+  aEintraege = DimArray(69)
+  aKontrollfeldtyen = DimArray(69)
+  aKontrollfeldnamen = DimArray(69)
+ 
+  PositionenZurueckschreiben
+
+  DatabaseContext = createUnoService(&quot;com.sun.star.sdb.DatabaseContext&quot;)
+  DataSource = DatabaseContext.getByName(&quot;aufgdbphys&quot;)
+  If Not DataSource.IsPasswordRequired Then
+  	Connection = DataSource.GetConnection(&quot;&quot;,&quot;&quot;)
+  Else	
+  	InteractionHandler = createUnoService(&quot;com.sun.star.sdb.InteractionHandler&quot;)
+  	Connection = DataSource.ConnectWithCompletion(InteractionHandler)
+  End If
+  Statement = Connection.createStatement()
+    
+  aKontrollfeldnamen = Split(&quot;StyleID, StyleName, StylePos, Head1LiYN, Head1LiTxt, Head1LiSty, Head1LiSize, Head1MiYN, Head1MiTxt, Head1MiSty, Head1MiSize, Head1ReYN, Head1ReTxt, Head1ReSty, Head1ReSize, Head2LiYN, Head2LiTxt, Head2LiSty, Head2LiSize, Head2MiYN, Head2MiTxt, Head2MiSty, Head2MiSize, Head2ReYN, Head2ReTxt, Head2ReSty, Head2ReSize, Head3LiYN, Head3LiTxt, Head3LiSty, Head3LiSize, Head3MiYN, Head3MiTxt, Head3MiSty, Head3MiSize, Head3ReYN, Head3ReTxt, Head3ReSty, Head3ReSize, HeadLine, AufgYN, AufgSty, AufgSize, AufgLine, ResYN, ResSty, ResSize, ResLine, Papierformat, Groesse, Rand, LoesAnf, TopHeadLiYN, TopHeadLiTxt, TopHeadLiSty, TopHeadLiSize, TopHeadMiYN, TopHeadMiTxt, TopHeadMiSty, TopHeadMiSize, TopHeadReYN, TopHeadReTxt, TopHeadReSty, TopHeadReSize, DeckblattYN, AbstandYN, AusfLoesYN, ZwischentitelYN, LoesSchlussYN, &quot;,&quot;, &quot;)
+  aKontrollfeldtypen = Split(&quot;Int, Txt, Int, Bool, Txt, List, List, Bool, Txt, List, List, Bool, Txt, List, List, Bool, Txt, List, List, Bool, Txt, List, List, Bool, Txt, List, List, Bool, Txt, List, List, Bool, Txt, List, List, Bool, Txt, List, List, Bool, Bool, List, List, Bool, Bool, List, List, Bool, List, List, Txt, Txt, Bool, Txt, List, List, Bool, Txt, List, List, Bool, Txt, List, List, Bool, Bool, Bool, Bool, Bool, &quot;,&quot;, &quot;)
+
+
+  iStyle = thisComponent.getCurrentController().getControl(thiscomponent.drawpage.forms.getbyName(&quot;StylesForm&quot;).getByName(&quot;Styles&quot;)).getSelectedItem()
+  
+  iSpeichern1 = 0
+  iSpeichern2 = 0
+  
+  iSpeichern1 = MsgBox (&quot;Änderungen abspeichern? &quot;, 260, &quot;Speicherdialog 1&quot;)
+  
+  If (iSpeichern1 = 6) then
+  	iSpeichern2 = MsgBox (&quot;Als neue Vorlage speichern?&quot;, 260, &quot;Speicherdialog 2&quot;)
+  End if
+
+StyleString = &quot;&quot;
+  If (iSpeichern1 = 7) then
+	  j = 0
+	  sSQL = &quot;&quot;
+	  Do while (j&lt;69) 
+	  StyleString = StyleString &amp; j+1 &amp; &quot; &quot; &amp; aKontrollfeldnamen(j) &amp; &quot; &quot; &amp; aKontrollfeldtypen(j) &amp; chr(13) 
+	  if (aKontrollfeldtypen(j) Like &quot;Int&quot;) then
+	  	aEintraege(j+1) = CDbl(zahlfeld_auslesen(akontrollfeldnamen(j))
+	  elseif (aKontrollfeldtypen(j) Like &quot;Bool&quot;) then
+	  	aEintraege(j+1)=boolfeld_auslesen(akontrollfeldnamen(j))
+	  elseif (aKontrollfeldtypen(j) Like &quot;Txt&quot;) then
+	  	aEintraege(j+1)=&quot;&apos;&quot;&amp;textfeld_auslesen(akontrollfeldnamen(j))&amp;&quot;&apos;&quot;
+	  elseif (aKontrollfeldtypen(j) Like &quot;List&quot;) then
+	  	aEintraege(j+1)=listbox_auslesen(akontrollfeldnamen(j))
+	  else
+	    goto ErrorHandler
+	  end if
+	  aEintraege(1) = 0
+	  aEintraege(2) = &quot;&apos;Temp&apos;&quot;
+	  aEintraege(3) = 0
+	
+	  sSQL = sSQL &amp; &quot;, &quot;&quot;&quot; &amp; aKontrollfeldnamen(j) &amp; &quot;&quot;&quot; = &quot; &amp; aEintraege(j+1)
+	  j=j+1
+	  loop
+&apos;	  sTextEinlesenString(&quot;/Users/moettli/Desktop/FelderStyle.txt&quot;, StyleString)
+	  sSQL = Right(sSQL, Len(sSQL)-2)
+	
+	  	sSQL = &quot;UPDATE &quot;&quot;Styles&quot;&quot; SET &quot; &amp; sSQL &amp; &quot; WHERE &quot;&quot;StyleName&quot;&quot; LIKE &apos;Temp&apos;&quot;
+&apos;	  	MsgBox sSQL
+	  ResultSet = Statement.executeUpdate(sSQL)
+
+  
+  Elseif (iSpeichern2 = 7) then
+	  j = 0
+	  sSQL = &quot;&quot;
+	  Do while (j&lt;69) 
+		  if (aKontrollfeldtypen(j) Like &quot;Int&quot;) then
+		  	aEintraege(j+1) = CDbl(zahlfeld_auslesen(akontrollfeldnamen(j))
+		  elseif (aKontrollfeldtypen(j) Like &quot;Bool&quot;) then
+		  	aEintraege(j+1)=boolfeld_auslesen(akontrollfeldnamen(j)
+		  elseif (aKontrollfeldtypen(j) Like &quot;Txt&quot;) then
+		  	aEintraege(j+1)=&quot;&apos;&quot;&amp;textfeld_auslesen(akontrollfeldnamen(j))&amp;&quot;&apos;&quot;
+		  elseif (aKontrollfeldtypen(j) Like &quot;List&quot;) then
+		  	aEintraege(j+1)=listbox_auslesen(akontrollfeldnamen(j))
+		  else
+		    goto ErrorHandler
+		  end if
+		  sSQL = sSQL &amp; &quot;, &quot;&quot;&quot; &amp; aKontrollfeldnamen(j) &amp; &quot;&quot;&quot; = &quot; &amp; aEintraege(j+1)
+&apos;		  MsgBox(sSQL)
+		  j=j+1
+	  loop
+	  	sSQL = Right(sSQL, Len(sSQL)-2)
+	
+	  	sSQL = &quot;UPDATE &quot;&quot;Styles&quot;&quot; SET &quot; &amp; sSQL &amp; &quot; WHERE &quot;&quot;StyleName&quot;&quot; = &apos;&quot; &amp; iStyle &amp; &quot;&apos;&quot;
+&apos;	  	MsgBox sSQL
+	    Statement.executeUpdate(sSQL)
+	
+  else
+	  
+	  sNewStyleName = InputBox(&quot;Neuen Vorlagennamen eingeben: &quot;, &quot;Neue Vorlage&quot;)
+	  sSQL = &quot;SELECT &quot;&quot;StylePos&quot;&quot; FROM &quot;&quot;Styles&quot;&quot; ORDER BY &quot;&quot;StylePos&quot;&quot; DESC LIMIT 1&quot;
+	  ResultSet = Statement.executeQuery(sSQL)
+	  if not isNull(ResultSet) then
+	  	Do while (ResultSet.next)
+			imaxPos = ResultSet.getInt(1)
+		loop
+	  end if
+	  j = 0
+	  sSQL = &quot;&quot;
+		  Do while (j&lt;69) 
+		  if (aKontrollfeldtypen(j) Like &quot;Int&quot;) then
+			  	aEintraege(j+1) = CDbl(zahlfeld_auslesen(akontrollfeldnamen(j))
+			  elseif (aKontrollfeldtypen(j) Like &quot;Bool&quot;) then
+			  	aEintraege(j+1)=boolfeld_auslesen(akontrollfeldnamen(j))
+			  elseif (aKontrollfeldtypen(j) Like &quot;Txt&quot;) then
+			  	aEintraege(j+1)=&quot;&apos;&quot;&amp;textfeld_auslesen(akontrollfeldnamen(j))&amp;&quot;&apos;&quot;
+			  elseif (aKontrollfeldtypen(j) Like &quot;List&quot;) then
+			  	aEintraege(j+1)=listbox_auslesen(akontrollfeldnamen(j))
+			  else
+			    goto ErrorHandler
+		  end if
+		  aEintraege(1) = imaxPos+1
+		  aEintraege(2) = &quot;&apos;&quot; &amp; sNewStyleName &amp; &quot;&apos;&quot;
+		  aEintraege(3) = imaxPos+1
+		  sSQL = sSQL &amp; &quot;, &quot; &amp; aEintraege(j+1)
+		  j=j+1
+	  	  loop
+	  sSQL = Right(sSQL, Len(sSQL)-2)
+	  sSQL = &quot;INSERT INTO &quot;&quot;Styles&quot;&quot; VALUES (&quot; &amp; sSQL &amp; &quot;)&quot;
+	&apos;  	MsgBox sSQL
+  	Statement.executeUpdate(sSQL)
+  	ThisComponent.drawpage.Forms.GetByIndex(0).reload()
+  	Wait(1000)
+  end if
+  
+  if aEintraege(49) = 0 then
+  	aEintraege(49) = &quot;a4paper&quot;
+  else
+  	aEintraege(49) = &quot;a5paper&quot;
+  end if
+  
+  if aEintraege(50) = 0 then
+  	aEintraege(50) = &quot;10pt&quot;
+  elseif aEintraege(50) = 1 then
+  	aEintraege(50) = &quot;11pt&quot;
+  else
+  	aEintraege(50) = &quot;12pt&quot;
+  end if  
+  TexDateiErstellenAusPruefungOt
+&apos;	ThisComponent.close(true)				&apos; Dokumnet schliessen
+  
+  Exit sub
+  ErrorHandler:
+  MsgBox &quot;Kein gültiger Datensatz gefunden!&quot;
+  
+End Sub
+
+Function HeadStrings(head as String, thema as String, klasse as String, datum as String)
+Dim s as String
+		if (Left(head,7) like &quot;Auslese&quot;) then
+			s = InputBox(&quot;Bitte &quot; &amp; Mid(head,9) &amp; &quot; eingeben: &quot;)
+		elseif (head like &quot;Vorgabe Titel&quot;) then
+			s = titel
+		elseif (head like &quot;Vorgabe Klasse&quot;) then
+			s = klasse
+		elseif (head like &quot;Vorgabe Thema&quot;) then
+			s = thema
+		elseif (head like &quot;Vorgabe Datum&quot;) then
+			s = datum
+		else
+			s = head
+		end if
+	HeadStrings = s
+end function
+
+
+Function StilAnpassen(style%, size%, text$)
+	astyle = DimArray(3)
+	asize = DimArray(3)
+	astyle(0)=&quot;textnormal&quot;
+	astyle(1)=&quot;textbf&quot;
+	astyle(2) = &quot;textsf&quot;
+	asize(0)=&quot;normalsize&quot;
+	asize(1)=&quot;footnotesize&quot;
+	asize(2)=&quot;large&quot;
+	Dim s as String
+	s = &quot;\&quot; &amp; astyle(style) &amp; &quot;{\&quot; &amp; asize(size) &amp; &quot;{&quot; &amp; text &amp; &quot;}}&quot;
+	StilAnpassen = s
+End Function
+
+
+Function sfErstelleTexHeaderOt
+	ashead = DimArray(17)
+	Dim sthema, sklasse, sdatum as String
+	Dim DatabaseContext, DataSource, Connection, InteractionHandler, Statement, ResultSet, oFelder, oControl As Object
+	Dim iAuswahl, iZaehler01,iZaehler02, j As Integer
+	Dim sID, sAufgabe As String 
+	
+	sthema = thiscomponent.getcurrentcontroller().getcontrol(ThisComponent.drawpage.getForms.GetByName(&quot;GespAuswahl&quot;).getbyName(&quot;Textfeld 5&quot;)).text
+	sklasse = thiscomponent.getcurrentcontroller().getcontrol(ThisComponent.drawpage.getForms.GetByName(&quot;GespAuswahl&quot;).getbyName(&quot;Textfeld 6&quot;)).text
+	sdatum = thiscomponent.getcurrentcontroller().getcontrol(ThisComponent.drawpage.getForms.GetByName(&quot;GespAuswahl&quot;).getbyName(&quot;Textfeld 7&quot;)).text
+	
+	
+	
+	j=0
+	for i=5 to 37 step 4
+		aEintraege(i) = HeadStrings(Left(Mid(aEintraege(i),2),Len(aEintraege(i))-2), sthema, sklasse,sdatum)
+		ashead(j)=StilAnpassen(aEintraege(i+1), aEintraege(i+2), aEintraege(i))
+		j = j+1 
+   	next
+   	
+	j=10
+	for i=54 to 62 step 4
+		if (Left(Mid(aEintraege(i),2),Len(aEintraege(i))-2) = &quot;Seite&quot;) then
+			ashead(j) = &quot;\thepage&quot;
+		else
+			aEintraege(i) = HeadStrings(Left(Mid(aEintraege(i),2),Len(aEintraege(i))-2), sthema, sklasse,sdatum)
+			ashead(j)=StilAnpassen(aEintraege(i+1), aEintraege(i+2), aEintraege(i))
+		end if
+		j = j+1 
+   	next
+   	
+
+	
+	Dim iHeaderDateiNummerPartA As Integer
+	Dim iHeaderDateiNummerPartB As Integer
+	Dim sFancyHdr, sDeckblatt as String
+	&apos;Dim iHeaderDateiNummerNEW As Integer
+    iHeaderDateiNummerPartA = FreeFile
+    iHeaderDateiNummerPartA2 = FreeFile    
+    iHeaderDateiNummerPartB = FreeFile
+    &apos;iHeaderDateiNummerNEW = FreeFile
+    
+    sWorkingDirectory = sfWorkingDirectory(&quot;aufgdbphys.odb&quot;)
+	sTexDateienVerzeichnis = sfAufgabenverzeichnis
+	
+	if (aEintraege(53) + aEintraege(57) + aEintraege(61) = 0) then
+		sFancyHdr = &quot;&quot;	
+	else
+		sFancyHdr = &quot;\pagestyle{fancy}&quot; &amp; chr(13) &amp; &quot;\lhead{&quot; &amp; ashead(10) &amp; &quot;} \chead{&quot; &amp; ashead(11) &amp; &quot;} \rhead{&quot; &amp; ashead(12) &amp; &quot;} \lfoot{} \cfoot{} \rfoot{}  \renewcommand{\headrulewidth}{0.4pt} \renewcommand{\footrulewidth}{0.4pt}&quot;
+	end if
+
+	
+	sTexHeaderA = &quot;headerfooter/header3a1.tex&quot;
+	sTexHeaderA2 = &quot;headerfooter/header3a2.tex&quot;
+	&apos;sAufgabenDateiName = sWorkingDirectory &amp; sTexDateienVerzeichnis &amp; &quot;/&quot; &amp; sTexDatei &amp; &quot;.tex&quot;            &apos; Define file name
+	sHeaderDateiPartA_Pfad = sWorkingDirectory &amp; sTexDateienVerzeichnis &amp; &quot;/&quot; &amp; sTexHeaderA            &apos; Define file name
+	sHeaderDateiPartA2_Pfad = sWorkingDirectory &amp; sTexDateienVerzeichnis &amp; &quot;/&quot; &amp; sTexHeaderA2            &apos; Define file name
+	sDeckblattPfad = sWorkingDirectory &amp; sTexDateienVerzeichnis &amp; &quot;/headerfooter/deckblatt.tex&quot; 
+	&apos;HeaderdateiA in String auslesen
+	sTexHeaderAInhalt = &quot;\documentclass[&quot;&amp; aEintraege(50) &amp; &quot;,&quot; &amp; aEintraege(49) &amp; sfDateiInhalt(sHeaderDateiPartA_Pfad,iHeaderDateiNummerPartA)
+	&apos;HeaderdateiB in String auslesen
+	sTexHeaderAInhalt = sTexHeaderAInhalt &amp; Left(Mid(aEintraege(51),2),Len(aEintraege(51))-2) &amp; sfDateiInhalt(sHeaderDateiPartA2_Pfad,iHeaderDateiNummerPartA2)
+	&apos;Zwischenteil
+	if (aEintraege(4) + aEintraege(8) + aEintraege(12) &lt;&gt; 0) then 
+	sZwischenteil = &quot;\noindent\parbox{0.3333\linewidth}{&quot; &amp; ashead(0) &amp; &quot;}&quot; &amp;_
+	&quot;\parbox{0.3333\linewidth}{\centering &quot; &amp; ashead(1) &amp; &quot;\par}&quot; &amp;_
+	&quot;\parbox{0.3333\linewidth}{\raggedleft &quot; &amp; ashead(2) &amp; &quot;}&quot; &amp;_
+	chr(13) &amp; chr(13)
+	end if
+	
+	if (aEintraege(16) + aEintraege(20) + aEintraege(24) &lt;&gt; 0) then
+	sZwischenteil = sZwischenteil &amp; &quot;\noindent\parbox{0.3333\linewidth}{&quot; &amp; ashead(3) &amp; &quot;}&quot; &amp;_
+	&quot;\parbox{0.3333\linewidth}{\centering &quot; &amp; ashead(4) &amp; &quot;\par}&quot; &amp;_
+	&quot;\parbox{0.3333\linewidth}{\raggedleft &quot; &amp; ashead(5) &amp; &quot;}&quot;&amp;_
+	chr(13) &amp; chr(13)
+	end if
+	
+	if (aEintraege(28) + aEintraege(32) + aEintraege(36) &lt;&gt; 0) then	
+	sZwischenteil = sZwischenteil &amp; &quot;\noindent\parbox{0.3333\linewidth}{&quot; &amp; ashead(6) &amp; &quot;}&quot; &amp;_
+	&quot;\parbox{0.3333\linewidth}{\centering &quot; &amp; ashead(7) &amp; &quot;\par}&quot; &amp;_
+	&quot;\parbox{0.3333\linewidth}{\raggedleft &quot; &amp; ashead(8) &amp; &quot;} \\&quot; &amp; sLine(aEintraege(40), 0)
+	end if
+	&apos;MsgBox sZwischenteil
+	
+	if aEintraege(41) = 1 then
+		sTexHeaderBInhalt = StilAnpassen(aEintraege(42), aEintraege(43), &quot;\begin{enumerate}&quot;)
+		sTexHeaderBInhalt = Left(sTexHeaderBInhalt, Len(sTexHeaderBInhalt)-2)
+	else
+		sTexHeaderBInhalt = StilAnpassen(aEintraege(46), aEintraege(47), &quot;\begin{enumerate}&quot;)
+		sTexHeaderBInhalt = Left(sTexHeaderBInhalt, Len(sTexHeaderBInhalt)-2)	
+	end if
+	
+	if (aEintraege(65) = 1) then
+		sDeckblatt =  sfDateiInhalt(sDeckblattPfad,FreeFile)
+	else
+		sDeckblatt = &quot;&quot;
+	end if
+	&apos;Zusammenfügen
+	sNeu = sTexHeaderAInhalt &amp; chr(13) &amp; sFancyHdr &amp; chr(13) &amp; &quot;\begin{document}&quot; &amp; chr(13) &amp; sDeckblatt &amp; chr(13) &amp; 	sZwischenteil  &amp; chr(13) &amp; sTexHeaderBInhalt
+	sfErstelleTexHeaderOt = sNeu
+End Function
+
+Sub TexDateiErstellenAusPruefungOt
+	DatenbankFormularBearbeiten(&quot;AufgabenAdministration&quot;)
+&apos;	AuswahlPruefungAuslesen()	
+
+	
+	Dim iAufgabenDateiNummer As Integer
+	Dim iHeaderDateiNummer As Integer
+	Dim iFooterDateiNummer As Integer
+    iAufgabenDateiNummer = FreeFile
+    iHeaderDateiNummer = FreeFile
+    iFooterDateiNummer = FreeFile
+    
+   	sWorkingDirectory = sfWorkingDirectory(&quot;aufgdbphys.odb&quot;)
+	sTexDateienVerzeichnis = sfAufgabenverzeichnis
+	
+	sTexDatei = &quot;auswahl_aufgaben&quot;
+	&apos;sTexHeader = &quot;headerfooter/header2&quot;
+	sTexFooter = &quot;headerfooter/footer2&quot;
+	sAufgabenDateiName = sWorkingDirectory &amp; sTexDateienVerzeichnis &amp; &quot;/&quot; &amp; sTexDatei &amp; &quot;.tex&quot;            &apos; Define file name
+	&apos;sHeaderDateiName = sWorkingDirectory &amp; sTexDateienVerzeichnis &amp; &quot;/&quot; &amp; sTexHeader &amp; &quot;.txt&quot;            &apos; Define file name
+	sFooterDateiName = sWorkingDirectory &amp; sTexDateienVerzeichnis &amp; &quot;/&quot; &amp; sTexFooter &amp; &quot;.txt&quot; &apos; Define file name
+	&apos;---------------
+	Dim DatabaseContext, DataSource, Connection, InteractionHandler, Statement, ResultSet As Object
+	Dim iZaehler01,iZaehler02 As Integer
+	Dim sID, sAufgabe, sAlleLoes As String 
+  	Dim sAbstand as String
+	
+    &apos;DatenbankKontext erstellen
+    DatabaseContext = createUnoService(&quot;com.sun.star.sdb.DatabaseContext&quot;)
+    &apos;Datenbank kontaktieren
+    DataSource = DatabaseContext.getByName(&quot;aufgdbphys&quot;)
+    &apos;Testen, ob Passwort benötigt wird
+    If Not DataSource.IsPasswordRequired Then
+    	Connection = DataSource.GetConnection(&quot;&quot;,&quot;&quot;)
+    Else	
+    	InteractionHandler = createUnoService(&quot;com.sun.star.sdb.InteractionHandler&quot;)
+    	Connection = DataSource.ConnectWithCompletion(InteractionHandler)
+    End If
+    &apos;Abfrage erstellen
+    Statement = Connection.createStatement()
+   &apos;ResultSet = Statement.executeQuery(&quot; SELECT `aufgaben`.`Aufg_ID` AS `Aufg_ID`, `aufgaben`.`AutorID` AS `AutorID`, `aufgaben`.`SchwierigkeitsgradID` AS `SchwierigkeitsgradID`, `aufgaben`.`Untergebiet` AS `Untergebiet`, `aufgaben`.`Aufgabentext` AS `Aufgabentext`, `aufgaben`.`Lösung` AS `Lösung`, `aufgaben`.`LinkBild` AS `LinkBild`, `aufgaben`.`AuswahlDruck` AS `AuswahlDruck`, `aufgaben`.`Position` AS `Position` FROM `ph_aufg_db`.`aufgaben` `aufgaben` WHERE ( aufgaben.AuswahlDruck = true ) ORDER BY `position`&quot;)
+    ResultSet = Statement.executeQuery(&quot;SELECT `Aufgaben`.`AufgID` AS `AufgID`, `Aufgaben`.`Fachgebiet` AS `Fachgebiet`, `Aufgaben`.`Author` AS `Author`, `Aufgaben`.`Schwierigkeitsgrad` AS `Schwierigkeitsgrad`, `Aufgaben`.`LetzteAenderung` AS `LetzteAenderung`, `Aufgaben`.`AufgabenText` AS `AufgabenText`, `Aufgaben`.`LinkZuBild` AS `LinkZuBild`, `Aufgaben`.`MC2` AS `MC2`, `Aufgaben`.`MC3` AS `MC3`, `Aufgaben`.`MC4` AS `MC4`, `Aufgaben`.`MC5` AS `MC5`, `Aufgaben`.`MC6` AS `MC6`, `Aufgaben`.`Loesung` AS `Loesung`, `Aufgaben`.`Auswahl` AS `Auswahl`, `Aufgaben`.`Position` AS `Position`, `Aufgaben`.`AbstNachAufg` AS `Abstand` FROM `Aufgaben` `Aufgaben` WHERE ( `Aufgaben`.`Auswahl` = True ) ORDER BY `Aufgaben`.`Position`, `Aufgaben`.`Fachgebiet`, `Aufgaben`.`Schwierigkeitsgrad`&quot;)
+   
+   &apos;Dimension von ResultSet bestimmen:
+   iZaehler01 = 0
+   	&apos;- Stringarray mit ID und Aufgabe und evtl weiteren Angaben erstellen (zuerst mehrere 1-dim-Array und dann ein 2-dim-Array)
+   	If Not IsNull(ResultSet) Then
+   		While ResultSet.next
+			iZaehler01 = iZaehler01 + 1
+			&apos;MsgBox iZaehler01
+		Wend
+   	End If
+   	
+   	&apos;Array Dimensionieren:
+   	Dim sArrayDaten(iZaehler01 - 1,4) As String
+   	Dim Loesungsart, sAbstandsstring, sZwiTitelabfrage as String
+
+   	
+   	If aEintraege(67) = 1 then
+   		Loesungsart = &quot;Loesung&quot;
+   	else
+   		Loesungsart = &quot;Kurzloesung&quot;
+   	end if
+    ResultSet = Statement.executeQuery(&quot;SELECT `Aufgaben`.`AufgID` AS `AufgID`, `Aufgaben`.`Fachgebiet` AS `Fachgebiet`, `Aufgaben`.`Author` AS `Author`, `Aufgaben`.`Schwierigkeitsgrad` AS `Schwierigkeitsgrad`, `Aufgaben`.`LetzteAenderung` AS `LetzteAenderung`, `Aufgaben`.`AufgabenText` AS `AufgabenText`, `Aufgaben`.`LinkZuBild` AS `LinkZuBild`, `Aufgaben`.`MC2` AS `MC2`, `Aufgaben`.`MC3` AS `MC3`, `Aufgaben`.`MC4` AS `MC4`, `Aufgaben`.`MC5` AS `MC5`, `Aufgaben`.`MC6` AS `MC6`, `Aufgaben`.`&quot; &amp; Loesungsart &amp; &quot;`  AS `Loesung`, `Aufgaben`.`Auswahl` AS `Auswahl`, `Aufgaben`.`Position` AS `Position`, `Aufgaben`.`AbstNachAufg` AS `Abstand` FROM `Aufgaben` `Aufgaben` WHERE ( `Aufgaben`.`Auswahl` = True ) ORDER BY `Aufgaben`.`Position`, `Aufgaben`.`Fachgebiet`, `Aufgaben`.`Schwierigkeitsgrad`&quot;)
+   	iZaehler02 = 0
+   	If Not IsNull(ResultSet) Then
+   		While ResultSet.next
+			iZaehler02 = iZaehler02 + 1
+			sID = ResultSet.getString(1)
+			sAufgabe = ResultSet.getString(6)
+			sLoesung = ResultSet.getString(13)
+			sAbstand = ResultSet.getString(16)
+			&apos;MsgBox sLoesung
+			&apos;Umlaute ersetzen (unicode vs. ascii-Problematik)
+			sAufgabe = Replace(sAufgabe, &quot;ö&quot;, &quot;\&quot;&quot;o&quot;)
+			sAufgabe = Replace(sAufgabe, &quot;Ö&quot;, &quot;\&quot;&quot;O&quot;)
+			sAufgabe = Replace(sAufgabe, &quot;ä&quot;, &quot;\&quot;&quot;a&quot;)
+			sAufgabe = Replace(sAufgabe, &quot;Ä&quot;, &quot;\&quot;&quot;A&quot;)
+			sAufgabe = Replace(sAufgabe, &quot;ü&quot;, &quot;\&quot;&quot;u&quot;)
+			sAufgabe = Replace(sAufgabe, &quot;Ü&quot;, &quot;\&quot;&quot;U&quot;)
+			
+			sLoesung = Replace(sLoesung, &quot;ö&quot;, &quot;\&quot;&quot;o&quot;)
+			sLoesung = Replace(sLoesung, &quot;Ö&quot;, &quot;\&quot;&quot;O&quot;)
+			sLoesung = Replace(sLoesung, &quot;ä&quot;, &quot;\&quot;&quot;a&quot;)
+			sLoesung = Replace(sLoesung, &quot;Ä&quot;, &quot;\&quot;&quot;A&quot;)
+			sLoesung = Replace(sLoesung, &quot;ü&quot;, &quot;\&quot;&quot;u&quot;)
+			sLoesung = Replace(sLoesung, &quot;Ü&quot;, &quot;\&quot;&quot;U&quot;)
+
+
+			&apos;In Array schreiben:
+			sArrayDaten(iZaehler02 - 1,0) = sID
+			sArrayDaten(iZaehler02 - 1,1) = sAufgabe
+			sArrayDaten(iZaehler02 - 1,3) = sLoesung
+			sArrayDaten(iZaehler02 - 1,4) = sAbstand
+		Wend
+   	End If
+   	
+   	&apos;Bei Aufgabenstring korrekten Pfad einfügen:
+   	for i = 0 to iZaehler02 - 1
+   		&apos;String mit korrektem Pfad
+   		&apos;sAngepassterString = PosUndReplaceVonMystringInSearchstring(sArrayDaten(i,1), &quot;\includegraphics&quot;, sWorkingDirectory &amp; sTexDateienVerzeichnis &amp; &quot;/&quot; &amp; sArrayDaten(i,0) &amp; &quot;/&quot;)
+   		sAngepassterString = sfAbsPfadBildDatei(sArrayDaten(i,1), sWorkingDirectory &amp; sTexDateienVerzeichnis &amp; &quot;/&quot; &amp; sArrayDaten(i,0) &amp; &quot;/&quot;, &quot;\includegraphics&quot;)
+   		
+   		&apos;In Array schreiben:
+   		sArrayDaten(i,2) = sAngepassterString
+   		&apos;MsgBox sArrayDaten(i,0) &amp; chr(13) &amp; chr(13) &amp; sArrayDaten(i,1) &amp; chr(13) &amp; chr(13) &amp; sArrayDaten(i,2) 
+   		
+   		&apos;Das gleiche für die Lösungen (nur schreibe ich es nicht mehr in eine neue Spalte des Arrays):
+   		&apos;sAngepassterString2 = PosUndReplaceVonMystringInSearchstring(sArrayDaten(i,3), &quot;\includegraphics&quot;, sWorkingDirectory &amp; sTexDateienVerzeichnis &amp; &quot;/&quot; &amp; sArrayDaten(i,0) &amp; &quot;/&quot;)
+   		sAngepassterString2 = sfAbsPfadBildDatei(sArrayDaten(i,3), sWorkingDirectory &amp; sTexDateienVerzeichnis &amp; &quot;/&quot; &amp; sArrayDaten(i,0) &amp; &quot;/&quot;, &quot;\includegraphics&quot;)
+   		
+   		sArrayDaten(i,3) = sAngepassterString2
+   	next i
+   	   
+	&apos;Datei erstellen_
+	&apos; Latexdatei beginnen
+	&apos;Headerdatei in String auslesen
+	&apos;--&gt;TexHeader = sfDateiInhalt(sHeaderDateiName,iHeaderDateiNummer)
+	TexHeader = sfErstelleTexHeaderOt()
+	&apos;Umlaute ersetzen (unicode vs. ascii-Problematik)
+	TexHeader = Replace(TexHeader, &quot;ö&quot;, &quot;\&quot;&quot;o&quot;)
+	TexHeader = Replace(TexHeader, &quot;Ö&quot;, &quot;\&quot;&quot;O&quot;)
+	TexHeader = Replace(TexHeader, &quot;ä&quot;, &quot;\&quot;&quot;a&quot;)
+	TexHeader = Replace(TexHeader, &quot;Ä&quot;, &quot;\&quot;&quot;A&quot;)
+	TexHeader = Replace(TexHeader, &quot;ü&quot;, &quot;\&quot;&quot;u&quot;)
+	TexHeader = Replace(TexHeader, &quot;Ü&quot;, &quot;\&quot;&quot;U&quot;)
+	
+	&apos;Footerdatei in String auslesen
+	TexFooter = sfDateiInhalt(sFooterDateiName,iFooterDateiNummer)
+	sAlleLoes = Left(Mid(aEintraege(52),2),Len(aEintraege(52))-2)
+    Open sAufgabenDateiName For Output As #iAufgabenDateiNummer
+	   	Print #iAufgabenDateiNummer, TexHeader &amp; chr(13)
+	   	for i = 0 to iZaehler02 - 1
+	   		if aEintraege(68) = 1 then
+	   			sZwiTitelabfrage = &quot;Zwischentitel vor Aufgabe &quot; &amp; i+1 &amp;&quot;?&quot;
+	   			if (MsgBox(sZwiTitelabfrage, 260, &quot;Zwischentitel&quot;) = 6) then
+	   				Print #iAufgabenDateiNummer, &quot;\begin{center}&quot; &amp; chr(13) &amp; StilAnpassen(2, 2, InputBox(&quot;Titel: &quot;, &quot;Zwischentitel&quot;)) &amp; chr(13) &amp; &quot;\end{center}&quot; &amp; chr(13)
+		   		end if
+		   	end if
+	   		if aEintraege(66) = 1 then 
+	   			sAbstandsstring = &quot;\vspace{&quot; &amp; sArrayDaten(i,4) &amp; &quot;mm}&quot;  &amp; chr(13)
+	   		else
+	   			sAbstandsstring = &quot;&quot;
+	   		end if
+	   		&apos;String mit korrektem Pfad
+	   		if aEintraege(41) = 1 then
+	   			if aEintraege(45) = 1 then
+					Print #iAufgabenDateiNummer, &quot;\item &quot; &amp; StilAnpassen( aEintraege(42), aEintraege(43), sArrayDaten(i,2))  &amp;_
+					sLine(aEintraege(44), 1) &amp; StilAnpassen(aEintraege(46), aEintraege(47), Left(Mid(aEintraege(52),2),Len(aEintraege(52))-2) &amp; sArrayDaten(i,3)) &amp;  chr(13) &amp; sLine(aEintraege(48), 0)  &amp; sAbstandsstring
+				else
+					Print #iAufgabenDateiNummer, &quot;\item &quot; &amp; StilAnpassen(aEintraege(42), aEintraege(43), sArrayDaten(i,2)) &amp; chr(13) &amp; sLine(aEintraege(48), 0) &amp; sAbstandsstring
+				end if
+			else	
+	   			if aEintraege(45) = 1 then
+					Print #iAufgabenDateiNummer, &quot;\item &quot; &amp; sLine(aEintraege(44), 1) &amp;_
+					StilAnpassen(aEintraege(46), aEintraege(47), Left(Mid(aEintraege(52),2),Len(aEintraege(52))-2) &amp; sArrayDaten(i,3)) &amp; chr(13) &amp; sLine(aEintraege(48), 0)  &amp; sAbstandsstring
+				else
+					Print #iAufgabenDateiNummer, &quot;\item &quot; &amp; &quot;~&quot;&amp; sLine(aEintraege(48), 0)  &amp; sAbstand
+				end if
+			end if
+		sAlleLoes = sAlleLoes &amp; i+1 &amp; &quot;. &quot; &amp; sArrayDaten(i,3) &amp; &quot;; &quot;
+		next i
+		sAlleLoes = StilAnpassen(aEintraege(46), aEintraege(47), sAlleLoes)
+		
+		Print #iAufgabenDateiNummer, &quot;\end{enumerate} }}&quot;
+		If aEintraege(69) = 1 then
+			Print #iAufgabenDateiNummer, sAlleLoes
+		end if
+   		Print #iAufgabenDateiNummer, TexFooter     &apos; Save line
+   		
+	Close #iAufgabenDateiNummer
+	PdflatexKompilieren(sWorkingDirectory &amp; sTexDateienVerzeichnis, sTexDatei)
+	PdfAnzeigen(sWorkingDirectory &amp; sTexDateienVerzeichnis, sTexDatei)
+	PdflatexHilfsdateienLoeschen(sWorkingDirectory &amp; sTexDateienVerzeichnis, sTexDatei)
+End Sub
+
+Sub ParallelSerieErstellen
+	Dim DatabaseContext, DataSource, Connection, InteractionHandler, Statement, ResultSet As Object
+	Dim iSize as Integer
+	Dim sSQL, sSQL2 as String
+	
+    DatabaseContext = createUnoService(&quot;com.sun.star.sdb.DatabaseContext&quot;)
+    DataSource = DatabaseContext.getByName(&quot;aufgdbphys&quot;)
+    If Not DataSource.IsPasswordRequired Then
+    	Connection = DataSource.GetConnection(&quot;&quot;,&quot;&quot;)
+    Else	
+    	InteractionHandler = createUnoService(&quot;com.sun.star.sdb.InteractionHandler&quot;)
+    	Connection = DataSource.ConnectWithCompletion(InteractionHandler)
+    End If
+    Statement = Connection.createStatement()
+    sSQL = &quot;SELECT &quot;&quot;IDVarianten&quot;&quot; FROM &quot;&quot;Aufgaben&quot;&quot; WHERE &quot;&quot;Auswahl&quot;&quot; = TRUE AND &quot;&quot;IDVarianten&quot;&quot; IS NOT NULL&quot; 
+    ResultSet = Statement.executeQuery(sSQL)
+   	If Not IsNull(ResultSet) Then
+   		iSize = 0   		
+   		Do While ResultSet.next()
+	   		iSize = iSize+1
+		loop
+		
+	 	ResultSet = Statement.executeQuery(sSQL)
+		i = 0
+		a = DimArray(iSize)
+   		Do While ResultSet.next()
+   			a(i) = ResultSet.getString(1)
+   			i = i+1
+		loop
+   	End If
+   	j = 0
+   	For i = lbound(a) to uBound(a)-1
+   		if a(i) &lt;&gt; 0 then
+	   	sSQL = &quot;UPDATE &quot;&quot;Aufgaben&quot;&quot; SET &quot;&quot;Auswahl&quot;&quot; = TRUE WHERE &quot;&quot;PermanenteID&quot;&quot; LIKE &apos;&quot; &amp; a(i) &amp; &quot;&apos;&quot;
+		Statement.executeUpdate(sSQL)
+		sSQL2 = &quot;UPDATE &quot;&quot;Aufgaben&quot;&quot; SET &quot;&quot;Auswahl&quot;&quot; = FALSE WHERE &quot;&quot;IDVarianten&quot;&quot; LIKE &apos;&quot; &amp; a(i) &amp; &quot;&apos;&quot;
+		Statement.executeUpdate(sSQL2)
+		j = j+1
+		end if
+	next 
+    MsgBox &quot;Zu &quot; &amp; j &amp; &quot; Aufgaben wurden Parallelaufgaben ausgewählt!&quot;
+End Sub
+
+Sub PositionenAusfuellen
+	DatenbankAktualisierenStyle
+    DatabaseContext = createUnoService(&quot;com.sun.star.sdb.DatabaseContext&quot;)
+    DataSource = DatabaseContext.getByName(&quot;aufgdbphys&quot;)
+    If Not DataSource.IsPasswordRequired Then
+    	Connection = DataSource.GetConnection(&quot;&quot;,&quot;&quot;)
+    Else	
+    	InteractionHandler = createUnoService(&quot;com.sun.star.sdb.InteractionHandler&quot;)
+    	Connection = DataSource.ConnectWithCompletion(InteractionHandler)
+    End If
+    Statement = Connection.createStatement()
+    Statement1 = Connection.createStatement()
+    sSQL = &quot;DELETE FROM &quot;&quot;Position&quot;&quot; &quot;
+    Statement.executeUpdate(sSQL)
+    sSQL = &quot;SELECT &quot;&quot;PermanenteID&quot;&quot;, &quot;&quot;Position&quot;&quot;, &quot;&quot;AufgabenText&quot;&quot; FROM &quot;&quot;Aufgaben&quot;&quot; WHERE &quot;&quot;Auswahl&quot;&quot; = TRUE ORDER BY &quot;&quot;Position&quot;&quot;&quot;
+    ResultSet1 = Statement.executeQuery(sSQL)
+   	If not isNull(ResultSet1) then
+   	i = 0
+   	Do While ResultSet1.next()
+   	&apos;Beginn neu ab 30.9.18 (Ot) Sicherstellen, dass es keine Apostrophprobleme gibt
+   		sText =  Left(Resultset1.getString(3), 50)
+   		sText = Replace(sText,&quot;&apos;&quot;,&quot;&apos;&apos;&quot;)
+ 		sSQL = &quot;INSERT INTO &quot;&quot;Position&quot;&quot; (&quot;&quot;PermanenteID&quot;&quot;, &quot;&quot;PosID&quot;&quot;, &quot;&quot;AufgPos&quot;&quot;, &quot;&quot;AufgText&quot;&quot;) VALUES (&apos;&quot;&amp;ResultSet1.getString(1)&amp;&quot;&apos;,&quot;&amp; i &amp; &quot;,&quot; &amp; i &amp; &quot;, &apos;&quot; &amp; sText &amp; &quot;&apos;)&quot;
+	&apos;Ende neu ab 30.9.18
+        Statement1.executeUpdate(sSQL)
+	    i = i+1
+	loop
+	maxiPos = i
+   	End If
+   	DatenbankAktualisierenStyle
+End Sub
+
+Sub PositionUp
+
+ Dim igewPos as Integer
+ Dim sSQL as String
+ 
+    DatabaseContext = createUnoService(&quot;com.sun.star.sdb.DatabaseContext&quot;)
+    DataSource = DatabaseContext.getByName(&quot;aufgdbphys&quot;)
+    If Not DataSource.IsPasswordRequired Then
+    	Connection = DataSource.GetConnection(&quot;&quot;,&quot;&quot;)
+    Else	
+    	InteractionHandler = createUnoService(&quot;com.sun.star.sdb.InteractionHandler&quot;)
+    	Connection = DataSource.ConnectWithCompletion(InteractionHandler)
+    End If
+    Statement = Connection.createStatement()
+
+
+ igewPos = Listbox_auslesen(&quot;PositionListBox&quot;)
+ sSQL = &quot;SELECT &quot;&quot;PosID&quot;&quot; FROM &quot;&quot;Position&quot;&quot; WHERE &quot;&quot;AufgPos&quot;&quot; = &quot; &amp; igewPos
+ ResultSet = Statement.executeQuery(sSQL)
+ Do While ResultSet.next()
+	 igewID = ResultSet.getInt(1)
+ loop
+ if igewPos &gt; 0 then
+	 sSQL = &quot;UPDATE &quot;&quot;Position&quot;&quot; SET &quot;&quot;AufgPos&quot;&quot; = &quot; &amp; igewPos &amp; &quot; WHERE &quot;&quot;AufgPos&quot;&quot; = &quot; &amp; igewPos-1
+	 Statement.executeUpdate(sSQL) 
+	 sSQL = &quot;UPDATE &quot;&quot;Position&quot;&quot; SET &quot;&quot;AufgPos&quot;&quot; = &quot; &amp; igewPos-1 &amp; &quot; WHERE &quot;&quot;PosID&quot;&quot; = &quot;&amp; igewID
+	 Statement.executeUpdate(sSQL) 	 
+	 DatenbankAktualisierenStyle
+	 Listbox_ausfuellen(&quot;PositionListBox&quot;, igewPos-1)
+ else
+ 	Beep
+ end if
+End Sub
+
+
+Sub PositionDown
+
+ Dim igewPos as Integer
+ Dim sSQL as String
+ 
+    DatabaseContext = createUnoService(&quot;com.sun.star.sdb.DatabaseContext&quot;)
+    DataSource = DatabaseContext.getByName(&quot;aufgdbphys&quot;)
+    If Not DataSource.IsPasswordRequired Then
+    	Connection = DataSource.GetConnection(&quot;&quot;,&quot;&quot;)
+    Else	
+    	InteractionHandler = createUnoService(&quot;com.sun.star.sdb.InteractionHandler&quot;)
+    	Connection = DataSource.ConnectWithCompletion(InteractionHandler)
+    End If
+    Statement = Connection.createStatement()
+
+
+ igewPos = Listbox_auslesen(&quot;PositionListBox&quot;)
+ sSQL = &quot;SELECT &quot;&quot;PosID&quot;&quot; FROM 	&quot;&quot;Position&quot;&quot; WHERE &quot;&quot;AufgPos&quot;&quot; = &quot; &amp; igewPos
+ ResultSet = Statement.executeQuery(sSQL)
+ Do While ResultSet.next()
+	 igewID = ResultSet.getInt(1)
+ loop
+ 
+ if igewPos &lt; maxiPos-1  then
+	 sSQL = &quot;UPDATE &quot;&quot;Position&quot;&quot; SET &quot;&quot;AufgPos&quot;&quot; = &quot; &amp; igewPos &amp; &quot; WHERE &quot;&quot;AufgPos&quot;&quot; = &quot; &amp; igewPos+1
+	 Statement.executeUpdate(sSQL) 
+	 sSQL = &quot;UPDATE &quot;&quot;Position&quot;&quot; SET &quot;&quot;AufgPos&quot;&quot; = &quot; &amp; igewPos+1 &amp; &quot;WHERE &quot;&quot;PosID&quot;&quot; = &quot;&amp; igewID
+	 Statement.executeUpdate(sSQL) 	 
+	 DatenbankAktualisierenStyle
+	 Listbox_ausfuellen(&quot;PositionListBox&quot;, igewPos+1)
+ else
+ 	Beep
+ end if
+End Sub
+
+Sub PositionenZurueckschreiben
+    DatabaseContext = createUnoService(&quot;com.sun.star.sdb.DatabaseContext&quot;)
+    DataSource = DatabaseContext.getByName(&quot;aufgdbphys&quot;)
+    If Not DataSource.IsPasswordRequired Then
+    	Connection = DataSource.GetConnection(&quot;&quot;,&quot;&quot;)
+    Else	
+    	InteractionHandler = createUnoService(&quot;com.sun.star.sdb.InteractionHandler&quot;)
+    	Connection = DataSource.ConnectWithCompletion(InteractionHandler)
+    End If
+    Statement = Connection.createStatement()
+    Statement1 = Connection.createStatement()    
+    Statement2 = Connection.createStatement()
+    sSQL = &quot;SELECT &quot;&quot;PermanenteID&quot;&quot;, &quot;&quot;AufgPos&quot;&quot; FROM &quot;&quot;Position&quot;&quot; ORDER BY &quot;&quot;PermanenteID&quot;&quot;&quot;
+    ResultSet = Statement.executeQuery(sSQL)
+   	If not isNull(ResultSet) then
+   	s1 = &quot;&quot;
+   	s2 = &quot;&quot;
+   	Do While ResultSet.next()
+		s1 = s1 &amp; ResultSet.getInt(2) &amp; &quot; &quot;
+		s2 = s2 &amp; ResultSet.getString(1) &amp; &quot; &quot;
+		sSQL = &quot;UPDATE &quot;&quot;Aufgaben&quot;&quot; SET &quot;&quot;Position&quot;&quot; = &quot; &amp; ResultSet.getInt(2) &amp; &quot; WHERE &quot;&quot;PermanenteID&quot;&quot; LIKE &apos;&quot; &amp; ResultSet.GetString(1) &amp; &quot;&apos;&quot;
+		Statement2.executeUpdate(sSQL)
+	loop
+		sSQL = &quot;UPDATE &quot;&quot;GespeicherteAuswahlen&quot;&quot; SET &quot;&quot;Position&quot;&quot; = &apos;&quot;&amp; s1 &amp; &quot;&apos; , &quot;&quot;AufgabenIDs&quot;&quot; = &apos;&quot; &amp; s2 &amp; &quot;&apos; WHERE &quot;&quot;IDAuswahl&quot;&quot; = &quot;&amp; iAuswahl
+		&apos;MsgBox(sSQL)
+	    Statement1.executeUpdate(sSQL)
+   	End If
+End Sub
+
+Sub DateiLaden(sDateiName as String)
+	Dim vDoc
+	Dim Arg()
+	Dim sURL as String
+	sURL = ConvertToURL(sdateiName)
+	vDoc=StarDesktop.loadComponentFromURL(sURL, &quot;_blank&quot;, 0, Arg())
+End Sub
+
+Sub FileManagerOeffnen(sVerzeichnis As String)
+	&apos;MsgBox convertfromurl(sVerzeichnis)
+	&apos;Testen, welches Betriebssystem (in Function afSystemeinstellungen eingestellt!):
+	if afSystemeinstellungen(1) = 1 then
+		shell(&quot;nautilus &quot; &amp; convertfromurl(sVerzeichnis),10)
+	elseif afSystemeinstellungen(1) = 2 then
+		shell(&quot;open &quot; &amp; convertfromurl(sVerzeichnis),10)
+	&apos;neu START 9.8.13
+	elseif afSystemeinstellungen(1) = 3 then
+		shell(&quot;explorer &quot; &amp; convertfromurl(sVerzeichnis),10)
+	&apos;neu END 9.8.13
+	end if
+End Sub	
+
+Sub DeckblattOeffnen
+	sWorkingDirectory = sfWorkingDirectory(&quot;aufgdbphys.odb&quot;)
+	sTexDateienVerzeichnis = sfAufgabenverzeichnis
+	sDeckblattPfad = sWorkingDirectory &amp; sTexDateienVerzeichnis &amp; &quot;/headerfooter/deckblatt.tex&quot;
+	FileManagerOeffnen(sDeckblattPfad)
+End Sub	
+
+Sub IDVarianten_durch_PermanenteID_ersetzen
+	Dim DatabaseContext, DataSource, Connection, InteractionHandler, Statement, ResultSet As Object
+	Dim iSize as Integer
+	Dim sSQL, sSQL2 as String
+	
+    DatabaseContext = createUnoService(&quot;com.sun.star.sdb.DatabaseContext&quot;)
+    DataSource = DatabaseContext.getByName(&quot;aufgdbphys&quot;)
+    If Not DataSource.IsPasswordRequired Then
+    	Connection = DataSource.GetConnection(&quot;&quot;,&quot;&quot;)
+    Else	
+    	InteractionHandler = createUnoService(&quot;com.sun.star.sdb.InteractionHandler&quot;)
+    	Connection = DataSource.ConnectWithCompletion(InteractionHandler)
+    End If
+    Statement = Connection.createStatement()
+    sSQL = &quot;SELECT &quot;&quot;Aufgaben&quot;&quot;.&quot;&quot;AufgID&quot;&quot;, &quot;&quot;Aufgabentemp&quot;&quot;.&quot;&quot;PermanenteID&quot;&quot; FROM &quot;&quot;Aufgaben&quot;&quot; INNER JOIN &quot;&quot;Aufgabentemp&quot;&quot; ON &quot;&quot;Aufgaben&quot;&quot;.&quot;&quot;IDVarianten&quot;&quot; = &quot;&quot;Aufgabentemp&quot;&quot;.&quot;&quot;AufgID&quot;&quot; &quot; 
+    ResultSet = Statement.executeQuery(sSQL)
+   	If Not IsNull(ResultSet) Then		
+   		Do While ResultSet.next()
+        Statement = Connection.createStatement()  	
+	   	sSQL = &quot;UPDATE &quot;&quot;Aufgaben&quot;&quot; SET &quot;&quot;IDVarianten&quot;&quot; = &apos;&quot; &amp; ResultSet.getString(2) &amp; &quot;&apos; WHERE &quot;&quot;AufgID&quot;&quot; = &quot; &amp; ResultSet.getInt(1)
+		Statement.executeUpdate(sSQL)
+		loop 
+   end if
+End Sub
+</script:module>

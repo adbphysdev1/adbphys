@@ -1,0 +1,1789 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE script:module PUBLIC "-//OpenOffice.org//DTD OfficeDocument 1.0//EN" "module.dtd">
+<script:module xmlns:script="http://openoffice.org/2000/script" script:name="ImExport" script:language="StarBasic">REM  *****  BASIC  *****
+
+Sub Main
+	&apos;LoescheAufgabeUeberID(11)
+	&apos;KopiereTabelleneintrag(1, &quot;testtabelle&quot;)
+	msgbox(BestimmePrimaryKey(&quot;Aufgaben&quot;))
+End Sub
+
+&apos;Diese Funktion liest den PrimaryKey der Tabellen aus. 
+Function BestimmePrimaryKey(sTabellenname As String)
+	Dim oMeta		&apos;Metadaten
+	Dim oResult		&apos;Resultat einer SQL-Abfrage
+	Dim oTables()	&apos;Enthält die primären Datentabellen
+	Dim oPrimaryKeys()
+	Dim oNull As Object
+	&apos;Meta-Daten auslesen:
+	oMeta = GetMetaData()
+
+	&apos;Die Liste der regulären Tabellen erhalten:
+	oResult = oMeta.getTables(oNull, &quot;%&quot;, &quot;%&quot;, Array(&quot;TABLE&quot;))
+	Redim oTables() &apos;ist das nötig?
+	Do While oResult.next()
+		AppendToArray(oTables(), oResult.getString(3))
+	Loop
+	
+	&apos;PrimaryKey auslesen:
+	Redim oPrimaryKeys()
+	for i = lbound(oTables()) to ubound(oTables())
+		oResult = oMeta.getPrimaryKeys(oNull, &quot;%&quot;, oTables(i))
+		Do While oResult.next()
+			AppendToArray(oPrimaryKeys(), oResult.getString(4))
+			&apos;MsgBox oResult.getString(4)
+		Loop
+	next
+
+	for i = lbound(oPrimaryKeys()) to ubound(oPrimaryKeys())
+		if oTables(i) = sTabellenname then
+			&apos;MsgBox oPrimaryKeys(i)
+			BestimmePrimaryKey = oPrimaryKeys(i)
+		end if
+	next
+End Function
+
+&apos;Diese Funktion liest die Metadaten der Tabellen aus, z.B. den PrimaryKey der einzelnen Tabellen,
+&apos;vgl. die Funktion BestimmePrimaryKey() 
+Function GetMetaData
+	Dim DatabaseContext As Object
+	Dim DataSource As Object
+	Dim Connection As Object
+	Dim InteractionHandler as Object
+	Dim Statement As Object
+	Dim oMeta As Object
+	DatabaseContext = createUnoService(&quot;com.sun.star.sdb.DatabaseContext&quot;)
+	DataSource = DatabaseContext.getByName(&quot;aufgdbphys&quot;)
+    If Not DataSource.IsPasswordRequired Then
+		Connection = DataSource.GetConnection(&quot;&quot;,&quot;&quot;)
+	Else
+		InteractionHandler = createUnoService(&quot;com.sun.star.sdb.InteractionHandler&quot;)
+		Connection = DataSource.ConnectWithCompletion(InteractionHandler)
+	End If
+	oMeta = Connection.getMetaData()
+	&apos;oPrimary = oMeta.getPrimaryKeys()
+	&apos;Connection.close()
+	
+	GetMetaData = oMeta
+End Function
+
+Sub KopiereTabelleneintrag(iID as Integer, sTabellenname as String)
+	Dim aDatensatz()
+	Dim DatabaseContext As Object
+	Dim DataSource As Object
+	Dim Connection As Object
+	Dim InteractionHandler as Object
+	Dim Statement As Object
+	DatabaseContext = createUnoService(&quot;com.sun.star.sdb.DatabaseContext&quot;)
+	DataSource = DatabaseContext.getByName(&quot;aufgdbphys&quot;)
+    If Not DataSource.IsPasswordRequired Then
+       Connection = DataSource.GetConnection(&quot;&quot;,&quot;&quot;)
+    Else
+       InteractionHandler = createUnoService(&quot;com.sun.star.sdb.InteractionHandler&quot;)
+       Connection = DataSource.ConnectWithCompletion(InteractionHandler)
+    End If
+    Statement = Connection.createStatement()
+	
+	&apos;Datensatz auslesen
+	aDatensatz = aDatensatzAusTabelleAuslesen(iID, sTabellenname)
+	
+	&apos;neuen Datensatz schreiben
+	sInsert = &quot;INSERT INTO &quot;&quot;Aufgaben&quot;&quot; VALUES (&quot; &amp; aDatensatz(0) &amp; &quot;, &quot; &amp; aDatensatz(1) &amp; &quot;, &quot; &amp; aDatensatz(2) &amp;_
+	&quot;, &quot; &amp; aDatensatz(3) &amp; &quot;, &apos;&quot; &amp; aDatensatz(4) &amp; &quot;&apos;, &apos;&quot; &amp; aDatensatz(5) &amp; &quot;&apos;, &apos;&quot; &amp; aDatensatz(6) &amp; &quot;&apos;, &apos;&quot; &amp; aDatensatz(7) &amp;_
+	&quot;&apos;, &apos;&quot; &amp; aDatensatz(8) &amp; &quot;&apos;, &apos;&quot; &amp; aDatensatz(9) &amp; &quot;&apos;, &apos;&quot; &amp; aDatensatz(10) &amp; &quot;&apos;, &apos;&quot; &amp; aDatensatz(11) &amp; &quot;&apos;, &apos;&quot; &amp; aDatensatz(12) &amp;_
+	&quot;&apos;, &quot; &amp; aDatensatz(13) &amp; &quot;, &quot; &amp; aDatensatz(14) &amp; &quot;, &quot; &amp; aDatensatz(15) &amp; &quot;, &apos;&quot; &amp; aDatensatz(16) &amp; &quot;&apos;, &apos;&quot; &amp; aDatensatz(17) &amp; &quot;&apos;, &quot; &amp; aDatensatz(18) &amp;_
+	&quot;, &apos;&quot; &amp; aDatensatz(19) &amp; &quot;&apos;, &quot; &amp; aDatensatz(20) &amp; &quot;)&quot;
+ 	&apos;sAusgewaehltePositionen
+ 	Print sInsert
+ 	Statement.execute(sInsert)
+ 	
+ 	&apos;ID von letztem Eintrag bestimmen und als Wert zurückgeben...
+End Sub
+
+Function aDatensatzAusTabelleAuslesen(iID as Integer, sTabellenname as String)
+	Dim aDatensatz()
+	Dim DatabaseContext As Object
+	Dim DataSource As Object
+	Dim Connection As Object
+	Dim InteractionHandler as Object
+	Dim Statement As Object
+	DatabaseContext = createUnoService(&quot;com.sun.star.sdb.DatabaseContext&quot;)
+	DataSource = DatabaseContext.getByName(&quot;aufgdbphys&quot;)
+    If Not DataSource.IsPasswordRequired Then
+       Connection = DataSource.GetConnection(&quot;&quot;,&quot;&quot;)
+    Else
+       InteractionHandler = createUnoService(&quot;com.sun.star.sdb.InteractionHandler&quot;)
+       Connection = DataSource.ConnectWithCompletion(InteractionHandler)
+    End If
+    Statement = Connection.createStatement()
+	&apos;Primärschlüssel bestimmen:
+	Primaerschluessel = BestimmePrimaryKey(sTabellenname)
+	
+	sSelect = &quot;SELECT * FROM &quot;&quot;&quot; &amp; sTabellenname &amp; &quot;&quot;&quot; WHERE &quot;&quot;&quot; &amp; Primaerschluessel &amp; &quot;&quot;&quot; = &quot; &amp; iID
+	MsgBox sSelect
+	ResultSet = Statement.executeQuery(sSelect)
+	
+	&apos;Länge Resultset bestimmen:
+	iEintraegeResultSet = ResultSet.columns.count
+	&apos;Cursor auf Datensatz setzen
+	ResultSet.next
+	Redim aDatensatz()
+	for i = 1 to iEintraegeResultSet
+		&apos;MsgBox ResultSet.getString(i)
+		AppendToArray(aDatensatz(), ResultSet.getString(i))
+	next
+	
+	aDatensatzAusTabelleAuslesen = aDatensatz
+End Function
+
+Sub aDatensatzInTabelleEinlesen(iID as Integer, sTabellenname as String, aDatensatz())
+	Dim DatabaseContext As Object
+	Dim DataSource As Object
+	Dim Connection As Object
+	Dim InteractionHandler as Object
+	Dim Statement As Object
+	DatabaseContext = createUnoService(&quot;com.sun.star.sdb.DatabaseContext&quot;)
+	DataSource = DatabaseContext.getByName(&quot;aufgdbphys&quot;)
+    If Not DataSource.IsPasswordRequired Then
+       Connection = DataSource.GetConnection(&quot;&quot;,&quot;&quot;)
+    Else
+       InteractionHandler = createUnoService(&quot;com.sun.star.sdb.InteractionHandler&quot;)
+       Connection = DataSource.ConnectWithCompletion(InteractionHandler)
+    End If
+    Statement = Connection.createStatement()
+	&apos;Primärschlüssel bestimmen:
+	Primaerschluessel = BestimmePrimaryKey(sTabellenname)
+	
+&apos; 	sInsert = &quot;INSERT INTO &quot;&quot;&quot; &amp; sTabellenname &amp; &quot;&quot;&quot; VALUES (&quot; &amp; iID &amp;_
+&apos; 	&quot;, &quot; &amp; IIf(aDatensatz(1) = &quot;&quot;,&quot;Null&quot;,&quot;&apos;&quot; &amp; aDatensatz(1) &amp; &quot;&apos;&quot;) &amp;_
+&apos; 	&quot;, &quot; &amp; IIf(aDatensatz(2) = &quot;&quot;,&quot;Null&quot;,&quot;&apos;&quot; &amp; aDatensatz(2) &amp; &quot;&apos;&quot;) &amp;_
+&apos; 	&quot;, &quot; &amp; IIf(aDatensatz(3) = &quot;&quot;,&quot;Null&quot;,&quot;&apos;&quot; &amp; aDatensatz(3) &amp; &quot;&apos;&quot;) &amp;_
+&apos; 	&quot;, &quot; &amp; IIf(aDatensatz(4) = &quot;&quot;,&quot;Null&quot;,&quot;&apos;&quot; &amp; aDatensatz(4) &amp; &quot;&apos;&quot;) &amp;_
+&apos; 	&quot;, &quot; &amp; IIf(aDatensatz(5) = &quot;&quot;,&quot;Null&quot;,&quot;&apos;&quot; &amp; aDatensatz(5) &amp; &quot;&apos;&quot;) &amp;_
+&apos; 	&quot;, &quot; &amp; IIf(aDatensatz(6) = &quot;&quot;,&quot;Null&quot;,&quot;&apos;&quot; &amp; aDatensatz(6) &amp; &quot;&apos;&quot;) &amp;_
+&apos; 	&quot;, &quot; &amp; IIf(aDatensatz(7) = &quot;&quot;,&quot;Null&quot;,&quot;&apos;&quot; &amp; aDatensatz(7) &amp; &quot;&apos;&quot;) &amp;_
+&apos; 	&quot;, &quot; &amp; IIf(aDatensatz(8) = &quot;&quot;,&quot;Null&quot;,&quot;&apos;&quot; &amp; aDatensatz(8) &amp; &quot;&apos;&quot;) &amp;_
+&apos; 	&quot;, &quot; &amp; IIf(aDatensatz(9) = &quot;&quot;,&quot;Null&quot;,&quot;&apos;&quot; &amp; aDatensatz(9) &amp; &quot;&apos;&quot;) &amp;_
+&apos; 	&quot;, &quot; &amp; IIf(aDatensatz(10) = &quot;&quot;,&quot;Null&quot;,&quot;&apos;&quot; &amp; aDatensatz(10) &amp; &quot;&apos;&quot;) &amp;_
+&apos; 	&quot;, &quot; &amp; IIf(aDatensatz(11) = &quot;&quot;,&quot;Null&quot;,&quot;&apos;&quot; &amp; aDatensatz(11) &amp; &quot;&apos;&quot;) &amp;_
+&apos; 	&quot;, &quot; &amp; IIf(aDatensatz(12) = &quot;&quot;,&quot;Null&quot;,&quot;&apos;&quot; &amp; aDatensatz(12) &amp; &quot;&apos;&quot;) &amp;_
+&apos; 	&quot;, &quot; &amp; IIf(aDatensatz(13) = &quot;&quot;,&quot;Null&quot;,&quot;&apos;&quot; &amp; aDatensatz(13) &amp; &quot;&apos;&quot;) &amp;_
+&apos; 	&quot;, &quot; &amp; IIf(aDatensatz(14) = &quot;&quot;,&quot;Null&quot;,&quot;&apos;&quot; &amp; aDatensatz(14) &amp; &quot;&apos;&quot;) &amp;_
+&apos; 	&quot;, &quot; &amp; IIf(aDatensatz(15) = &quot;&quot;,&quot;Null&quot;,&quot;&apos;&quot; &amp; aDatensatz(15) &amp; &quot;&apos;&quot;) &amp;_
+&apos; 	&quot;, &quot; &amp; IIf(aDatensatz(16) = &quot;&quot;,&quot;Null&quot;,&quot;&apos;&quot; &amp; aDatensatz(16) &amp; &quot;&apos;&quot;) &amp;_
+&apos; 	&quot;, &quot; &amp; IIf(aDatensatz(17) = &quot;&quot;,&quot;Null&quot;,&quot;&apos;&quot; &amp; aDatensatz(17) &amp; &quot;&apos;&quot;) &amp;_
+&apos; 	&quot;, &quot; &amp; IIf(aDatensatz(18) = &quot;&quot;,&quot;Null&quot;,&quot;&apos;&quot; &amp; aDatensatz(18) &amp; &quot;&apos;&quot;) &amp;_
+&apos; 	&quot;, &quot; &amp; IIf(aDatensatz(19) = &quot;&quot;,&quot;Null&quot;,&quot;&apos;&quot; &amp; aDatensatz(19) &amp; &quot;&apos;&quot;) &amp;_
+&apos; 	&quot;, &quot; &amp; IIf(aDatensatz(20) = &quot;&quot;,&quot;Null&quot;,&quot;&apos;&quot; &amp; aDatensatz(20) &amp; &quot;&apos;&quot;) &amp; &quot;)&quot;
+ 	
+ 	sStart = &quot;INSERT INTO &quot;&quot;&quot; &amp; sTabellenname &amp; &quot;&quot;&quot; VALUES (&quot; &amp; iID
+ 	&apos;for i=1 to 20
+ 	for i=1 to LaengeDatensatzTabelleAufgaben()-1
+ 		sStart = sStart &amp; &quot;, &quot; &amp; IIf(aDatensatz(i) = &quot;&quot;,&quot;Null&quot;,&quot;&apos;&quot; &amp; aDatensatz(i) &amp; &quot;&apos;&quot;)
+ 	next i
+ 	sStart = sStart &amp; &quot;)&quot;
+ 	&apos;MsgBox sStart
+ 	Statement.execute(sStart)
+End Sub
+
+Sub aDatensatzInTabelleEinlesen_V02(sTabellenname as String, aDatensatz())
+	Dim DatabaseContext As Object
+	Dim DataSource As Object
+	Dim Connection As Object
+	Dim InteractionHandler as Object
+	Dim Statement As Object
+	Dim iIDLetze,iIDLetzePlusEins As Integer
+	
+	DatabaseContext = createUnoService(&quot;com.sun.star.sdb.DatabaseContext&quot;)
+	DataSource = DatabaseContext.getByName(&quot;aufgdbphys&quot;)
+    If Not DataSource.IsPasswordRequired Then
+       Connection = DataSource.GetConnection(&quot;&quot;,&quot;&quot;)
+    Else
+       InteractionHandler = createUnoService(&quot;com.sun.star.sdb.InteractionHandler&quot;)
+       Connection = DataSource.ConnectWithCompletion(InteractionHandler)
+    End If
+    Statement = Connection.createStatement()
+	&apos;Primärschlüssel bestimmen:
+	Primaerschluessel = BestimmePrimaryKey(sTabellenname)
+	
+	&apos;ID des letzten Eintrages bestimmen
+	iIDLetze = cint(iIDLetzterEintrag(&quot;Aufgaben&quot;))
+	iIDLetzePlusEins = iIDLetze + 1
+ 	
+ 	sStart = &quot;INSERT INTO &quot;&quot;&quot; &amp; sTabellenname &amp; &quot;&quot;&quot; VALUES (&quot; &amp; iIDLetzePlusEins
+ 	&apos;for i=1 to 20
+ 	ubound(aDatensatz())
+ 	for i=1 to ubound(aDatensatz())
+ 		sStart = sStart &amp; &quot;, &quot; &amp; IIf(aDatensatz(i) = &quot;&quot;,&quot;Null&quot;,&quot;&apos;&quot; &amp; aDatensatz(i) &amp; &quot;&apos;&quot;)
+ 	next i
+ 	sStart = sStart &amp; &quot;)&quot;
+ 	&apos;MsgBox sStart
+ 	Statement.execute(sStart)
+End Sub
+
+Sub aDatensatzInTabelleEinlesenV03(sTabellenname as String, aDatensatz())
+	Dim DatabaseContext As Object
+	Dim DataSource As Object
+	Dim Connection As Object
+	Dim InteractionHandler as Object
+	Dim Statement As Object
+	Dim iIDLetze,iIDLetzePlusEins As Integer
+	
+	DatabaseContext = createUnoService(&quot;com.sun.star.sdb.DatabaseContext&quot;)
+	DataSource = DatabaseContext.getByName(&quot;aufgdbphys&quot;)
+    If Not DataSource.IsPasswordRequired Then
+       Connection = DataSource.GetConnection(&quot;&quot;,&quot;&quot;)
+    Else
+       InteractionHandler = createUnoService(&quot;com.sun.star.sdb.InteractionHandler&quot;)
+       Connection = DataSource.ConnectWithCompletion(InteractionHandler)
+    End If
+    Statement = Connection.createStatement()
+	&apos;Primärschlüssel bestimmen:
+	Primaerschluessel = BestimmePrimaryKey(sTabellenname)
+	
+	&apos;ID des letzten Eintrages bestimmen
+	iIDLetze = cint(iIDLetzterEintrag(&quot;Aufgaben&quot;))
+	iIDLetzePlusEins = iIDLetze + 1
+ 	
+ 	sStart = &quot;INSERT INTO &quot;&quot;&quot; &amp; sTabellenname &amp; &quot;&quot;&quot; VALUES (&quot; &amp; iIDLetzePlusEins
+ 	&apos;for i=1 to 20
+ 	ubound(aDatensatz())
+ 	for i=2 to ubound(aDatensatz())-1
+ 		sStart = sStart &amp; &quot;, &quot; &amp; IIf(aDatensatz(i) = &quot;&quot;,&quot;Null&quot;,&quot;&apos;&quot; &amp; aDatensatz(i) &amp; &quot;&apos;&quot;)
+ 	next i
+ 	sStart = sStart &amp; &quot;)&quot;
+ 	&apos;MsgBox sStart
+ 	Statement.execute(sStart)
+End Sub
+
+Sub aDatensatzInTabelleGespeicherteAuswahlenEinlesen(aDatensatz())
+	&apos;Letzte Änderung: 13.10.14, Erasmus Bieri
+
+	&apos;liest Array aDatensatz() in Tabelle sTabellenname ein 
+	&apos;OHNE ID!
+
+	Dim DatabaseContext As Object
+	Dim DataSource As Object
+	Dim Connection As Object
+	Dim InteractionHandler as Object
+	Dim Statement As Object
+	&apos;Dim iIDLetze,iIDLetzePlusEins As Integer
+	
+	DatabaseContext = createUnoService(&quot;com.sun.star.sdb.DatabaseContext&quot;)
+	DataSource = DatabaseContext.getByName(&quot;aufgdbphys&quot;)
+    If Not DataSource.IsPasswordRequired Then
+       Connection = DataSource.GetConnection(&quot;&quot;,&quot;&quot;)
+    Else
+       InteractionHandler = createUnoService(&quot;com.sun.star.sdb.InteractionHandler&quot;)
+       Connection = DataSource.ConnectWithCompletion(InteractionHandler)
+    End If
+    Statement = Connection.createStatement()
+ 	
+ 	sStart = &quot;INSERT INTO &quot;&quot;GespeicherteAuswahlen&quot;&quot; (&quot;&quot;NameAuswahl&quot;&quot;, &quot;&quot;AufgabenIDs&quot;&quot;, &quot; &amp;_
+ 	&quot;&quot;&quot;Position&quot;&quot;, &quot;&quot;Thema&quot;&quot;, &quot;&quot;Klasse&quot;&quot;, &quot;&quot;Datum&quot;&quot;, &quot;&quot;Lehrerkürzel&quot;&quot;, &quot;&quot;Serie&quot;&quot;) VALUES (&quot;
+ 	sStart = sStart &amp; IIf(aDatensatz(1) = &quot;&quot;,&quot;Null&quot;,&quot;&apos;&quot; &amp; aDatensatz(1) &amp; &quot;&apos;&quot;)
+ 	for i=2 to ubound(aDatensatz())
+  		sStart = sStart &amp; &quot;, &quot; &amp; IIf(aDatensatz(i) = &quot;&quot;,&quot;Null&quot;,&quot;&apos;&quot; &amp; aDatensatz(i) &amp; &quot;&apos;&quot;)
+ 	next i
+ 	sStart = sStart &amp; &quot;)&quot;
+ 	&apos;MsgBox sStart
+ 	Statement.executeUpdate(sStart)
+End Sub
+
+Function iIDLetzterEintrag(sTabellenname as String)
+	Dim DatabaseContext As Object
+	Dim DataSource As Object
+	Dim Connection As Object
+	Dim InteractionHandler as Object
+	Dim Statement As Object
+	DatabaseContext = createUnoService(&quot;com.sun.star.sdb.DatabaseContext&quot;)
+    DataSource = DatabaseContext.getByName(&quot;aufgdbphys&quot;)
+    If Not DataSource.IsPasswordRequired Then
+       Connection = DataSource.GetConnection(&quot;&quot;,&quot;&quot;)
+    Else
+       InteractionHandler = createUnoService(&quot;com.sun.star.sdb.InteractionHandler&quot;)
+       Connection = DataSource.ConnectWithCompletion(InteractionHandler)
+    End If
+    Statement = Connection.createStatement()
+	&apos;PrimaryKey(d.h. ID) bestimmen
+	iID = BestimmePrimaryKey(sTabellenname)
+	&apos;msgbox(iID)
+	&apos;Letzte ID Bestimmen
+	sSelect = &quot;SELECT &quot;&quot;&quot; &amp; iID &amp; &quot;&quot;&quot; FROM &quot;&quot;&quot; &amp; sTabellenname &amp; &quot;&quot;&quot; ORDER BY &quot;&quot;&quot; &amp; iID &amp; &quot;&quot;&quot; DESC LIMIT 1&quot;
+	&apos;sSelect = &quot;SELECT &quot;&quot;ID&quot;&quot; FROM &quot;&quot;testtabelle&quot;&quot; ORDER BY &quot;&quot;ID&quot;&quot; DESC LIMIT 1&quot;
+	&apos;msgbox(sSelect)
+	ResultSet = Statement.executeQuery(sSelect)
+	If Not IsNull(ResultSet) Then
+   		While ResultSet.next
+   			iIDLetzterEintrag = ResultSet.getString(1)
+			&apos;msgbox iIDLetzterEintrag
+		Wend
+	End If
+End Function
+
+Sub Test_Aufgaben_Loeschen
+	&apos;LoescheMarkierteAufgaben(&quot;Aufgaben&quot;)
+	LoescheVonBisID(&quot;Aufgaben&quot;)
+	iIDLetzterEintrag(&quot;Aufgaben&quot;)
+End Sub
+
+Sub ACHTUNG_Test
+	LoescheAlleAufgaben(&quot;GespeicherteAuswahlen&quot;)
+	iIDLetzterEintrag(&quot;GespeicherteAuswahlen&quot;)
+End Sub
+
+Sub tttttttest
+	sOrdnerpfad = &quot;/media/truecrypt1/synchro/schule/diverseProgramme/aufgabenDB_ImportTest/&quot; &amp; sfAufgabenverzeichnis &amp; &quot;/ImportExport/2012_4_27_13248&quot;
+	AufgabenAusVerzeichnisImportieren(sOrdnerpfad)
+End Sub
+
+Sub Test12345
+	aArray() = afGespeicherteAuswahlDateiInArrayEinlesen(&quot;/media/truecrypt1/synchro/schule/diverseProgramme/aufgabenDB_ImportTest/&quot; &amp; sfAufgabenverzeichnis &amp; &quot;/ImportExport/2012_3_9_151944/Auswahl.dat&quot;)
+	msgbox ubound(aArray,1)
+	msgbox ubound(aArray,2)
+	msgbox aArray(0,1)
+	for k = lbound(aArray,1) to 1&apos;ubound(aArray,1)-1
+		msgbox &quot;&gt;&quot; &amp; aArray(k,2) &amp; &quot;&lt;&quot;
+		a = split(aArray(k,2))
+		for m = lbound(a) to ubound(a)
+			msgbox a(m)
+		next
+	next
+	&apos;for i = 0 to 1
+	&apos;	for j = 0 to 8
+	&apos;		msgbox aArray(i,j)
+	&apos;	next
+	&apos;next
+	&apos;aDatensatzInTabelleEinlesenGespeicherteAuswahlen(&quot;GespeicherteAuswahlen&quot;,aArray())
+End Sub
+
+Sub aDatensatzInTabelleEinlesenGespeicherteAuswahlen(sTabellenname as String, aDatensatz())
+	Dim DatabaseContext As Object
+	Dim DataSource As Object
+	Dim Connection As Object
+	Dim InteractionHandler as Object
+	Dim Statement As Object
+	DatabaseContext = createUnoService(&quot;com.sun.star.sdb.DatabaseContext&quot;)
+	DataSource = DatabaseContext.getByName(&quot;aufgdbphys&quot;)
+    If Not DataSource.IsPasswordRequired Then
+       Connection = DataSource.GetConnection(&quot;&quot;,&quot;&quot;)
+    Else
+       InteractionHandler = createUnoService(&quot;com.sun.star.sdb.InteractionHandler&quot;)
+       Connection = DataSource.ConnectWithCompletion(InteractionHandler)
+    End If
+    Statement = Connection.createStatement()
+	&apos;Primärschlüssel bestimmen:
+	
+	iID = iIDLetzterEintrag(sTabellenname)
+	
+	for i = lbound(aDatensatz,1) to ubound(aDatensatz,1)-1
+ 		sInsert = &quot;INSERT INTO &quot;&quot;&quot; &amp; sTabellenname &amp; &quot;&quot;&quot; VALUES (&quot; &amp;_
+ 		cint(iID) + i + 1 &amp;_
+ 		&quot;, &quot; &amp; IIf(aDatensatz(i,1) = &quot;&quot;,&quot;Null&quot;,&quot;&apos;&quot; &amp; aDatensatz(i,1) &amp; &quot;&apos;&quot;) &amp;_
+ 		&quot;, &quot; &amp; IIf(aDatensatz(i,2) = &quot;&quot;,&quot;Null&quot;,&quot;&apos;&quot; &amp; aDatensatz(i,2) &amp; &quot;&apos;&quot;) &amp;_
+ 		&quot;, &quot; &amp; IIf(aDatensatz(i,3) = &quot;&quot;,&quot;Null&quot;,&quot;&apos;&quot; &amp; aDatensatz(i,3) &amp; &quot;&apos;&quot;) &amp;_
+ 		&quot;, &quot; &amp; IIf(aDatensatz(i,4) = &quot;&quot;,&quot;Null&quot;,&quot;&apos;&quot; &amp; aDatensatz(i,4) &amp; &quot;&apos;&quot;) &amp;_
+ 		&quot;, &quot; &amp; IIf(aDatensatz(i,5) = &quot;&quot;,&quot;Null&quot;,&quot;&apos;&quot; &amp; aDatensatz(i,5) &amp; &quot;&apos;&quot;) &amp;_
+ 		&quot;, &quot; &amp; IIf(aDatensatz(i,6) = &quot;&quot;,&quot;Null&quot;,&quot;&apos;&quot; &amp; aDatensatz(i,6) &amp; &quot;&apos;&quot;) &amp;_
+ 		&quot;, &quot; &amp; IIf(aDatensatz(i,7) = &quot;&quot;,&quot;Null&quot;,&quot;&apos;&quot; &amp; aDatensatz(i,7) &amp; &quot;&apos;&quot;) &amp;_
+ 		&quot;, &quot; &amp; IIf(aDatensatz(i,8) = &quot;&quot;,&quot;Null&quot;,&quot;&apos;&quot; &amp; aDatensatz(i,8) &amp; &quot;&apos;&quot;) &amp; &quot;)&quot;
+ 		&apos;MsgBox sInsert
+ 		Statement.execute(sInsert)
+ 	next
+End Sub
+
+Function afGespeicherteAuswahlDateiInArrayEinlesen(sPfadZuDatei As String)
+	&apos;msgbox sPfadZuDatei
+	&apos;&apos;Datei in String sInhalt einlesen
+	sInhalt = sDateiInStringEinlesenV2(sPfadZuDatei)
+	&apos;MsgBox sInhalt
+	&apos;String mit Trenner chr(13) in 1D-Array schreiben:
+	aArray1D = split(sInhalt,chr(13))
+	&apos;msgbox aArray1D(0)
+	&apos;Jeder Eintrag von aArray01 ebenfalls in einen Array umwandeln (Trenner: Leerzeichen (Voreinstellung))
+	&apos;2D-Array: aArray2D
+	Dim aArray2D(1,1) As String
+	&apos;msgbox &quot;i von &quot; &amp; lbound(aArray1D) &amp; &quot; bis &quot; &amp; ubound(aArray1D) - 1
+	for i = lbound(aArray1D) to ubound(aArray1D) - 1
+		sHilf01 = Right(aArray1D(i),len(aArray1D(i))-2)
+		sHilf02 = Left(sHilf01,len(sHilf01)-1)
+		&apos;msgbox &quot;A-&gt;&quot; &amp; sHilf02 &amp; &quot;&lt;-E&quot;
+		aHilfaArray = split(sHilf02,&quot;&quot;&quot; &quot;&quot;&quot;)
+		for j = lbound(aHilfaArray) to ubound(aHilfaArray)
+			ReDim Preserve aArray2D(i+1,j+1)
+			aArray2D(i,j) = cstr(aHilfaArray(j))
+			&apos;msgbox aHilfaArray(j)
+			&apos;msgbox &quot;i: &quot; &amp; i &amp; &quot;, j: &quot; &amp; j &amp; &quot;, &quot; &amp; aArray2D(i,j)
+		next
+	next
+	for i = lbound(aArray1D) to ubound(aArray1D) - 1
+		sHilf01 = Right(aArray1D(i),len(aArray1D(i))-2)
+		sHilf02 = Left(sHilf01,len(sHilf01)-1)
+		&apos;msgbox &quot;A-&gt;&quot; &amp; sHilf02 &amp; &quot;&lt;-E&quot;
+		aHilfaArray = split(sHilf02,&quot;&quot;&quot; &quot;&quot;&quot;)
+		for j = lbound(aHilfaArray) to ubound(aHilfaArray)
+			aArray2D(i,j) = cstr(aHilfaArray(j))
+			&apos;msgbox aHilfaArray(j)
+			&apos;msgbox &quot;i: &quot; &amp; i &amp; &quot;, j: &quot; &amp; j &amp; &quot;, &quot; &amp; aArray2D(i,j)
+		next
+	next
+	afGespeicherteAuswahlDateiInArrayEinlesen = aArray2D()
+End Function
+
+Sub LoescheVonBisID(sNameTabelle As String)
+	&apos;Markierte Aufgaben Zurücksetzen:
+	MarkierteAufgabenZuruecksetzen()
+	Dim DatabaseContext As Object
+	Dim DataSource As Object
+	Dim Connection As Object
+	Dim InteractionHandler as Object
+	Dim Statement As Object
+	DatabaseContext = createUnoService(&quot;com.sun.star.sdb.DatabaseContext&quot;)
+    DataSource = DatabaseContext.getByName(&quot;aufgdbphys&quot;)
+    If Not DataSource.IsPasswordRequired Then
+       Connection = DataSource.GetConnection(&quot;&quot;,&quot;&quot;)
+    Else
+       InteractionHandler = createUnoService(&quot;com.sun.star.sdb.InteractionHandler&quot;)
+       Connection = DataSource.ConnectWithCompletion(InteractionHandler)
+    End If
+    Statement = Connection.createStatement()
+	&apos;Input der IDs
+	Dim iIDStart
+	Dim iIDEnde
+	iIDStart = cint(InputBox(&quot;1. ID der zu löschenden Aufgaben&quot;,&quot;Aufgaben nach ID löschen:&quot;))
+	iIDEnde = cint(InputBox(&quot;Letzte ID der zu löschenden Aufgaben&quot;,&quot;Aufgaben nach ID löschen:&quot;))
+	if iIDEnde &lt; iIDStart then
+		MsgBox &quot;Keine die 2. Zahl ist kleiner als die 1. Zahl!&quot;
+		exit sub
+	else
+		iHilf = MsgBox(&quot;Sind Sie sicher, dass Sie die Aufgaben &quot; &amp; iIDStart &amp; &quot; bis &quot; &amp; iIDEnde &amp; &quot; löschen wollen ?&quot;,257)
+		&apos;MsgBox iHilf
+		if iHilf = 2 then
+			msgbox &quot;Löschen abgebrochen!&quot; 
+			exit sub
+		end if
+		&apos;Aufgaben auswählen:
+		for i = iIDStart to iIDEnde
+			sAbfrage = &quot;UPDATE &quot;&quot;Aufgaben&quot;&quot; SET &quot;&quot;Auswahl&quot;&quot; = &apos;True&apos; WHERE  (&quot;&quot;AufgID&quot;&quot; = &quot; &amp; i &amp; &quot;) &quot;
+			&apos;msgbox sAbfrage
+ 			Statement.executeUpdate(sAbfrage)
+ 		next
+ 		&apos;Verwenden von LoescheMarkierteAufgaben(sNameTabelle As String)
+		LoescheMarkierteAufgaben(sNameTabelle)
+	end if
+	Msgbox &quot;Sub LoescheVonBisID ausgeführt&quot;
+End Sub
+
+Sub LoescheMarkierteAufgaben(sNameTabelle As String)
+	&apos;StatusBar:
+	oStatus = ThisComponent.CurrentController.StatusIndicator
+		
+	sWorkingDirectory = sfWorkingDirectory(&quot;aufgdbphys.odb&quot;)
+   	sAufgabenVerzeichnis = sfAufgabenverzeichnis
+	Dim DatabaseContext As Object
+	Dim DataSource As Object
+	Dim Connection As Object
+	Dim InteractionHandler as Object
+	Dim Statement As Object
+	Dim sAuswahlenMitZuLoeschendenAufgaben As String
+	sAuswahlenMitZuLoeschendenAufgaben = &quot;&quot;
+	DatabaseContext = createUnoService(&quot;com.sun.star.sdb.DatabaseContext&quot;)
+    DataSource = DatabaseContext.getByName(&quot;aufgdbphys&quot;)
+    If Not DataSource.IsPasswordRequired Then
+       Connection = DataSource.GetConnection(&quot;&quot;,&quot;&quot;)
+    Else
+       InteractionHandler = createUnoService(&quot;com.sun.star.sdb.InteractionHandler&quot;)
+       Connection = DataSource.ConnectWithCompletion(InteractionHandler)
+    End If
+        
+    &apos;IF Aufgaben ausgewählt: ELSE: (das gibt es schon irgendwo...): Es wurden keine AUfgaben ausgewählt
+    &apos;Abfrage (wieviele Aufgaben wurden ausgewählt?) erstellen
+    Statement = Connection.createStatement()
+	ResultSet = Statement.executeQuery(&quot;SELECT `Aufgaben`.`AufgID` AS `AufgID`, `Aufgaben`.`Fachgebiet` AS `Fachgebiet`, `Aufgaben`.`Author` AS `Author`, `Aufgaben`.`Schwierigkeitsgrad` AS `Schwierigkeitsgrad`, `Aufgaben`.`LetzteAenderung` AS `LetzteAenderung`, `Aufgaben`.`AufgabenText` AS `AufgabenText`, `Aufgaben`.`LinkZuBild` AS `LinkZuBild`, `Aufgaben`.`MC2` AS `MC2`, `Aufgaben`.`MC3` AS `MC3`, `Aufgaben`.`MC4` AS `MC4`, `Aufgaben`.`MC5` AS `MC5`, `Aufgaben`.`MC6` AS `MC6`, `Aufgaben`.`Loesung` AS `Loesung`, `Aufgaben`.`Auswahl` AS `Auswahl`, `Aufgaben`.`Position` AS `Position`, `Aufgaben`.`LoesungJN` AS `LoesungJN`, `Aufgaben`.`IDVarianten` AS `IDVarianten`, `Aufgaben`.`Kurzloesung` AS `Kurzloesung`, `Aufgaben`.`KurzloesungJN` AS `KurzloesungJN` FROM `Aufgaben` `Aufgaben` WHERE ( `Aufgaben`.`Auswahl` = True )&quot;)
+   	iAusgewaehlteAufgaben = 0
+   	If Not IsNull(ResultSet) Then
+   		While ResultSet.next
+			iAusgewaehlteAufgaben = iAusgewaehlteAufgaben + 1
+		Wend
+	End If
+        
+    &apos;Die IDs bestimmen von den Aufgaben, welche ausgewählt sind:
+    if iAusgewaehlteAufgaben &gt; 0 then
+ 		MsgBox &quot;Es wurden &quot; &amp; iAusgewaehlteAufgaben &amp; &quot; Aufgabe(n) ausgewählt.&quot;
+ 		&apos;IDs ausgewählter Aufgaben bestimmen und in String speichern (Trennzeichen: Leerzeichen):
+		sStringMitAusgewaehltenAufgaben = AusgwAufgIDBestimmen()
+		&apos;msgbox &quot;-&gt;&quot; &amp; sStringMitAusgewaehltenAufgaben &amp; &quot;&lt;-&quot;
+		&apos;Array mit den Einträgen aus dem String &quot;sStringMitAusgewaehltenAufgaben&quot; erstellen:
+		aArrayMitAusgewaehltenAufgaben = Split(sStringMitAusgewaehltenAufgaben)
+		&apos;msgbox &quot;Erster Index: &quot; &amp; lbound(aArrayMitAusgewaehltenAufgaben) &amp; chr(13) &amp; &quot;Letzter Index: &quot; &amp; ubound(aArrayMitAusgewaehltenAufgaben) &amp; chr(13) &amp; &quot;Länge Array: &quot; &amp; ubound(aArrayMitAusgewaehltenAufgaben) - lbound(aArrayMitAusgewaehltenAufgaben) + 1
+		&apos;msgbox aArrayMitAusgewaehltenAufgaben(lbound(aArrayMitAusgewaehltenAufgaben))
+		&apos;msgbox aArrayMitAusgewaehltenAufgaben(ubound(aArrayMitAusgewaehltenAufgaben)-1)
+		&apos;&apos;Nach ID löschen:
+		sDelete = &quot;DELETE FROM &quot;&quot;&quot;&amp; sNameTabelle &amp; &quot;&quot;&quot; WHERE (&quot;&quot;Auswahl&quot;&quot; =  True)&quot; 
+ 		&apos;MsgBox sDelete
+ 		Statement2 = Connection.createStatement()
+ 		Statement2.execute(sDelete)
+		oSFA = createUnoService(&quot;com.sun.star.ucb.SimpleFileAccess&quot;)
+		
+		oStatus.start(&quot;Bitte warten ...&quot;, ubound(aArrayMitAusgewaehltenAufgaben)-1 )
+		for i = lbound(aArrayMitAusgewaehltenAufgaben) to ubound(aArrayMitAusgewaehltenAufgaben)-1
+			oStatus.text = &quot;Vorgang &quot; &amp; i &amp; &quot; von &quot; &amp; ubound(aArrayMitAusgewaehltenAufgaben) &amp; &quot; wird bearbeitet.&quot;
+			oStatus.value = i/(ubound(aArrayMitAusgewaehltenAufgaben))
+ 			if FileExists(sWorkingDirectory &amp; sAufgabenVerzeichnis &amp; &quot;/&quot; &amp; aArrayMitAusgewaehltenAufgaben(i)) then
+ 				&apos;MsgBox sWorkingDirectory &amp; sAufgabenVerzeichnis &amp; &quot;/&quot; &amp; aArrayMitAusgewaehltenAufgaben(i) &amp; &quot; existiert und wird gelöscht&quot;
+				oSFA.kill(sWorkingDirectory &amp; sAufgabenVerzeichnis &amp; &quot;/&quot; &amp; aArrayMitAusgewaehltenAufgaben(i))
+			end if
+			&apos;------
+			sAuswahlenMitZuLoeschendenAufgaben = sAuswahlenMitZuLoeschendenAufgaben &amp; Join(aFindeAuswahlMitAufgabe(cint(aArrayMitAusgewaehltenAufgaben(i))), &quot; &quot;) &amp; &quot; &quot;
+			&apos;for iii = 0 to ubound(aaa)-1
+			&apos;	&apos;msgbox(aaa(iii))
+			&apos;	LoescheAufgabeUeberID(cstr(aaa(iii)),&quot;GespeicherteAuswahlen&quot;)
+			&apos;next
+			&apos;----------
+		next
+		oStatus.end
+	else
+		MsgBox &quot;Es wurden &quot; &amp; iAusgewaehlteAufgaben &amp; &quot; Aufgabe(n) ausgewählt.&quot;
+		Exit Sub
+	end if	
+	msgbox sAuswahlenMitZuLoeschendenAufgaben
+	&apos;Array mit Auswahlen erstellen:
+	aAuswahlenMitZuLoeschendenAufgaben = Split(sAuswahlenMitZuLoeschendenAufgaben)
+	ShellSort(aAuswahlenMitZuLoeschendenAufgaben())
+	msgbox Join(aAuswahlenMitZuLoeschendenAufgaben)
+	&apos;Zutesten----------------------
+	for i = 0 to ubound(aAuswahlenMitZuLoeschendenAufgaben)
+		&apos;msgbox &quot;aaa&quot; &amp; cstr(aAuswahlenMitZuLoeschendenAufgaben(i))
+		if cstr(aAuswahlenMitZuLoeschendenAufgaben(i)) = &quot;&quot; then
+			&apos;msgbox &quot;nüt&quot;
+		else
+			&apos;msgbox &quot;löschen &quot; &amp; cstr(aAuswahlenMitZuLoeschendenAufgaben(i))
+			LoescheAufgabeUeberID(cstr(aAuswahlenMitZuLoeschendenAufgaben(i)),&quot;GespeicherteAuswahlen&quot;)
+		end if
+	next
+	&apos;Ende Test
+	Msgbox &quot;Sub LoescheMarkierteAufgaben ausgeführt&quot;
+End Sub
+
+Sub TestaFindeAuswahlMitAufgabe
+	sAuswahlenMitZuLoeschendenAufgaben = sAuswahlenMitZuLoeschendenAufgaben &amp; Join(aFindeAuswahlMitAufgabe(14), &quot; &quot;) &amp; &quot; &quot;
+	msgbox sAuswahlenMitZuLoeschendenAufgaben
+End Sub
+
+Sub AuswahlReiniger
+	&apos;StatusBar:
+	oStatus = ThisComponent.CurrentController.StatusIndicator
+	REM Diese Sub löscht alle Auswahlen mit Aufgaben mit ID 00
+	aaa = aFindeAuswahlMitAufgabe(00)
+	oStatus.start(&quot;Bitte warten ...&quot;, ubound(aaa)-1 )
+	for i = 0 to ubound(aaa)-1
+		oStatus.text = &quot;Vorgang &quot; &amp; i &amp; &quot; von &quot; &amp; ubound(aaa) &amp; &quot; wird bearbeitet.&quot;
+		oStatus.value = i/(ubound(aaa))
+		&apos;msgbox(aaa(i))
+		LoescheAufgabeUeberID(cstr(aaa(i)),&quot;GespeicherteAuswahlen&quot;)
+	next
+	oStatus.end
+	iIDLetzterEintrag(&quot;GespeicherteAuswahlen&quot;)
+End Sub
+
+Function aFindeAuswahlMitAufgabe(sAufgabenID)
+	iAufgabenID = cint(sAufgabenID)
+	Dim aHilfsArray(1,2) As String
+	Dim DatabaseContext As Object
+	Dim DataSource As Object
+	Dim Connection As Object
+	Dim InteractionHandler as Object
+	Dim Statement As Object
+	DatabaseContext = createUnoService(&quot;com.sun.star.sdb.DatabaseContext&quot;)
+    DataSource = DatabaseContext.getByName(&quot;aufgdbphys&quot;)
+    If Not DataSource.IsPasswordRequired Then
+       Connection = DataSource.GetConnection(&quot;&quot;,&quot;&quot;)
+    Else
+       InteractionHandler = createUnoService(&quot;com.sun.star.sdb.InteractionHandler&quot;)
+       Connection = DataSource.ConnectWithCompletion(InteractionHandler)
+    End If
+    Statement = Connection.createStatement()
+	ResultSet = Statement.executeQuery(&quot;SELECT `GespeicherteAuswahlen`.`IDAuswahl` AS `IDAuswahl`, `GespeicherteAuswahlen`.`AufgabenIDs` AS `AufgabenIDs` FROM `GespeicherteAuswahlen` `GespeicherteAuswahlen`&quot;)
+	&apos;2. Resultset ohne geänderte ID in Datei speichern
+   	If Not IsNull(ResultSet) Then
+   		j = 0
+   		While ResultSet.next
+   			j = j + 1
+			for i = 1 to 2
+				redim preserve aHilfsArray(j,2)
+				aHilfsArray(j-1,i-1) = ResultSet.getString(i)
+			next
+		Wend
+	End If
+	obereGrenze = ubound(aHilfsArray(),1)-1
+	&apos;msgbox aHilfsArray(obereGrenze-1,0)
+	hilfsstring = &quot;&quot;
+	for k = 0 to obereGrenze
+		saHilf = Split(aHilfsArray(k,1)
+		for l = 0 to ubound(saHilf)
+			if cint(saHilf(l)) = iAufgabenID then
+				&apos;msgbox &quot;Die Prüfung mit ID &quot; &amp; aHilfsArray(k,0) &amp; &quot; enthält eine Aufgabe mit ID &quot; &amp; iAufgabenID &amp; &quot;.&quot;
+				hilfsstring = hilfsstring &amp; cstr(aHilfsArray(k,0)) &amp; &quot; &quot;
+			end if
+		next
+	next
+	aFindeAuswahlMitAufgabe = Split(hilfsstring)
+End Function
+
+Sub LoescheAufgabeUeberID(sID as String,sNameTabelle As String)
+	sID = CStr(sID)
+	&apos;MsgBox sID
+	
+	&apos;Bestimme PrimaryKey:
+	sPrimaryKey = BestimmePrimaryKey(sNameTabelle)
+	
+	Dim DatabaseContext As Object
+	Dim DataSource As Object
+	Dim Connection As Object
+	Dim InteractionHandler as Object
+	Dim Statement As Object
+	DatabaseContext = createUnoService(&quot;com.sun.star.sdb.DatabaseContext&quot;)
+    DataSource = DatabaseContext.getByName(&quot;aufgdbphys&quot;)
+    If Not DataSource.IsPasswordRequired Then
+       Connection = DataSource.GetConnection(&quot;&quot;,&quot;&quot;)
+    Else
+       InteractionHandler = createUnoService(&quot;com.sun.star.sdb.InteractionHandler&quot;)
+       Connection = DataSource.ConnectWithCompletion(InteractionHandler)
+    End If
+    Statement = Connection.createStatement()
+	&apos;&apos;Nach ID löschen:
+	sDelete = &quot;DELETE FROM &quot;&quot;&quot; &amp; sNameTabelle &amp; &quot;&quot;&quot; WHERE &quot;&quot;&quot; &amp; sPrimaryKey &amp; &quot;&quot;&quot; = &quot; &amp; sID
+ 	&apos;MsgBox sDelete
+ 	Statement.execute(sDelete)
+End Sub
+
+Sub DatenbankInitialisieren
+	&apos;ACHTUNG!!!!! Nur mit Vorsicht zu verwenden!
+	LoescheAlleAufgaben(&quot;Aufgaben&quot;)
+	LoescheAlleAufgaben(&quot;GespeicherteAuswahlen&quot;)
+	MsgBox &quot;Nun alle entsprechenden Ordner von Hand löschen!&quot;
+End Sub
+
+Sub DatenbankInitialisierenAufgaben
+	&apos;Letzte Änderung: 12.8.15, Erasmus Bieri
+
+	&apos;Dieser Makro setzt die Tabelle &quot;Aufgaben&quot; zurück
+	&apos;die entsprechenden Ordner müssen von Hand gelöscht werden
+
+	&apos;ACHTUNG!!!!! Nur mit Vorsicht zu verwenden!
+	&apos;Rückfrage
+	rueckgabe = MsgBox(&quot;Möchten Sie wirklich ALLE Aufgaben löschen? Dieser Vorgang kann NICHT mehr rückgängig gemacht werden!!&quot;,1)
+	if rueckgabe = 2 then
+		MsgBox &quot;Abbruch!&quot;
+		exit sub
+	end if
+	rueckgabe = MsgBox(&quot;NOCHMALS (Rot ist die Farbe der GEFAHR): Möchten Sie wirklich ALLE Aufgaben löschen? Dieser Vorgang kann NICHT mehr rückgängig gemacht werden!!&quot;,1)
+	if rueckgabe = 2 then
+		MsgBox &quot;Abbruch!&quot;
+		exit sub
+	end if
+	&apos;Nun noch Datenbank zurücksetzen
+	LoescheAlleAufgaben(&quot;Aufgaben&quot;)
+	MsgBox &quot;Alle nummerierten Aufgabenordner im Ordner aufgdbphys_dateien von Hand löschen! (NICHT aber die Ordner Einstellungen, headerfooter und ImportExport!!!)&quot;
+End Sub
+
+Sub LoescheAlleAufgaben(sNameTabelle As String)
+	&apos;Bestimme PrimaryKey:
+	sPrimaryKey = BestimmePrimaryKey(sNameTabelle)
+	
+	Dim DatabaseContext As Object
+	Dim DataSource As Object
+	Dim Connection As Object
+	Dim InteractionHandler as Object
+	Dim Statement As Object
+	DatabaseContext = createUnoService(&quot;com.sun.star.sdb.DatabaseContext&quot;)
+    DataSource = DatabaseContext.getByName(&quot;aufgdbphys&quot;)
+    If Not DataSource.IsPasswordRequired Then
+       Connection = DataSource.GetConnection(&quot;&quot;,&quot;&quot;)
+    Else
+       InteractionHandler = createUnoService(&quot;com.sun.star.sdb.InteractionHandler&quot;)
+       Connection = DataSource.ConnectWithCompletion(InteractionHandler)
+    End If
+    Statement = Connection.createStatement()
+	&apos;ALLE Aufgaben löschen:
+	sDelete = &quot;DELETE FROM &quot;&quot;&quot; &amp; sNameTabelle &amp; &quot;&quot;&quot;&quot;
+	Statement.execute(sDelete)
+ 	MsgBox sDelete
+ 	Statement.execute(sDelete)
+ 	
+ 	sIDaufEinszuruecksetzen = &quot;ALTER TABLE &quot;&quot;&quot; &amp; sNameTabelle &amp; &quot;&quot;&quot; ALTER COLUMN &quot;&quot;&quot; &amp; sPrimaryKey &amp; &quot;&quot;&quot; RESTART WITH 1 &quot;
+ 	MsgBox sIDaufEinszuruecksetzen
+ 	Statement.execute(sIDaufEinszuruecksetzen)
+End Sub
+
+Function sImportExportVerzeichnisErstellen
+	sWorkingDirectory = sfWorkingDirectory(&quot;aufgdbphys.odb&quot;)
+   	sAufgabenVerzeichnis = sfAufgabenverzeichnis
+   	sImportExportVerzeichnis = sAufgabenVerzeichnis &amp; &quot;/ImportExport&quot;
+   	
+	sVerzeichnis = sWorkingDirectory &amp; sAufgabenVerzeichnis &amp; &quot;/&quot;
+	&apos;Testen, ob Verzeichnis (sVerzeichnis) schon vorhanden
+	if FileExists(sVerzeichnis) then
+		&apos;MsgBox &quot;Verzechnis &quot; &amp; sVerzeichnis &amp; &quot; existiert&quot;
+		else
+		VerzeichnisErstellen(sVerzeichnis)
+		&apos;MsgBox &quot;Verzeichnis &quot; &amp; sVerzeichnis &amp; &quot; wurde NEU erstellt&quot;
+	end if
+	
+	sVerzeichnis = sWorkingDirectory &amp; sImportExportVerzeichnis &amp; &quot;/&quot;
+	&apos;Testen, ob Verzeichnis (sVerzeichnis) schon vorhanden
+	if FileExists(sVerzeichnis) then
+		&apos;MsgBox &quot;Verzechnis &quot; &amp; sVerzeichnis &amp; &quot; existiert&quot;
+		else
+		VerzeichnisErstellen(sVerzeichnis)
+		&apos;MsgBox &quot;Verzeichnis &quot; &amp; sVerzeichnis &amp; &quot; wurde NEU erstellt&quot;
+	end if	
+	
+	&apos;Neues datum- und zeitabhängiges Verzeichnis erstellen
+	dDatum = Year(now()) &amp; &quot;_&quot; &amp; month(now) &amp; &quot;_&quot; &amp;  day(now) &amp; &quot;_&quot; &amp; hour(now) &amp; minute(now) &amp; second(now)
+	&apos;MsgBox dDatum
+	
+	sVerzeichnis = sWorkingDirectory &amp; sImportExportVerzeichnis &amp; &quot;/&quot; &amp; dDatum &amp; &quot;/&quot;
+	&apos;Testen, ob Verzeichnis (sVerzeichnis) schon vorhanden
+	if FileExists(sVerzeichnis) then
+		MsgBox &quot;Verzeichnis &quot; &amp; sVerzeichnis &amp; &quot; existiert&quot;
+		else
+		VerzeichnisErstellen(sVerzeichnis)
+		MsgBox &quot;Verzeichnis &quot; &amp; sVerzeichnis &amp; &quot; wurde NEU erstellt&quot;
+	end if	
+	
+	sImportExportVerzeichnisErstellen = sVerzeichnis
+	&apos;MsgBox sImportExportVerzeichnisErstellen
+End Function
+
+Sub DatenExportieren
+	&apos;Ordner erstellen
+	sExportOrdner = sImportExportVerzeichnisErstellen()
+	&apos;MsgBox &quot;Der Exportordner ist &quot; &amp; sExportOrdner
+	sWorkingDirectory = sfWorkingDirectory(&quot;aufgdbphys.odb&quot;)
+	sAufgabenVerzeichnis = sfAufgabenverzeichnis
+	
+	&apos;Umrechungstabelle in sExportOrdner erstellen
+	sUmrechungstabelle = &quot;IDNeuAlt.dat&quot;
+	sAuswahl = &quot;Auswahl.dat&quot;
+	oSFA = createUnoService(&quot;com.sun.star.ucb.SimpleFileAccess&quot;)
+	if FileExists(sExportOrdner &amp; sUmrechungstabelle) then
+		MsgBox sExportOrdner &amp; sUmrechungstabelle &amp; &quot; existiert und wird gelöscht&quot;
+		oSFA.kill(sExportOrdner &amp; sUmrechungstabelle)
+	end if
+	oOutputStream = createUnoService(&quot;com.sun.star.io.TextOutputStream&quot;)
+	oDatei = oSFA.OpenFileReadWrite(sExportOrdner &amp; sUmrechungstabelle)
+	oOutputStream.SetOutputStream(oDatei.getOutputStream)
+	Dim DatabaseContext, DataSource, Connection, InteractionHandler, Statement, ResultSet As Object
+	Dim iZaehler01 As Integer	
+	&apos;DatenbankKontext erstellen
+    DatabaseContext = createUnoService(&quot;com.sun.star.sdb.DatabaseContext&quot;)
+    &apos;Datenbank kontaktieren
+    DataSource = DatabaseContext.getByName(&quot;aufgdbphys&quot;)
+    &apos;Testen, ob Passwort benötigt wird
+    If Not DataSource.IsPasswordRequired Then
+    	Connection = DataSource.GetConnection(&quot;&quot;,&quot;&quot;)
+    Else	
+    	InteractionHandler = createUnoService(&quot;com.sun.star.sdb.InteractionHandler&quot;)
+    	Connection = DataSource.ConnectWithCompletion(InteractionHandler)
+    End If
+    &apos;Abfrage erstellen
+    Statement = Connection.createStatement()
+	ResultSet = Statement.executeQuery(&quot;SELECT * FROM `Aufgaben` WHERE ( `Aufgaben`.`Auswahl` = True )&quot;)
+   	iZaehler01 = 0
+   	If Not IsNull(ResultSet) Then
+   		While ResultSet.next
+			iZaehler01 = iZaehler01 + 1
+			sID = ResultSet.getString(1)
+			sPrint = iZaehler01 &amp; &quot; &quot; &amp; sID &amp; chr(13)
+			&apos;MsgBox sPrint
+			&apos;Print #iAufgabenDateiNummer, sPrint
+			oOutputStream.writeString(sPrint)
+		Wend
+		&apos;Close #iAufgabenDateiNummer
+		MsgBox &quot;Es wurden &quot; &amp; iZaehler01 &amp; &quot; Aufgaben ausgewählt und ihre ID in der Umrechungstabelle gespeichert.&quot;
+	Else
+		MsgBox &quot;Es wurden keine Aufgaben ausgewählt.&quot;
+   		Exit Sub
+	End If
+	oOutputStream.closeOutput()
+	&apos;Umrechnungstabelle erstellt
+	
+	&apos;Auch wenn man es evtl. schneller Programmieren könnte, der Klarheit wegen:
+	&apos;Umrechnungstabelle wieder in STring einlesen
+	&apos;oSFA weiter oben schon erstellt
+	sPfadZuUmrechungstabelle = sExportOrdner &amp; sUmrechungstabelle
+	if oSFA.exists(sPfadZuUmrechungstabelle) then
+		oInputStream = createUnoService(&quot;com.sun.star.io.TextInputStream&quot;)
+		oDatei = oSFA.OpenFileReadWrite(sPfadZuUmrechungstabelle)
+		oInputStream.SetInputStream(oDatei.getInputStream)
+		&apos;Zeilen einlesen
+		do while not oInputStream.isEOF
+			&apos;Zeile einlesen, das Zeilenende wird nicht mit übertragen!
+			sInhaltUmrechungstabelle = sInhaltUmrechungstabelle &amp; oInputStream.ReadLine() &amp; chr(13)
+		loop
+		oInputStream.closeInput()
+		&apos;msgbox sInhaltUmrechungstabelle
+	else
+		sFehlertxt = &quot;Datei: &quot;&quot;&quot; &amp; ConvertFromUrl(sInhaltUmrechungstabelle) &amp; &quot;&quot;&quot; existiert nicht!&quot;
+		msgbox (sFehlertxt, 16, &quot;Fehler!&quot;)
+	end if	
+	&apos;Umrechnungstabelle in STring sInhaltUmrechungstabelle eingelesen
+	
+	&apos;String sInhaltUmrechungstabelle in array sArrayInhaltUmrechungstabelle umwandeln:
+	sArrayInhaltUmrechungstabelle = afStringInArray(sInhaltUmrechungstabelle)
+	&apos;msgbox ubound(sArrayInhaltUmrechungstabelle)
+	&apos;msgbox sArrayInhaltUmrechungstabelle(6,2)
+	
+	&apos;Mithilfe array entsprechende IDs ändern.
+	
+	&apos;Aufgaben in einzelnen Dateien speichern, für jeden Datenbankeintrag eine neue Zeile
+	ResultSet2 = Statement.executeQuery(&quot;SELECT * FROM `Aufgaben` WHERE ( `Aufgaben`.`Auswahl` = True )&quot;)
+   	iZaehler01 = 0
+   	If Not IsNull(ResultSet2) Then
+   		While ResultSet2.next
+			iZaehler01 = iZaehler01 + 1
+			sPrint = &quot;-----&quot;
+			for i = 1 to ResultSet2.columns.count
+				sDBEintrag = ResultSet2.getString(i)
+				if i = 1 then
+					iUebereinstimmungJN = 0
+					&apos;msgbox &quot;ubound: &quot; &amp; ubound(sArrayInhaltUmrechungstabelle(),1)
+					&apos;msgbox sArrayInhaltUmrechungstabelle(10,1)
+					for j = 0 to ubound(sArrayInhaltUmrechungstabelle(),1)
+						if sDBEintrag = sArrayInhaltUmrechungstabelle(j,1) then
+							sDBEintrag = sArrayInhaltUmrechungstabelle(j,0)
+							iUebereinstimmungJN = 1
+							sURLAlt = sWorkingDirectory &amp; sAufgabenVerzeichnis &amp; &quot;/&quot; &amp; sArrayInhaltUmrechungstabelle(j,1)
+							sURLNeu = sExportOrdner &amp; sArrayInhaltUmrechungstabelle(j,0)
+							KopierenUndUmbenennenOrdner(sURLAlt,sURLNeu)
+							exit for
+							&apos;msgbox sDBEintrag
+						else
+							&apos;msgbox &quot;keine übereinstimmung&quot;
+						end if
+					next
+				end if
+				if i = 17 then
+					iUebereinstimmungJN = 0
+					for j = 0 to ubound(sArrayInhaltUmrechungstabelle(),1)
+						if sDBEintrag = sArrayInhaltUmrechungstabelle(j,1) then
+							sDBEintrag = sArrayInhaltUmrechungstabelle(j,0)
+							&apos;msgbox &quot;j: &quot; &amp; j &amp; &quot; &quot; &amp; sDBEintrag
+							iUebereinstimmungJN = 1
+							exit for
+						else
+							&apos;msgbox &quot;j: &quot; &amp; j &amp; &quot; keine übereinstimmung:&quot; &amp; sDBEintrag
+						end if
+					next
+					if iUebereinstimmungJN = 0 then
+						sDBEintrag = &quot;&quot;
+					end if
+				end if
+				if i = 1 then
+					oDatei = oSFA.OpenFileReadWrite(sExportOrdner &amp; iZaehler01 &amp; &quot;.dat&quot;)
+					oOutputStream.SetOutputStream(oDatei.getOutputStream)
+				end if	
+				sPrint = sPrint &amp; chr(13) &amp; sDBEintrag &amp; chr(13) &amp; &quot;-----&quot;
+			next i	
+			&apos;MsgBox sPrint
+			oOutputStream.writeString(sPrint)
+			oOutputStream.closeOutput()
+		Wend
+		&apos;MsgBox &quot;Es wurden &quot; &amp; iZaehler01 &amp; &quot; Aufgaben ausgewählt und ihre ID in der Umrechungstabelle gespeichert.&quot;
+	Else
+		&apos;MsgBox &quot;Es wurden keine Aufgaben ausgewählt.&quot;
+   		Exit Sub
+	End If
+	
+	&apos;Exportordner komprimieren:
+	&apos;s = convertfromurl(sWorkingDirectory &amp; sAufgabenVerzeichnis &amp; &quot;/ImportExport&quot; &amp; &quot;/&quot; &amp; sfLetztesUnterverzeichnis(sExportOrdner))
+	&apos;msgbox &quot;zip -r &quot; &amp; s &amp; &quot;.zip &quot; &amp; s 
+	&apos;shell(&quot;zip -r &quot; &amp; s &amp; &quot;.zip &quot; &amp; s)
+	
+	MsgBox &quot;Die ausgewählten Aufgaben wurden gespeichert im Verzeichnis &quot; &amp; chr(13) &amp; chr(13) &amp; _
+	convertfromurl(sExportOrdner)
+	
+&apos;	&apos;Auswahlen speichern (mit geänderten ID&apos;s)
+&apos;	&apos;1. Resulset
+&apos;	oOutputStream = createUnoService(&quot;com.sun.star.io.TextOutputStream&quot;)
+&apos;	oDatei = oSFA.OpenFileReadWrite(sExportOrdner &amp; sAuswahl)
+&apos;	oOutputStream.SetOutputStream(oDatei.getOutputStream)
+&apos;
+&apos;	ResultSet3 = Statement.executeQuery(&quot;SELECT `GespeicherteAuswahlen`.`IDAuswahl` AS `IDAuswahl`, `GespeicherteAuswahlen`.`NameAuswahl` AS `NameAuswahl`, `GespeicherteAuswahlen`.`AufgabenIDs` AS `AufgabenIDs`, `GespeicherteAuswahlen`.`Position` AS `Position`, `GespeicherteAuswahlen`.`Thema` AS `Thema`, `GespeicherteAuswahlen`.`Klasse` AS `Klasse`, `GespeicherteAuswahlen`.`Datum` AS `Datum`, `GespeicherteAuswahlen`.`Lehrerkürzel` AS `Lehrerkürzel`, `GespeicherteAuswahlen`.`Serie` AS `Serie` FROM `GespeicherteAuswahlen` `GespeicherteAuswahlen`&quot;)
+&apos;	&apos;2. Resultset ohne geänderte ID in Datei speichern
+  &apos; 	If Not IsNull(ResultSet3) Then
+ &apos;  		While ResultSet3.next
+&apos;			sPrint = &quot;&quot;
+&apos;			for i = 1 to 9
+&apos;				sEintragAuswahl = ResultSet3.getString(i)
+&apos;				if i = 3 then
+&apos;					&apos;msgbox &quot;i: &quot;&amp; i
+&apos;					&apos;leerzeichen zu beginn entfernen:
+&apos;					do while Left(sEintragAuswahl,1) = &quot; &quot;
+&apos;						sEintragAuswahl = Mid(sEintragAuswahl,2,len(sEintragAuswahl)-1)
+&apos;					loop
+&apos;					&apos;leerzeichen am ende entfernen:
+&apos;					do while Right(sEintragAuswahl,1) = &quot; &quot;
+&apos;						sEintragAuswahl = Mid(sEintragAuswahl,1,len(sEintragAuswahl)-1)
+&apos;					loop
+&apos;					&apos;msgbox &quot;ohne leerschlag: &quot; &amp; sEintragAuswahl &amp; &quot;-&quot;
+&apos;					aArrayEintragAuswahl =Split(sEintragAuswahl,&quot; &quot;)
+&apos;					sEintragAuswahl = &quot;&quot;
+&apos;					for j = 0 to ubound(aArrayEintragAuswahl)
+&apos;						&apos;msgbox &quot;j: &quot;&amp; j
+&apos;						iUebereinstimmungJN = 0
+&apos;						for k = 0 to ubound(sArrayInhaltUmrechungstabelle(),1)
+&apos;							&apos;msgbox &quot;k1: &quot; &amp; k &amp; &quot; &quot; &amp; aArrayEintragAuswahl(j)
+&apos;							if aArrayEintragAuswahl(j) = sArrayInhaltUmrechungstabelle(k,1) then
+&apos;								aArrayEintragAuswahl(j) = sArrayInhaltUmrechungstabelle(k,0)
+&apos;								&apos;msgbox &quot;k2: &quot; &amp; k &amp; &quot; &quot; &amp; aArrayEintragAuswahl(j)
+&apos;								iUebereinstimmungJN = 1
+&apos;								exit for
+&apos;							else
+&apos;							end if
+&apos;							
+&apos;						next
+&apos;						if iUebereinstimmungJN = 0 then
+&apos;							aArrayEintragAuswahl(j) = &quot;00&quot;
+&apos;						end if
+&apos;						&apos;msgbox &quot;iUebereinstimmungJN: &quot; &amp; iUebereinstimmungJN
+&apos;						&apos;msgbox &quot;sEintragAuswahlA: &quot; &amp; sEintragAuswahl
+&apos;						sEintragAuswahl = sEintragAuswahl &amp; aArrayEintragAuswahl(j) &amp; &quot; &quot;
+&apos;						&apos;msgbox &quot;sEintragAuswahlB: &quot; &amp; sEintragAuswahl
+&apos;						&apos;leerzeichen am ende entfernen:
+&apos;						next
+&apos;				end if
+&apos;				&apos;msgbox &quot;sEintragAuswahlC: &quot; &amp; sEintragAuswahl
+&apos;				do while Right(sEintragAuswahl,1) = &quot; &quot;
+&apos;					sEintragAuswahl = Mid(sEintragAuswahl,1,len(sEintragAuswahl)-1)
+&apos;				loop
+&apos;				sPrint = sPrint &amp; &quot; &quot; &amp; &quot;&quot;&quot;&quot; &amp; sEintragAuswahl &amp; &quot;&quot;&quot;&quot;
+&apos;			next
+&apos;			sPrint = sPrint &amp; chr(13)
+&apos;			&apos;msgbox &quot;sPrint: &quot; &amp; sPrint
+&apos;			&apos;MsgBox sPrint
+&apos;			oOutputStream.writeString(sPrint)
+&apos;			&apos;Print #iAufgabenDateiNummer, sPrint
+&apos;		Wend
+&apos;	End If
+&apos;	oOutputStream.closeOutput()
+&apos;	&apos;MsgBox &quot;Die ausgewählten Aufgaben wurden gespeichert.&quot;
+	
+	MsgBox &quot;Die Exportfunktion ist beendet.&quot; &amp; chr(13) &amp; &quot;Sie finden die Daten im Verzeichnis &quot; &amp; chr(13) &amp; chr(13) &amp; _
+	convertfromurl(sExportOrdner) &amp; &quot;.&quot; &apos;&amp; chr(13) &apos;&amp; chr(13) &amp; _
+	&apos;&quot;bzw. in der gleichnamigen Archivdatei.&quot; 
+End Sub
+
+Sub DatenExportieren02
+	&apos;Letzte Änderung: 29.8.14, Erasmus Bieri
+
+	&apos;Dieser Makro exportiert die augewählten Aufgaben mitsamt aller Bilddateien
+	&apos;in Textdateien im Ordner sfAufgabenverzeichnis &amp; &quot;/ImportExport&quot;
+	
+	&apos;Ordner erstellen
+	sExportOrdner = sImportExportVerzeichnisErstellen()
+	&apos;MsgBox &quot;Der Exportordner ist &quot; &amp; sExportOrdner
+	sWorkingDirectory = sfWorkingDirectory(&quot;aufgdbphys.odb&quot;)
+	sAufgabenVerzeichnis = sfAufgabenverzeichnis
+	
+	oSFA = createUnoService(&quot;com.sun.star.ucb.SimpleFileAccess&quot;)
+	oOutputStream = createUnoService(&quot;com.sun.star.io.TextOutputStream&quot;)
+
+	Dim DatabaseContext, DataSource, Connection, InteractionHandler, Statement, ResultSet As Object
+	Dim iZaehler01 As Integer	
+	
+	&apos;DatenbankKontext erstellen
+    DatabaseContext = createUnoService(&quot;com.sun.star.sdb.DatabaseContext&quot;)
+    &apos;Datenbank kontaktieren
+    DataSource = DatabaseContext.getByName(&quot;aufgdbphys&quot;)
+    &apos;Testen, ob Passwort benötigt wird
+    If Not DataSource.IsPasswordRequired Then
+    	Connection = DataSource.GetConnection(&quot;&quot;,&quot;&quot;)
+    Else	
+    	InteractionHandler = createUnoService(&quot;com.sun.star.sdb.InteractionHandler&quot;)
+    	Connection = DataSource.ConnectWithCompletion(InteractionHandler)
+    End If
+    &apos;Abfrage erstellen
+    Statement = Connection.createStatement()
+	ResultSet = Statement.executeQuery(&quot;SELECT * FROM `Aufgaben` WHERE ( `Aufgaben`.`Auswahl` = True )&quot;)
+	
+	&apos;Aufgaben in einzelnen Dateien speichern, für jeden Datenbankeintrag eine neue Zeile
+	iZaehler01 = 0
+   	If Not IsNull(ResultSet) Then
+   		While ResultSet.next
+			iZaehler01 = iZaehler01 + 1
+			sPrint = &quot;-----&quot;
+			for i = 1 to ResultSet.columns.count
+				if i = 1 then
+					oDatei = oSFA.OpenFileReadWrite(sExportOrdner &amp; iZaehler01 &amp; &quot;.dat&quot;)
+					oOutputStream.SetOutputStream(oDatei.getOutputStream)
+					sURLAlt = sWorkingDirectory &amp; sAufgabenVerzeichnis &amp; &quot;/&quot; &amp; ResultSet.getString(i)
+					sURLNeu = sExportOrdner &amp; iZaehler01
+					&apos;MsgBox &quot;alt: &quot; &amp; sURLAlt &amp; chr(13) &amp; &quot;neu: &quot; &amp; sURLNeu
+					KopierenUndUmbenennenOrdner(sURLAlt,sURLNeu)
+				end if	
+				sPrint = sPrint &amp; chr(13) &amp; ResultSet.getString(i) &amp; chr(13) &amp; &quot;-----&quot;
+			next i	
+			&apos;MsgBox sPrint
+			oOutputStream.writeString(sPrint)
+			oOutputStream.closeOutput()
+		Wend
+		&apos;MsgBox &quot;Es wurden &quot; &amp; iZaehler01 &amp; &quot; Aufgaben ausgewählt und ihre ID in der Umrechungstabelle gespeichert.&quot;
+	Else
+		MsgBox &quot;Es wurden keine Aufgaben ausgewählt.&quot;
+   		Exit Sub
+	End If
+	
+	MsgBox &quot;Die Exportfunktion ist beendet.&quot; &amp; chr(13) &amp; &quot;Sie finden die Daten im Verzeichnis &quot; &amp; chr(13) &amp; chr(13) &amp; _
+	convertfromurl(sExportOrdner) &amp; &quot;.&quot; &apos;&amp; chr(13) &apos;&amp; chr(13) &amp; _
+	&apos;&quot;bzw. in der gleichnamigen Archivdatei.&quot; 
+End Sub
+
+Sub DatenExportieren02NurAufgabenText
+	&apos;Letzte Änderung: 27.10.16, Erasmus Bieri
+
+	&apos;Dieser Makro exportiert nur die Aufgabentexte der augewählten Aufgaben
+	&apos;in Textdateien im Ordner sfAufgabenverzeichnis &amp; &quot;/ImportExport&quot;
+	
+	&apos;Ordner erstellen
+	sExportOrdner = sImportExportVerzeichnisErstellen()
+	&apos;MsgBox &quot;Der Exportordner ist &quot; &amp; sExportOrdner
+	sWorkingDirectory = sfWorkingDirectory(&quot;aufgdbphys.odb&quot;)
+	sAufgabenVerzeichnis = sfAufgabenverzeichnis
+	
+	oSFA = createUnoService(&quot;com.sun.star.ucb.SimpleFileAccess&quot;)
+	oOutputStream = createUnoService(&quot;com.sun.star.io.TextOutputStream&quot;)
+
+	Dim DatabaseContext, DataSource, Connection, InteractionHandler, Statement, ResultSet As Object
+	Dim iZaehler01 As Integer	
+	
+	&apos;DatenbankKontext erstellen
+    DatabaseContext = createUnoService(&quot;com.sun.star.sdb.DatabaseContext&quot;)
+    &apos;Datenbank kontaktieren
+    DataSource = DatabaseContext.getByName(&quot;aufgdbphys&quot;)
+    &apos;Testen, ob Passwort benötigt wird
+    If Not DataSource.IsPasswordRequired Then
+    	Connection = DataSource.GetConnection(&quot;&quot;,&quot;&quot;)
+    Else	
+    	InteractionHandler = createUnoService(&quot;com.sun.star.sdb.InteractionHandler&quot;)
+    	Connection = DataSource.ConnectWithCompletion(InteractionHandler)
+    End If
+    &apos;Abfrage erstellen
+    Statement = Connection.createStatement()
+	ResultSet = Statement.executeQuery(&quot;SELECT * FROM `Aufgaben` WHERE ( `Aufgaben`.`Auswahl` = True )&quot;)
+	
+	&apos;iZaehler01 = 0
+   	If Not IsNull(ResultSet) Then
+   		While ResultSet.next
+			&apos;iZaehler01 = iZaehler01 + 1
+			sPrint = &quot;-----&quot;
+			&apos;for i = 1 to ResultSet.columns.count
+			sAufgabenText = ResultSet.getString(6)
+			sPermanenteID = ResultSet.getString(22)
+
+			oDatei = oSFA.OpenFileReadWrite(sExportOrdner &amp; sPermanenteID &amp; &quot;.dat&quot;)
+			oOutputStream.SetOutputStream(oDatei.getOutputStream)
+			sPrint = sPermanenteID &amp; chr(13) &amp; sAufgabenText
+			
+			&apos;Print sPrint
+			oOutputStream.writeString(sPrint)
+			oOutputStream.closeOutput()
+		Wend
+		&apos;MsgBox &quot;Es wurden &quot; &amp; iZaehler01 &amp; &quot; Aufgaben ausgewählt und ihre ID in der Umrechungstabelle gespeichert.&quot;
+	Else
+		MsgBox &quot;Es wurden keine Aufgaben ausgewählt.&quot;
+   		Exit Sub
+	End If
+	
+	MsgBox &quot;Die Exportfunktion ist beendet.&quot; &amp; chr(13) &amp; &quot;Sie finden die Daten im Verzeichnis &quot; &amp; chr(13) &amp; chr(13) &amp; _
+	convertfromurl(sExportOrdner) &amp; &quot;.&quot; &apos;&amp; chr(13) &apos;&amp; chr(13) &amp; _
+	&apos;&quot;bzw. in der gleichnamigen Archivdatei.&quot; 
+End Sub
+
+Sub PruefungenExportieren02
+	&apos;Letzte Änderung: 9.10.14, Erasmus Bieri
+
+	&apos;Dieser Makro exportiert alle Prüfungen
+	&apos;in eine Textdateien im Ordner sfAufgabenverzeichnis &amp; &quot;/ImportExport&quot;
+	
+	&apos;Möglichkeit zu Abbruch:
+	rueckgabe = MsgBox(&quot;Wollen Sie wirklich alle Prüfungen exportieren?&quot;,292)
+	if rueckgabe = 2 then
+		MsgBox &quot;Abbruch!&quot;
+		exit sub
+	end if
+	
+	&apos;Ordner erstellen
+	sExportOrdner = sImportExportVerzeichnisErstellen()
+	&apos;MsgBox &quot;Der Exportordner ist &quot; &amp; sExportOrdner
+	sWorkingDirectory = sfWorkingDirectory(&quot;aufgdbphys.odb&quot;)
+	sAufgabenVerzeichnis = sfAufgabenverzeichnis
+	
+	oSFA = createUnoService(&quot;com.sun.star.ucb.SimpleFileAccess&quot;)
+	oOutputStream = createUnoService(&quot;com.sun.star.io.TextOutputStream&quot;)
+
+	Dim DatabaseContext, DataSource, Connection, InteractionHandler, Statement, ResultSet As Object
+	Dim iZaehler01 As Integer	
+	
+	&apos;DatenbankKontext erstellen
+    DatabaseContext = createUnoService(&quot;com.sun.star.sdb.DatabaseContext&quot;)
+    &apos;Datenbank kontaktieren
+    DataSource = DatabaseContext.getByName(&quot;aufgdbphys&quot;)
+    &apos;Testen, ob Passwort benötigt wird
+    If Not DataSource.IsPasswordRequired Then
+    	Connection = DataSource.GetConnection(&quot;&quot;,&quot;&quot;)
+    Else	
+    	InteractionHandler = createUnoService(&quot;com.sun.star.sdb.InteractionHandler&quot;)
+    	Connection = DataSource.ConnectWithCompletion(InteractionHandler)
+    End If
+    &apos;Abfrage erstellen
+    Statement = Connection.createStatement()
+	ResultSet = Statement.executeQuery(&quot;SELECT * FROM `GespeicherteAuswahlen`&quot;)
+	
+	&apos;Pruefungen in einer Datei speichern,
+	&apos;Trenner zwischen Prüfungen:
+	sTrennerPruefungen = &quot;----------&quot;
+	&apos;Trenner zwischen einzelnen Eintraegen der Pruefungen:
+	sTrennerEintraegePruefungen = &quot;-----&quot;
+	
+	oDatei = oSFA.OpenFileReadWrite(sExportOrdner &amp; &quot;Pruefungen.dat&quot;)
+	oOutputStream.SetOutputStream(oDatei.getOutputStream)
+	sPrint = sTrennerPruefungen
+   	If Not IsNull(ResultSet) Then
+   		While ResultSet.next
+			for i = 1 to ResultSet.columns.count
+				if i = ResultSet.columns.count then
+					sPrint = sPrint &amp; chr(13) &amp; ResultSet.getString(i) &amp; chr(13) &amp; sTrennerPruefungen
+				else
+					sPrint = sPrint &amp; chr(13) &amp; ResultSet.getString(i) &amp; chr(13) &amp; sTrennerEintraegePruefungen
+				end if	
+				&apos;MsgBox sPrint
+			next i	
+		Wend
+	&apos;MsgBox sPrint
+	oOutputStream.writeString(sPrint)
+	oOutputStream.closeOutput()
+	Else
+		MsgBox &quot;Es gibt keine Pruefungen.&quot;
+   		Exit Sub
+	End If
+	
+	MsgBox &quot;Die Exportfunktion für Prüfungen ist beendet.&quot; &amp; chr(13) &amp; &quot;Sie finden die Daten im Verzeichnis &quot; &amp; chr(13) &amp; chr(13) &amp; _
+	convertfromurl(sExportOrdner) &amp; &quot;.&quot; &apos;&amp; chr(13) &apos;&amp; chr(13) &amp; _
+	&apos;&quot;bzw. in der gleichnamigen Archivdatei.&quot; 
+End Sub
+
+Function sDateiInStringEinlesen(sDateipfad As String)
+	&apos;msgbox &quot;Beginn sDateiInStringEinlesen(sDateipfad As String)&quot;
+	&apos;Daten von Umrechnungstabelle in String einlesen
+	oSFA = createUnoService(&quot;com.sun.star.ucb.SimpleFileAccess&quot;)
+	if oSFA.exists(sDateipfad) then
+		oInputStream = createUnoService(&quot;com.sun.star.io.TextInputStream&quot;)
+		oDatei = oSFA.OpenFileReadWrite(sDateipfad)
+		oInputStream.SetInputStream(oDatei.getInputStream)
+		&apos;Zeilen einlesen
+		do while not oInputStream.isEOF
+			&apos;Zeile einlesen, das Zeilenende wird nicht mit übertragen!
+			sInhaltUmrechungstabelle = sInhaltUmrechungstabelle &amp; oInputStream.ReadLine() &amp; chr(13)
+		loop
+		oInputStream.closeInput()
+		&apos;msgbox sInhaltUmrechungstabelle
+	else
+		sFehlertxt = &quot;Datei: &quot;&quot;&quot; &amp; ConvertFromUrl(sDateipfad) &amp; &quot;&quot;&quot; existiert nicht!&quot;
+		msgbox (sFehlertxt, 16, &quot;Fehler!&quot;)
+	end if	
+	&apos;Umrechnungstabelle in STring sInhaltUmrechungstabelle eingelesen
+	sDateiInStringEinlesen = sInhaltUmrechungstabelle
+	&apos;msgbox &quot;Ende sDateiInStringEinlesen(sDateipfad As String)&quot;
+End Function
+
+Function sDateiInStringEinlesenV2(sDateipfad As String)
+	&apos;Daten von Umrechnungstabelle in String einlesen
+	iZaehler = 0
+	oSFA = createUnoService(&quot;com.sun.star.ucb.SimpleFileAccess&quot;)
+	if oSFA.exists(sDateipfad) then
+		oInputStream = createUnoService(&quot;com.sun.star.io.TextInputStream&quot;)
+		oDatei = oSFA.OpenFileReadWrite(sDateipfad)
+		oInputStream.SetInputStream(oDatei.getInputStream)
+		&apos;Zeile einlesen, das Zeilenende wird nicht mit übertragen!
+		do while not oInputStream.isEOF
+			iZaehler = iZaehler + 1
+			if iZaehler = 1 then 
+				sInhaltUmrechungstabelle = sInhaltUmrechungstabelle &amp; oInputStream.ReadLine()
+			else
+				sInhaltUmrechungstabelle = sInhaltUmrechungstabelle &amp; chr(13) &amp; oInputStream.ReadLine()
+			end if
+		loop
+		oInputStream.closeInput()
+		&apos;msgbox sInhaltUmrechungstabelle
+	else
+		sFehlertxt = &quot;Datei: &quot;&quot;&quot; &amp; ConvertFromUrl(sDateipfad) &amp; &quot;&quot;&quot; existiert nicht!&quot;
+		msgbox (sFehlertxt, 16, &quot;Fehler!&quot;)
+	end if	
+	&apos;Umrechnungstabelle in STring sInhaltUmrechungstabelle eingelesen
+	sDateiInStringEinlesenV2 = sInhaltUmrechungstabelle
+End Function
+
+Function LaengeDatensatzTabelleAufgaben()
+	&apos;---- 4.2.14 START: Bestimmung der Länge eines Datensatzes:
+	&apos;DatenbankKontext erstellen
+    DatabaseContext = createUnoService(&quot;com.sun.star.sdb.DatabaseContext&quot;)
+    &apos;Datenbank kontaktieren
+    DataSource = DatabaseContext.getByName(&quot;aufgdbphys&quot;)
+    &apos;Testen, ob Passwort benötigt wird
+    If Not DataSource.IsPasswordRequired Then
+    	Connection = DataSource.GetConnection(&quot;&quot;,&quot;&quot;)
+    Else	
+    	InteractionHandler = createUnoService(&quot;com.sun.star.sdb.InteractionHandler&quot;)
+    	Connection = DataSource.ConnectWithCompletion(InteractionHandler)
+    End If
+    &apos;Abfrage erstellen
+    Statement = Connection.createStatement()
+	ResultSet = Statement.executeQuery(&quot;SELECT * FROM `Aufgaben` WHERE ( `Aufgaben`.`Auswahl` = True )&quot;)
+	
+	LaengeDatensatzTabelleAufgaben = ResultSet.columns.count
+	&apos;MsgBox iLaengeDatensatz
+	&apos;---- ENDE: BEstimmun der Länge eines Datensatzes
+End Function
+
+Sub ExportOrdnerFuerImportKonvertieren(sOrdnerpfad As String, sNameTabelle As String)
+	&apos;---- 4.2.14 START: Bestimmung der Länge eines Datensatzes:
+	iLaengeDatensatz = LaengeDatensatzTabelleAufgaben()
+	MsgBox iLaengeDatensatz
+	&apos;---- ENDE: BEstimmun der Länge eines Datensatzes
+
+	&apos;StatusBar:
+	oStatus = ThisComponent.CurrentController.StatusIndicator
+
+	&apos;msgbox &quot;Beginn Sub ExportOrdnerFuerImportKonvertieren(sOrdnerpfad As String)&quot;
+	oSFA = createUnoService(&quot;com.sun.star.ucb.SimpleFileAccess&quot;)
+	&apos;Ordner für konvertierte Dateien erstellen:
+	sWorkingDirectory = sfWorkingDirectory(&quot;aufgdbphys.odb&quot;)
+   	sAufgabenVerzeichnis = sfAufgabenverzeichnis
+   	
+	sVerzeichnis = sOrdnerpfad &amp; &quot;/konvertierteDateien&quot;
+	&apos;Testen, ob Verzeichnis (sVerzeichnis) schon vorhanden
+	if FileExists(sVerzeichnis) then
+		&apos;MsgBox &quot;Verzechnis &quot; &amp; sVerzeichnis &amp; &quot; existiert&quot;
+		else
+		VerzeichnisErstellen(sVerzeichnis)
+		&apos;MsgBox &quot;Verzeichnis &quot; &amp; sVerzeichnis &amp; &quot; wurde NEU erstellt&quot;
+	end if
+	
+	&apos;UmrechnungstabelleExport.dat in String sUmrechnungstabelleExport einlesen
+	sUmrechnungstabelleExport = sDateiInStringEinlesen(sOrdnerpfad &amp; &quot;/UmrechnungstabelleExport.dat&quot;)
+	
+	&apos;String sUmrechnungstabelleExport in Array sArrayUmrechnungstabelleExport umwandeln:
+	sArrayUmrechnungstabelleExport = afStringInArray(sUmrechnungstabelleExport)
+	
+	&apos;Array aUmrechnungstabelleExport abarbeiten
+	&apos;&apos; Datei sArrayUmrechnungstabelleExport(0,0), sArrayUmrechnungstabelleExport(1,0) usw. kopieren in neuen Ordner
+	oStatus.start(&quot;Bitte warten ...&quot;, ubound(sArrayUmrechnungstabelleExport(),1)-1 )
+	for j=0 to ubound(sArrayUmrechnungstabelleExport(),1)-1
+		oStatus.text = &quot;Vorgang &quot; &amp; j &amp; &quot; von &quot; &amp; ubound(sArrayUmrechnungstabelleExport(),1)-1 &amp; &quot; wird bearbeitet.&quot;
+		oStatus.value = j/(ubound(sArrayUmrechnungstabelleExport(),1))
+		
+		&apos;j=4
+		iIDAlt = sArrayUmrechnungstabelleExport(j,0)
+		iIDNeu = sArrayUmrechnungstabelleExport(j,1)
+		&apos;MsgBox &quot;iIDAlt: &quot; &amp; iIDAlt &amp; &quot;; iIDNeu: &quot; &amp; iIDNeu 
+		sPfadAlt = sOrdnerpfad &amp; &quot;/&quot; &amp; iIDAlt &amp; &quot;.dat&quot;
+		sPfadNeu = sVerzeichnis &amp; &quot;/&quot; &amp; iIDNeu &amp; &quot;.dat&quot;
+		if FileExists(sPfadAlt) or FileExists(sPfadNeu) then
+			oSFA.copy(sPfadAlt,sPfadNeu)
+		end if
+		&apos;zugehörigen Aufgabenordner kopieren
+		sOrdnerPfadAlt = sOrdnerpfad &amp; &quot;/&quot; &amp; iIDAlt
+		sOrdnerPfadNeu = sVerzeichnis &amp; &quot;/&quot; &amp; iIDNeu
+		&apos;if FileExists(sOrdnerPfadAlt) or FileExists(sOrdnerPfadNeu) then
+		&apos;	KopierenUndUmbenennenOrdner(sOrdnerPfadAlt,sOrdnerPfadNeu)
+		&apos;end if
+		
+		if FileExists(sOrdnerPfadAlt) or FileExists(sWorkingDirectory &amp; sAufgabenVerzeichnis &amp; &quot;/&quot; &amp; iIDNeu) then
+			KopierenUndUmbenennenOrdner(sOrdnerPfadAlt,sWorkingDirectory &amp; sAufgabenVerzeichnis &amp; &quot;/&quot; &amp; iIDNeu)
+		end if
+		
+		&apos;aufgabenpaare updaten:
+		&apos;inhalt aufgabendaten in array schreiben
+		aArrayAufgabe = afDateiInArrayDB(sPfadNeu)
+		&apos;datei löschen
+		oSFA.kill(sPfadNeu)
+		&apos;ID der Aufgabenpaare anpassen
+		for k = 0 to ubound(sArrayUmrechnungstabelleExport(),1)-1
+			if sArrayUmrechnungstabelleExport(k,0) = aArrayAufgabe(17) then
+				aArrayAufgabe(17) = sArrayUmrechnungstabelleExport(k,1)
+			end if
+		next k
+	
+		ahilf = aArrayAufgabe
+		
+		Redim aDatensatz(iLaengeDatensatz)
+		for i = 0 to iLaengeDatensatz - 1
+			&apos;if i = 5 then
+			&apos;	aDatensatz(i) = Replace(ahilf(i+1),&quot;&apos;&quot;,&quot;&apos;&apos;&quot;)
+			&apos;else	
+				aDatensatz(i) = Replace(ahilf(i+1),&quot;&apos;&quot;,&quot;&apos;&apos;&quot;)
+			&apos;end if
+			&apos;MsgBox i &amp; &quot; &quot; &amp; aDatensatz(i)
+		next	
+		aDatensatzInTabelleEinlesen(iIDNeu,sNameTabelle,aDatensatz)
+	next j
+	oStatus.end
+	MsgBox &quot;Aufgaben importiert.&quot; &amp; chr(13) &amp; &quot; Die Importfunktion ist beendet.&quot;
+&apos;	&apos;----- Gespeicherte Auswahlen importieren : ANFANG
+&apos;	aArrayGespeicherteAuswahlen = afGespeicherteAuswahlDateiInArrayEinlesen(sOrdnerpfad &amp; &quot;/Auswahl.dat&quot;)
+&apos;	
+&apos;	Dim aKopie
+&apos;	for k = lbound(aArrayGespeicherteAuswahlen,1) to ubound(aArrayGespeicherteAuswahlen,1)-1
+&apos;		&apos;msgbox &quot;&gt;&quot; &amp; aArrayGespeicherteAuswahlen(k,2) &amp; &quot;&lt;&quot;
+&apos;		a = split(aArrayGespeicherteAuswahlen(k,2))
+&apos;		aKopie = split(aArrayGespeicherteAuswahlen(k,2))
+&apos;		for m = lbound(a) to ubound(a)
+&apos;			&apos;msgbox a(m)
+&apos;			for j=0 to ubound(sArrayUmrechnungstabelleExport(),1)-1
+&apos;				&apos;j=4
+&apos;				iIDAlt = sArrayUmrechnungstabelleExport(j,0)
+&apos;				iIDNeu = sArrayUmrechnungstabelleExport(j,1)
+&apos;				&apos;msgbox &quot;j: &quot; &amp; j &amp; &quot;, m: &quot; &amp; m &amp; &quot;, a(m): &quot; &amp; a(m) &amp; &quot;, iIDAlt: &quot; &amp; iIDAlt &amp; &quot;, iIDNeu: &quot; &amp; iIDNeu
+&apos;				if cint(a(m)) = cint(iIDAlt) then
+&apos;					&apos;msgbox &quot;alte ID: &quot; &amp; iIDAlt &amp; &quot;, neue ID: &quot; &amp; iIDNeu
+&apos;					aKopie(m) = iIDNeu
+&apos;				end if
+&apos;			next
+&apos;			&apos;Zurückkopieren (kopie teilweise geändert)
+&apos;			next
+&apos;		sJoin = join(aKopie, &quot; &quot;)
+&apos;		aArrayGespeicherteAuswahlen(k,2) = sJoin
+&apos;	next
+&apos;	
+&apos;	aDatensatzInTabelleEinlesenGespeicherteAuswahlen(&quot;GespeicherteAuswahlen&quot;, aArrayGespeicherteAuswahlen())
+&apos;	&apos;----- Gespeicherte Auswahlen importieren : ENDE
+&apos;	Msgbox &quot;Die Prüfungen (gespeicherte Auswahlen) wurden ebenfalls importiert.&quot; &amp; chr(13) &amp; chr(13) &amp;_
+&apos;	&quot;Die Importfunktion ist beendet.&quot;
+End Sub
+
+Sub DatenImportieren02(sOrdnerpfad As String, sNameTabelle As String)
+	&apos;Letzte Änderung: 12.8.15, Erasmus Bieri
+
+	&apos;Importiert Aufgaben in Datenbank
+
+	&apos;StatusBar:
+	oStatus = ThisComponent.CurrentController.StatusIndicator
+	
+	iLaengeDatensatz = LaengeDatensatzTabelleAufgaben()
+	MsgBox &quot;Länge Datensatz: &quot; &amp; iLaengeDatensatz
+
+	&apos;StatusBar:
+	&apos;oStatus = ThisComponent.CurrentController.StatusIndicator
+
+	oSFA = createUnoService(&quot;com.sun.star.ucb.SimpleFileAccess&quot;)
+
+	sWorkingDirectory = sfWorkingDirectory(&quot;aufgdbphys.odb&quot;)
+   	sAufgabenVerzeichnis = sfAufgabenverzeichnis
+   		
+	&apos;oStatus.start(&quot;Bitte warten ...&quot;, ubound(sArrayUmrechnungstabelleExport(),1)-1 )
+	
+	MsgBox &quot;ID von letzem Eintrag bestimmen...&quot;
+	
+	iLetzterEintragTabelle = cint(iIDLetzterEintrag(sNameTabelle))
+	MsgBox &quot;ID letzter Eintrag von Tabelle &quot;&quot;&quot; &amp; sNameTabelle &amp; &quot;&quot;&quot;: &quot; &amp; iLetzterEintragTabelle
+	
+	&apos;NEU 12.8.15:
+	&apos;Anzahl neuer Eintraege bestimmen
+	iHilfsZaehler = 1
+	sPfadAltDatei = sOrdnerpfad &amp; &quot;/&quot; &amp; iHilfsZaehler &amp; &quot;.dat&quot;
+	while(FileExists(sPfadAltDatei))
+		iHilfsZaehler = iHilfsZaehler + 1
+		sPfadAltDatei = sOrdnerpfad &amp; &quot;/&quot; &amp; iHilfsZaehler &amp; &quot;.dat&quot;
+	Wend
+	MsgBox iHilfsZaehler
+	oStatus.start(&quot;Bitte warten ...&quot;, iHilfsZaehler)
+	&apos;ENDE NEU 12.8.15
+	
+	iZaehlerAlt = 1
+	iZaehlerNeu = iLetzterEintragTabelle + 1
+	
+	sPfadAltDatei = sOrdnerpfad &amp; &quot;/&quot; &amp; iZaehlerAlt &amp; &quot;.dat&quot;
+	sPfadAltOrdner = sOrdnerpfad &amp; &quot;/&quot; &amp; iZaehlerAlt &amp; &quot;/&quot; 
+	&apos;sPfadNeuDatei = sWorkingDirectory &amp; sAufgabenVerzeichnis &amp; &quot;/&quot; &amp; iZaehlerNeu &amp; &quot;.dat&quot;
+	sPfadNeuOrdner = sWorkingDirectory &amp; sAufgabenVerzeichnis &amp; &quot;/&quot; &amp; iZaehlerNeu &amp; &quot;/&quot;    
+    
+    msgbox sPfadAltDatei &amp; chr(13) &amp; sPfadAltOrdner &amp; chr(13) &amp; sPfadNeuOrdner
+	
+	while(FileExists(sPfadAltDatei))
+		&apos;msgbox sPfadAltDatei &amp; chr(13) &amp; sPfadAltOrdner &amp; chr(13) &amp; sPfadNeuOrdner
+		
+		&apos;A) Datei sPfadAltDatei in Datenbank einlesen:
+		&apos;Datei in Array lesen:
+		aArrayAufgabe = afDateiInArrayDB(sPfadAltDatei)
+		
+		&apos;Hochkommas maskieren
+		for i = 1 to ubound(aArrayAufgabe())-1
+			sHilf = aArrayAufgabe(i)
+			aArrayAufgabe(i) = Replace(sHilf,&quot;&apos;&quot;,&quot;&apos;&apos;&quot;)
+			&apos;msgbox aArrayAufgabe(i)
+		next
+		&apos;Array in DB einlesen
+		aDatensatzInTabelleEinlesenV03(sNameTabelle,aArrayAufgabe)
+		
+		&apos;B) Ordner sPfadAltOrdner an die Stelle sPfadNeuOrdner kopieren:
+		if FileExists(sPfadAltOrdner) then
+			KopierenUndUmbenennenOrdner(sPfadAltOrdner,sPfadNeuOrdner)
+		end if
+		
+		oStatus.text = &quot;ZaehlerAlt: &quot; &amp; iZaehlerAlt &amp; &quot;, ZaehlerNeu: &quot; &amp; iZaehlerNeu &amp; &quot;.&quot;
+		&apos;NEU 12.8.15:
+		oStatus.value = iZaehlerAlt
+		&apos;ENDE NEU 12.8.15
+
+		iZaehlerAlt = iZaehlerAlt + 1
+		iZaehlerNeu = iZaehlerNeu + 1
+		sPfadAltDatei = sOrdnerpfad &amp; &quot;/&quot; &amp; iZaehlerAlt &amp; &quot;.dat&quot;
+		sPfadAltOrdner = sOrdnerpfad &amp; &quot;/&quot; &amp; iZaehlerAlt &amp; &quot;/&quot;
+		&apos;sPfadNeuDatei = sWorkingDirectory &amp; sAufgabenVerzeichnis &amp; &quot;/&quot; &amp; iZaehlerNeu &amp; &quot;.dat&quot;
+		sPfadNeuOrdner = sWorkingDirectory &amp; sAufgabenVerzeichnis &amp; &quot;/&quot; &amp; iZaehlerNeu &amp; &quot;/&quot;
+	Wend
+	
+	MsgBox &quot;Aufgaben importiert.&quot; &amp; chr(13) &amp; &quot; Die Importfunktion ist beendet.&quot;
+	
+	oStatus.end
+
+End Sub
+
+Sub Import_Test
+	&apos;sOrdnerpfad = &quot;/media/truecrypt1/schule/diverseProgramme/aufgabenDB/&quot; &amp; sfAufgabenverzeichnis &amp; &quot;/ImportExport/2011_9_28_145629&quot;
+	&apos;sOrdnerpfad = &quot;/media/truecrypt1/synchro/schule/diverseProgramme/aufgabenDB/&quot; &amp; sfAufgabenverzeichnis &amp; &quot;/ImportExport/2011_6_24_15251&quot;
+	&apos;sOrdnerpfad = &quot;/media/truecrypt1/synchro/schule/diverseProgramme/aufgabenDB_ImportTest/&quot; &amp; sfAufgabenverzeichnis &amp; &quot;/ImportExport/2012_3_9_152057&quot;
+	&apos;sOrdnerpfad = &quot;/media/truecrypt1/synchro/schule/diverseProgramme/aufgabenDB_ImportTest/&quot; &amp; sfAufgabenverzeichnis &amp; &quot;/ImportExport/2011_9_28_145629&quot;
+	&apos;sOrdnerpfad = &quot;/media/truecrypt1/synchro/schule/diverseProgramme/aufgabenDB_ImportTest/&quot; &amp; sfAufgabenverzeichnis &amp; &quot;/ImportExport/2012_3_9_151944&quot;
+	sOrdnerpfad = &quot;/media/truecrypt1/synchro/schule/diverseProgramme/aufgabenDB_ImportTest/&quot; &amp; sfAufgabenverzeichnis &amp; &quot;/ImportExport/2012_4_27_13248&quot;
+	ErstelleUmrechnungstabelleImport(converttourl(sOrdnerpfad),&quot;Aufgaben&quot;)
+	ExportOrdnerFuerImportKonvertieren(converttourl(sOrdnerpfad),&quot;Aufgaben&quot;)
+	&apos;sPfadZuDatei = &quot;/media/truecrypt1/schule/diverseProgramme/aufgabenDB/&quot; &amp; sfAufgabenverzeichnis &amp; &quot;/ImportExport/2011_6_24_15251/5.dat&quot;
+	&apos;aArray = afDateiInArrayDB(converttourl(sPfadZuDatei))
+	&apos;for j = 0 to ubound(aaa)
+	&apos;	msgbox aaa(j)
+	&apos;next j
+	&apos;sPfadZuDatei2 = &quot;/media/truecrypt1/schule/diverseProgramme/aufgabenDB/&quot; &amp; sfAufgabenverzeichnis &amp; &quot;/ImportExport/2011_6_24_15251/5_2.dat&quot;
+	&apos;afArrayInDateiDB(aArray,&quot;-----&quot;,sPfadZuDatei2)
+End Sub
+
+Sub AufgabenAusVerzeichnisImportieren(sOrdnerpfad As String)
+	&apos;ErstelleUmrechnungstabelleImport(converttourl(sOrdnerpfad),&quot;Aufgaben&quot;)
+	&apos;ExportOrdnerFuerImportKonvertieren(converttourl(sOrdnerpfad),&quot;Aufgaben&quot;)
+	DatenImportieren02(converttourl(sOrdnerpfad),&quot;Aufgaben&quot;)
+End Sub
+
+Sub PruefungenAusDateiImportieren(sDateipfad As String)
+	&apos;Letzte Änderung: 13.10.14, Erasmus Bieri
+
+	&apos;Liest die Datei, welche die exportierten Prüfungen enthält,
+	&apos;in die Tabelle &quot;GespeicherteAuswahlen&quot; ein
+	
+	Dim sDateiInString As String
+	Dim aArrayEinzelnePruefungen As Variant
+	Dim aArrayEinzelneAufgabe As Variant
+	
+	&apos;Möglichkeit zu Abbruch:
+	rueckgabe = MsgBox(&quot;Wollen Sie wirklich neue Prüfungen importieren?&quot;,292)
+	if rueckgabe = 2 then
+		MsgBox &quot;Abbruch!&quot;
+		exit sub
+	end if
+	
+	&apos;1. Datei in String sDateiInString einlesen
+	sDateiInString = sDateiInStringEinlesenV2(sDateipfad)
+	&apos;MsgBox sDateiInString
+	
+	&apos;2. Split mit grossem Trenner 
+	sTrenner = &quot;----------&quot;
+	aArrayEinzelnePruefungen = Split(sDateiInString,sTrenner)
+	
+	&apos;3. Split mit kleinem Trenner und Einlesen von Array in Tabelle
+	&apos;&quot;GespeicherteAuswahlen&quot; in DB
+	sTrenner = &quot;-----&quot;
+	for j = 1 to ubound(aArrayEinzelnePruefungen)-1
+		aArrayEinzelneAufgabe = Split(aArrayEinzelnePruefungen(j),sTrenner)
+		for k = 0 to ubound(aArrayEinzelneAufgabe)
+			&apos;MsgBox DeleteStr(aArrayEinzelneAufgabe(k),chr(13))
+			aArrayEinzelneAufgabe(k) = DeleteStr(aArrayEinzelneAufgabe(k),chr(13))
+		next k
+		
+		&apos;Datensatz aArrayEinzelneAufgabe() in Tabelle schreiben
+		aDatensatzInTabelleGespeicherteAuswahlenEinlesen(aArrayEinzelneAufgabe())
+	next j
+End Sub
+
+Sub AuswahlKonvertieren(sPfadIUmrechnungstabelleExport As String, sPfadAuswahl As String)
+
+End Sub
+
+Function afDateiInArrayDB(sPfadZuDatei As String)
+	&apos;msgbox &quot;Beginn Function afDateiInArrayDB(sPfadZuDatei As String)&quot;
+	&apos;MsgBox sPfadZuDatei
+	&apos;a) Datei in String sInhalt einlesen
+	sInhalt = sDateiInStringEinlesenV2(sPfadZuDatei)
+	&apos;MsgBox sInhalt
+	sTrenner = chr(13) &amp; &quot;-----&quot; &amp; chr(13)
+	hilfsarray = Split(chr(13) &amp; sInhalt &amp; chr(13),sTrenner)
+	&apos;for j = 0 to ubound(hilfsarray)
+	&apos;	msgbox hilfsarray(j)
+	&apos;next j
+	afDateiInArrayDB = hilfsarray
+	&apos;msgbox &quot;Ende Function afDateiInArrayDB(sPfadZuDatei As String)&quot;
+End Function
+
+Sub afArrayInDateiDB(aArray,sTrenner,sPfadZuDatei As String)
+	&apos;msgbox &quot;Beginn Sub afArrayInDateiDB(aArray,sTrenner,sPfadZuDatei As String)&quot;
+	Dim sPrint As String
+	oSFA = createUnoService(&quot;com.sun.star.ucb.SimpleFileAccess&quot;)
+	oOutputStream = createUnoService(&quot;com.sun.star.io.TextOutputStream&quot;)
+	if FileExists(sPfadZuDatei) then
+		MsgBox sPfadZuDatei &amp; &quot; existiert und wird gelöscht&quot;
+		oSFA.kill(sPfadZuDatei)
+	end if
+	oDatei = oSFA.OpenFileReadWrite(sPfadZuDatei)
+	oOutputStream.SetOutputStream(oDatei.getOutputStream)
+	&apos;Länge der Spalten:
+	iLaengeSpalten = ubound(aArray())-1
+	for j = 1 to iLaengeSpalten
+		if j &lt; iLaengeSpalten then
+			sPrint = sPrint &amp; sTrenner &amp; chr(13) &amp; aArray(j) &amp; chr(13)
+		else
+			sPrint = sPrint &amp; sTrenner &amp; chr(13) &amp; aArray(j) &amp; chr(13) &amp; sTrenner
+		end if
+	next j
+	&apos;msgbox sPrint
+
+	oOutputStream.writeString(sPrint)
+	oOutputStream.closeOutput()
+	&apos;msgbox &quot;Ende Sub afArrayInDateiDB(aArray,sTrenner,sPfadZuDatei As String)&quot;
+End Sub
+
+Sub ErstelleUmrechnungstabelleImport(sPfadOrdnerUmrechnungstabelle As String, sNameTabelle As String)
+	&apos;Erstellen einer Umrechnungstabelle für den Import von Aufgaben
+	&apos;Basis ist eine Umrechnungstabelle, welche beim exportieren von Aufgaben erstellt wurde
+	&apos;und den Namen IDNeuAlt.dat hat.
+	&apos;Dazu muss als erstes mittels eines Dialoges der Ordner ausgewählt werden, in welchem sich
+	&apos; die Datei befindet. 
+	&apos;Dieses Problem löse ich später und arbeite vorläufig mit einem fixen Verzeichnis:
+	sWorkingDirectory = sfWorkingDirectory(&quot;aufgdbphys.odb&quot;)
+   	sAufgabenVerzeichnis = sfAufgabenverzeichnis
+	sImportExportVerzeichnis = sfAufgabenverzeichnis &amp; &quot;/ImportExport&quot;
+	&apos;sPfadOrdnerUmrechnungstabelle =sWorkingDirectory &amp; sImportExportVerzeichnis &amp; &quot;/2011_6_24_15251&quot;
+	&apos;msgbox sPfadOrdnerUmrechnungstabelle
+	sPfadZuUmrechungstabelle = sPfadOrdnerUmrechnungstabelle &amp; &quot;/IDNeuAlt.dat&quot;
+	&apos;msgbox sPfadZuUmrechungstabelle &amp; chr(13) &amp; converttourl(sPfadZuUmrechungstabelle)
+	
+	&apos;Daten von Umrechnungstabelle in String einlesen
+	oSFA = createUnoService(&quot;com.sun.star.ucb.SimpleFileAccess&quot;)
+	if oSFA.exists(sPfadZuUmrechungstabelle) then
+		oInputStream = createUnoService(&quot;com.sun.star.io.TextInputStream&quot;)
+		oDatei = oSFA.OpenFileReadWrite(sPfadZuUmrechungstabelle)
+		oInputStream.SetInputStream(oDatei.getInputStream)
+		&apos;Zeilen einlesen
+		do while not oInputStream.isEOF
+			&apos;Zeile einlesen, das Zeilenende wird nicht mit übertragen!
+			sInhaltUmrechungstabelle = sInhaltUmrechungstabelle &amp; oInputStream.ReadLine() &amp; chr(13)
+		loop
+		oInputStream.closeInput()
+		&apos;msgbox sInhaltUmrechungstabelle
+	else
+		sFehlertxt = &quot;Datei: &quot;&quot;&quot; &amp; ConvertFromUrl(sPfadZuUmrechungstabelle) &amp; &quot;&quot;&quot; existiert nicht!&quot;
+		msgbox (sFehlertxt, 16, &quot;Fehler!&quot;)
+	end if	
+	&apos;Umrechnungstabelle in STring sInhaltUmrechungstabelle eingelesen
+	
+	&apos;String sInhaltUmrechungstabelle in array sArrayInhaltUmrechungstabelle umwandeln:
+	sArrayInhaltUmrechungstabelle = afStringInArray(sInhaltUmrechungstabelle)
+	
+	&apos;ID von letzten Eintrag bestimmen
+	iID = iIDLetzterEintrag(sNameTabelle)
+	&apos;msgbox iID
+	
+	&apos;Neue Spalte zu Array sArrayInhaltUmrechungstabelle hinzufügen, in welcher die neuen (bzgl. Import) ID
+	&apos; stehen
+	iIDZaehler = cint(iID) + 1
+	iUpperBound = ubound(sArrayInhaltUmrechungstabelle(),1)
+	&apos;msgbox iUpperBound
+	
+	&apos;Neuer Array mit einer Zeile weniger:
+	dim sArrayInhaltUmrechungstabelleNEU(iUpperBound-1,2)
+	
+	for j = 0 to iUpperBound-1 &apos;da im Moment beim Einlesen die letzte Zeile mit einem Zeilenumbruch aufhört...
+		sArrayInhaltUmrechungstabelleNEU(j,0) = sArrayInhaltUmrechungstabelle(j,0)
+		sArrayInhaltUmrechungstabelleNEU(j,1) = iIDZaehler
+		iIDZaehler = iIDZaehler + 1
+		&apos;msgbox &quot;iIDZaehler: &quot; &amp; iIDZaehler &amp; chr(13) &amp;_
+		&apos;sArrayInhaltUmrechungstabelle(j,0) &amp; &quot; &quot; &amp; sArrayInhaltUmrechungstabelle(j,1) &amp; &quot; &quot; &amp; sArrayInhaltUmrechungstabelle(j,2)
+	next
+	&apos;msgbox &quot;iIDZaehler: &quot; &amp; iIDZaehler	
+	&apos;msgbox &quot;letzte Zeile sArrayInhaltUmrechungstabelle: &quot; &amp; chr(13) &amp; sArrayInhaltUmrechungstabelleNEU(iUpperBound-1,0) &amp; &quot; &quot; &amp; sArrayInhaltUmrechungstabelleNEU(iUpperBound-1,1)
+	ArrayInDateiSchreiben(sArrayInhaltUmrechungstabelleNEU, sPfadOrdnerUmrechnungstabelle &amp; &quot;/UmrechnungstabelleExport.dat&quot;)
+End Sub
+
+Sub ArrayInDateiSchreiben(aArray(), sDateipfad as String)
+	Dim sPrint As String
+	
+	&apos;Weiteres Vorgehen:
+	oSFA = createUnoService(&quot;com.sun.star.ucb.SimpleFileAccess&quot;)
+	oOutputStream = createUnoService(&quot;com.sun.star.io.TextOutputStream&quot;)
+	if FileExists(sDateipfad) then
+		MsgBox sDateipfad &amp; &quot; existiert und wird gelöscht&quot;
+		oSFA.kill(sDateipfad)
+	end if
+
+	oDatei = oSFA.OpenFileReadWrite(sDateipfad)
+	oOutputStream.SetOutputStream(oDatei.getOutputStream)
+	
+	&apos;Grösse des Arrays bestimmen:
+	&apos;Länge der Spalten:
+	iLaengeSpalten = ubound(aArray(),1)
+	&apos;Länge der Zeilen:
+	iLaengeZeilen = ubound(aArray(),2)
+	for j = 0 to iLaengeSpalten
+		sHilf = &quot;&quot;
+		for i = 0 to iLaengeZeilen
+			if i = iLaengeZeilen then
+				sHilf = sHilf &amp; aArray(j,i) &amp; chr(13)
+			else
+				sHilf = sHilf &amp; aArray(j,i) &amp; &quot; &quot;
+			end if
+	&apos;	&apos;sPrint = sPrint &amp; chr(13) &amp; sDBEintrag &amp; chr(13) &amp; &quot;-----&quot;
+		next i
+		sPrint = sPrint &amp; sHilf
+	next j	
+	&apos;msgbox sPrint
+
+	oOutputStream.writeString(sPrint)
+	oOutputStream.closeOutput()
+
+	&apos;MsgBox &quot;Die Datei &quot; &amp; converttourl(sDateipfad) &amp; &quot; wurde gespeichert.&quot;
+End Sub
+
+Sub UmrechungstabelleID
+	AufgabeSpeichern()
+	Dim DatabaseContext, DataSource, Connection, InteractionHandler, Statement, ResultSet As Object
+	Dim iZaehler01,iZaehler02 As Integer
+	
+	Dim iAufgabenDateiNummer As Integer
+    iAufgabenDateiNummer = FreeFile
+    
+   	sWorkingDirectory = sfWorkingDirectory(&quot;aufgdbphys.odb&quot;)
+   	sAufgabenVerzeichnis = sfAufgabenverzeichnis
+	sImportExportVerzeichnis = sfAufgabenverzeichnis &amp; &quot;/ImportExport&quot;
+	
+	&apos;sExportDatei = InputBox(&quot;Geben Sie den Namen der Exportdatei an:&quot;, &quot;Export Aufgaben&quot;, &quot;Export&quot;)
+	sExportDatei = &quot;IDNeuAlt.dat&quot;
+	sAufgabenDateiName = sWorkingDirectory &amp; sImportExportVerzeichnis &amp; &quot;/&quot; &amp; sExportDatei &apos;&amp; &quot;.dat&quot;         &apos; Define file name
+	&apos;MsgBox sAufgabenDateiName
+	
+    &apos;DatenbankKontext erstellen
+    DatabaseContext = createUnoService(&quot;com.sun.star.sdb.DatabaseContext&quot;)
+    &apos;Datenbank kontaktieren
+    DataSource = DatabaseContext.getByName(&quot;aufgdbphys&quot;)
+    &apos;Testen, ob Passwort benötigt wird
+    If Not DataSource.IsPasswordRequired Then
+    	Connection = DataSource.GetConnection(&quot;&quot;,&quot;&quot;)
+    Else	
+    	InteractionHandler = createUnoService(&quot;com.sun.star.sdb.InteractionHandler&quot;)
+    	Connection = DataSource.ConnectWithCompletion(InteractionHandler)
+    End If
+    &apos;Abfrage erstellen
+    Statement = Connection.createStatement()
+	
+    ResultSet = Statement.executeQuery(&quot;SELECT `Aufgaben`.`AufgID` AS `AufgID`, `Aufgaben`.`Fachgebiet` AS `Fachgebiet`, `Aufgaben`.`Author` AS `Author`, `Aufgaben`.`Schwierigkeitsgrad` AS `Schwierigkeitsgrad`, `Aufgaben`.`LetzteAenderung` AS `LetzteAenderung`, `Aufgaben`.`AufgabenText` AS `AufgabenText`, `Aufgaben`.`LinkZuBild` AS `LinkZuBild`, `Aufgaben`.`MC2` AS `MC2`, `Aufgaben`.`MC3` AS `MC3`, `Aufgaben`.`MC4` AS `MC4`, `Aufgaben`.`MC5` AS `MC5`, `Aufgaben`.`MC6` AS `MC6`, `Aufgaben`.`Loesung` AS `Loesung`, `Aufgaben`.`Auswahl` AS `Auswahl`, `Aufgaben`.`Position` AS `Position`, `Aufgaben`.`LoesungJN` AS `LoesungJN`, `Aufgaben`.`IDVarianten` AS `IDVarianten`, `Aufgaben`.`Kurzloesung` AS `Kurzloesung`, `Aufgaben`.`KurzloesungJN` AS `KurzloesungJN` FROM `Aufgaben` `Aufgaben` WHERE ( `Aufgaben`.`Auswahl` = True )&quot;)
+   	iZaehler01 = 0
+   	If Not IsNull(ResultSet) Then
+   		Open sAufgabenDateiName For Output As #iAufgabenDateiNummer
+   		While ResultSet.next
+			iZaehler01 = iZaehler01 + 1
+			sID = ResultSet.getString(1)
+			sPrint = iZaehler01 &amp; &quot; &quot; &amp; sID &amp; chr(13)
+			&apos;MsgBox sPrint
+			Print #iAufgabenDateiNummer, sPrint
+		Wend
+		Close #iAufgabenDateiNummer
+		MsgBox &quot;Es wurden &quot; &amp; iZaehler01 &amp; &quot; Aufgaben ausgewählt.&quot;
+	Else
+		MsgBox &quot;Es wurden keine Aufgaben ausgewählt.&quot;
+   		Exit Sub
+	End If
+End Sub	
+
+&apos;Sub ExportAusgewaehlteAufgaben
+&apos;	AufgabeSpeichern()
+&apos;	
+&apos;	Dim iAufgabenDateiNummer As Integer
+&apos;   iAufgabenDateiNummer = FreeFile
+&apos;    
+&apos;  	sWorkingDirectory = sfWorkingDirectory(&quot;aufgdbphys.odb&quot;)
+&apos;  	sAufgabenVerzeichnis = sfAufgabenverzeichnis
+&apos;	sImportExportVerzeichnis = sfAufgabenverzeichnis &amp; &quot;/ImportExport&quot;
+&apos;	
+&apos;	sExportDatei = InputBox(&quot;Geben Sie den Namen der Exportdatei an:&quot;, &quot;Export Aufgaben&quot;, &quot;Export&quot;)
+&apos;	&apos;sExportDatei = &quot;ExportAufgaben.dat&quot;
+&apos;	sAufgabenDateiName = sWorkingDirectory &amp; sImportExportVerzeichnis &amp; &quot;/&quot; &amp; sExportDatei &apos;&amp; &quot;.dat&quot;         &apos; Define file name
+&apos;	&apos;MsgBox sAufgabenDateiName
+&apos;
+&apos;	Dim DatabaseContext, DataSource, Connection, InteractionHandler, Statement, ResultSet As Object
+&apos;	Dim iZaehler01,iZaehler02 As Integer
+&apos;	
+&apos;   &apos;DatenbankKontext erstellen
+&apos;   DatabaseContext = createUnoService(&quot;com.sun.star.sdb.DatabaseContext&quot;)
+&apos;   &apos;Datenbank kontaktieren
+&apos;   DataSource = DatabaseContext.getByName(&quot;aufgdbphys&quot;)
+&apos;   &apos;Testen, ob Passwort benötigt wird
+&apos;   If Not DataSource.IsPasswordRequired Then
+&apos;    	Connection = DataSource.GetConnection(&quot;&quot;,&quot;&quot;)
+&apos;   Else	
+&apos;    	InteractionHandler = createUnoService(&quot;com.sun.star.sdb.InteractionHandler&quot;)
+&apos;    	Connection = DataSource.ConnectWithCompletion(InteractionHandler)
+&apos;   End If
+&apos;   &apos;Abfrage erstellen
+&apos;   Statement = Connection.createStatement()
+&apos;
+&apos;   ResultSet = Statement.executeQuery(&quot;SELECT `Aufgaben`.`AufgID` AS `AufgID`, `Aufgaben`.`Fachgebiet` AS `Fachgebiet`, `Aufgaben`.`Author` AS `Author`, `Aufgaben`.`Schwierigkeitsgrad` AS `Schwierigkeitsgrad`, `Aufgaben`.`LetzteAenderung` AS `LetzteAenderung`, `Aufgaben`.`AufgabenText` AS `AufgabenText`, `Aufgaben`.`LinkZuBild` AS `LinkZuBild`, `Aufgaben`.`MC2` AS `MC2`, `Aufgaben`.`MC3` AS `MC3`, `Aufgaben`.`MC4` AS `MC4`, `Aufgaben`.`MC5` AS `MC5`, `Aufgaben`.`MC6` AS `MC6`, `Aufgaben`.`Loesung` AS `Loesung`, `Aufgaben`.`Auswahl` AS `Auswahl`, `Aufgaben`.`Position` AS `Position`, `Aufgaben`.`LoesungJN` AS `LoesungJN`, `Aufgaben`.`IDVarianten` AS `IDVarianten`, `Aufgaben`.`Kurzloesung` AS `Kurzloesung`, `Aufgaben`.`KurzloesungJN` AS `KurzloesungJN` FROM `Aufgaben` `Aufgaben` WHERE ( `Aufgaben`.`Auswahl` = True )&quot;)
+&apos;  	iZaehler02 = 0
+&apos;  	If Not IsNull(ResultSet) Then
+&apos;  		Open sAufgabenDateiName For Output As #iAufgabenDateiNummer
+&apos;  		While ResultSet.next
+&apos;		iZaehler02 = iZaehler02 + 1
+&apos;			
+&apos;			sID = ResultSet.getString(1)
+&apos;			sFachgebiet = ResultSet.getString(2)
+&apos;			sAuthor = ResultSet.getString(3)
+&apos;			sSchwierigkeitsgrad = ResultSet.getString(4)
+&apos;			sLetzteAenderung = ResultSet.getString(5)
+&apos;			sAufgabeText = ResultSet.getString(6)
+&apos;			sLinkZuBild = ResultSet.getString(7)
+&apos;			sMC2 = ResultSet.getString(8)
+&apos;			sMC3 = ResultSet.getString(9)
+&apos;			sMC4 = ResultSet.getString(10)
+&apos;			sMC5 = ResultSet.getString(11)
+&apos;			sMC6 = ResultSet.getString(12)
+&apos;			sLoesung = ResultSet.getString(13)
+&apos;			sPosition = ResultSet.getString(15)
+&apos;			sIDVarianten = ResultSet.getString(17)
+&apos;			
+&apos;			sSeparator = &quot; ;; &quot;
+&apos;		   	sTotal = chr(13) &amp; &quot;AUFGABENANFANG&quot; &amp; chr(13) &amp; sID &amp; sSeparator &amp; sFachgebiet &amp; sSeparator &amp; sAuthor &amp; sSeparator &amp; sSchwierigkeitsgrad &amp; sSeparator &amp;_
+&apos; 			sLetzteAenderung &amp; sSeparator &amp; sAufgabeText &amp; sSeparator &amp; sLinkZuBild &amp; sSeparator &amp; sMC2 &amp; sSeparator &amp; sMC3 &amp; sSeparator &amp;_
+&apos;  			sMC4 &amp; sSeparator &amp; sMC5 &amp; sSeparator &amp; sMC6 &amp; sSeparator &amp; sLoesung &amp; sSeparator &amp; sPosition &amp; sSeparator &amp; sIDVarianten &amp; chr(13) &amp; &quot;AUFGABENENDE&quot; &amp; chr(13)
+&apos;  			&apos;MsgBox sTotal
+&apos;   	
+&apos;    		Print #iAufgabenDateiNummer, sTotal
+&apos;    		
+&apos;    		&apos;Um die Dateien der enrsprechenden Aufgaben zu kopieren, siehe:
+&apos;    		&apos;oSimpleFileAccess com.sun.star.ucb.SimpleFileAccess example &apos;
+&apos;			
+&apos;		Wend
+&apos;		MsgBox &quot;Es wurden &quot; &amp; iZaehler02 &amp; &quot; Aufgaben ausgewählt.&quot;
+&apos;		Close #iAufgabenDateiNummer
+&apos;	Else
+&apos;		MsgBox &quot;Es wurden keine Aufgaben ausgewählt.&quot;
+&apos;  		Exit Sub
+&apos;	End If
+&apos;End Sub
+</script:module>

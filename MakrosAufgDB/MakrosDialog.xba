@@ -1,0 +1,214 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE script:module PUBLIC "-//OpenOffice.org//DTD OfficeDocument 1.0//EN" "module.dtd">
+<script:module xmlns:script="http://openoffice.org/2000/script" script:name="MakrosDialog" script:language="StarBasic">REM  *****  BASIC  *****
+
+Dim oDialog1, oDialog2, oDialog3, oDialog4 as Object  &apos; der Dialog 
+Dim oModel1, oModel2, oModel3, oModel4 as Object   &apos; das Modell des Dialoges
+Dim oView1, oView2, oView3, oView4 as Object    &apos; der View (Ansicht) des Dialoges
+
+Sub testtttttttttttttttt
+	sPfad = &quot;/media/truecrypt1/synchro/schule/diverseProgramme/aufgabenDB_Zusammenzug/&quot; &amp; sfAufgabenverzeichnis &amp; &quot;/Einstellungen/test.dat&quot;
+	abc = saEinstellungen(sPfad,&quot;-----&quot;)
+	Msgbox abc(3)
+End Sub
+
+Sub EinstellungenEinlesen
+	aArrayEinstellungen = saEinstellungen(sfWorkingDirectory(&quot;aufgdbphys.odb&quot;) &amp; sfAufgabenverzeichnis &amp; &quot;/Einstellungen/EinstellungenAufgabenDB.txt&quot;, &quot;-----&quot;)
+	oDialog4.getControl(&quot;PfadPdfLatex&quot;).text = aArrayEinstellungen(0)
+	oDialog4.getControl(&quot;PfadConvert&quot;).text = aArrayEinstellungen(1)
+	oDialog4.getControl(&quot;NummerAutor&quot;).text = aArrayEinstellungen(2)
+	oDialog4.getControl(&quot;NummerSystem&quot;).text = aArrayEinstellungen(3)
+	oDialog4.getControl(&quot;WaitingTimeNachPdflatex&quot;).text = aArrayEinstellungen(4)
+	&apos; Hier kommen dann weitere Einstellungen hin....
+End Sub
+
+Sub EinstellungenSchreiben
+	&apos;Array erstellen:
+	Dim aArray(11)
+	sTrenner = &quot;-----&quot;
+	aArray(0) = oDialog4.getControl(&quot;PfadPdfLatex&quot;).text
+	aArray(1) = sTrenner
+	aArray(2) = oDialog4.getControl(&quot;PfadConvert&quot;).text
+	aArray(3) = sTrenner
+	aArray(4) = oDialog4.getControl(&quot;NummerAutor&quot;).text
+	aArray(5) = sTrenner
+	aArray(6) = oDialog4.getControl(&quot;NummerSystem&quot;).text
+	aArray(7) = sTrenner
+	aArray(8) = oDialog4.getControl(&quot;WaitingTimeNachPdflatex&quot;).text
+	aArray(9) = sTrenner
+	aArray(10) = &quot;# In dieser Datei werden verschiedene systemspezifische Einstellungen gespeichert: &quot; &amp; chr(13) &amp;_
+	&quot;# Eintrag 1: Pfad zu pdflatex&quot; &amp; chr(13) &amp;_
+	&quot;# Eintrag 2: Pfad zu convert&quot; &amp; chr(13) &amp;_
+	&quot;# Eintrag 3: Zahlenkürzel Autor&quot; &amp; chr(13) &amp;_
+	&quot;# Eintrag 4: Zahlenkürzel System (1: Linux, 2: OS X, 3: Windows)&quot; &amp; chr(13) &amp;_
+	&quot;# Eintrag 5: Wartezeit in ms nach pdflatex (nur relevant für Windows)&quot;
+
+	&apos;Array in Datei schreiben
+	Dim sPrint As String
+	sDateipfad = sfWorkingDirectory(&quot;aufgdbphys.odb&quot;) &amp; sfAufgabenverzeichnis &amp; &quot;/Einstellungen/EinstellungenAufgabenDB.txt&quot;
+	oSFA = createUnoService(&quot;com.sun.star.ucb.SimpleFileAccess&quot;)
+	oOutputStream = createUnoService(&quot;com.sun.star.io.TextOutputStream&quot;)
+	if FileExists(sDateipfad) then
+		MsgBox sDateipfad &amp; &quot; wird überschrieben.&quot;
+		oSFA.kill(sDateipfad)
+	end if
+	oDatei = oSFA.OpenFileReadWrite(sDateipfad)
+	oOutputStream.SetOutputStream(oDatei.getOutputStream)
+	&apos;Grösse des Arrays bestimmen:
+	&apos;Länge der Spalten:
+	iLaengeSpalten = ubound(aArray(),1)
+	&apos;msgbox iLaengeSpalten
+	for j = 0 to iLaengeSpalten
+		sPrint = sPrint &amp; aArray(j) &amp; chr(13)
+	next j	
+	&apos;msgbox sPrint
+	oOutputStream.writeString(sPrint)
+	oOutputStream.closeOutput()
+End Sub
+
+Function saEinstellungen(sPfadZuEinstellungen, sTrenner)
+	&apos;Liest die durch sTrenner getrennten Einträge der Datei sPfadZuEinstellungen 
+	&apos;in einen Array. Sie löscht dabei allfällige Zeilenumbrüche (cr = chr(13), lf = chr(10)
+	Dim Zeilenumbrucharray(1) As String
+	Zeilenumbrucharray(0) = chr(13)
+	Zeilenumbrucharray(1) = chr(10)
+	&apos;Dateiinhalt in String:
+	sEinstellungenText = sDateiInStringEinlesen(converttourl(sPfadZuEinstellungen))
+	&apos;Zeilenumbrüche entfernen:
+	sEinstellungenTextOhneZeilenUmbrueche = ElimChar(sEinstellungenText,Zeilenumbrucharray())
+	&apos;Array erstellen
+	saEinstellungen = split(sEinstellungenTextOhneZeilenUmbrueche,sTrenner)
+End Function
+
+Sub DialogSystemeinstellungenAnzeigen
+	DialogLibraries.LoadLibrary(&quot;MakrosAufgDB&quot;)
+ 	oDialog4 = createUnoDialog(DialogLibraries.MakrosAufgDB.DialogSystemeinstellungen)
+ 	oView4 = oDialog4.getView()
+ 	oModel4 = oDialog4.getModel()
+	&apos;msgbox oDialog.dbg_methods
+ 	oDialog4.execute()
+ 	&apos;oModel1.Backgroundcolor = void
+End Sub
+
+Sub DialogImExportAnzeigen
+	DialogLibraries.LoadLibrary(&quot;MakrosAufgDB&quot;)
+ 	oDialog1 = createUnoDialog(DialogLibraries.MakrosAufgDB.DialogImExport)
+ 	oView1 = oDialog1.getView()
+ 	oModel1 = oDialog1.getModel()
+	&apos;msgbox oDialog.dbg_methods
+ 	oDialog1.execute()
+ 	&apos;oModel1.Backgroundcolor = void
+ 	oForm1 = ThisComponent.drawpage.getForms.GetByName(&quot;MainForm&quot;)
+	&apos;oLsgJN = oForm1.getbyName(&quot;LoesungenJN&quot;)
+End Sub
+
+Sub DialogEintraegeLoeschenAnzeigen
+	DialogLibraries.LoadLibrary(&quot;MakrosAufgDB&quot;)
+ 	oDialog2 = createUnoDialog(DialogLibraries.MakrosAufgDB.DialogEintraegeInDBLoeschen)
+ 	oView2 = oDialog2.getView()
+ 	oModel2 = oDialog2.getModel()
+ 	oDialog2.getPeer().setProperty( &quot;NativeWidgetLook&quot;, False )
+	&apos;msgbox oDialog.dbg_methods
+ 	oDialog2.execute()
+ 	&apos;oModel2.Backgroundcolor = void
+End Sub
+
+Sub DialogAuswahlPruefungenAnzeigen
+	DialogLibraries.LoadLibrary(&quot;MakrosAufgDB&quot;)
+ 	oDialog3 = createUnoDialog(DialogLibraries.MakrosAufgDB.DialogAuswahlPruefungen)
+ 	oView3 = oDialog3.getView()
+ 	oModel3 = oDialog3.getModel()
+	&apos;msgbox oDialog.dbg_methods
+ 	oDialog3.execute()
+ 	&apos;oModel3.Backgroundcolor = void
+ 	oForm3 = ThisComponent.drawpage.getForms.GetByName(&quot;MainForm&quot;)
+	&apos;oLsgJN = oForm1.getbyName(&quot;LoesungenJN&quot;)
+End Sub
+
+Sub ImportStarten
+	sImportverzeichnis = oDialog1.getControl(&quot;TextFeldImportVerzeichnis&quot;).text
+	msgbox &quot;Importverzeichnis: &quot; &amp; sImportverzeichnis
+	AufgabenAusVerzeichnisImportieren(sImportverzeichnis)
+End Sub
+
+Sub ImportPruefungenStarten
+	&apos;Letzte Änderung: 11.10.14, Erasmus Bieri
+
+	&apos;Startet den Import aus der Datei, welche die zu importierenden
+	&apos;Pruefungen enthaelt.
+	&apos;Ruft Methode &quot;PruefungenAusDateiImportieren&quot; auf
+	
+	sImportDateiPruefungen = oDialog1.getControl(&quot;TextFeldImportDateiPruefungen&quot;).text
+	msgbox &quot;Import-Datei: &quot; &amp; sImportDateiPruefungen
+	PruefungenAusDateiImportieren(sImportDateiPruefungen)
+End Sub
+
+Sub ImportverzeichnisauswaehlenButton
+	Dim oDlg as Object, oPS as Object, sPfad as String
+	Dim oTest as Object
+	oDlg = CreateUnoService(&quot;com.sun.star.ui.dialogs.OfficeFolderPicker&quot;)
+	oPS = CreateUnoService(&quot;com.sun.star.util.PathSettings&quot;)
+	oDlg.setTitle(&quot;Bitte ein Verzeichnis auswählen&quot;)
+	&apos;Startverzeichnis auswählen
+	oDlg.setDisplayDirectory(sfWorkingDirectory(&quot;aufgdbphys.odb&quot;))
+		if oDlg.execute() then
+	   sPfad = oDlg.getDirectory
+	   &apos;msgbox ConvertFromURL(sPfad)
+	   oDialog1.getControl(&quot;TextFeldImportVerzeichnis&quot;).text = ConvertFromURL(sPfad)
+	end if
+End Sub
+
+Sub ImportDateiPruefungenAuswaehlen
+	&apos;Letzte Änderung: 11.10.14, Erasmus Bieri
+
+	&apos;Setzen Eintrag Textfeld &quot;TextFeldImportDateiPruefungen&quot; durch Auswahldialog
+	
+	Dim oDlg as Object, oPS as Object, sPfad as Variant
+	Dim oTest as Object
+	oDlg = CreateUnoService(&quot;com.sun.star.ui.dialogs.FilePicker&quot;)
+	oPS = CreateUnoService(&quot;com.sun.star.util.PathSettings&quot;)
+	oDlg.setTitle(&quot;Bitte die Datei auswählen, welche die zu importierenden Prüfungen enthält:&quot;)
+	&apos;Startverzeichnis auswählen
+	oDlg.setDisplayDirectory(sfWorkingDirectory(&quot;aufgdbphys.odb&quot;))
+		if oDlg.execute() then
+	   		sPfad = oDlg.getFiles()
+	   		&apos;msgbox ConvertFromURL(sPfad(0))
+	   		oDialog1.getControl(&quot;TextFeldImportDateiPruefungen&quot;).text = ConvertFromURL(sPfad(0))
+		end if
+End Sub
+
+sub DialogImExportBeenden
+ 	oDialog1.endExecute()
+end sub
+
+sub DialogEintraegeLoeschenBeenden
+ 	oDialog2.endExecute()
+end sub
+
+sub DialogAuswahlPruefungenBeenden
+ 	oDialog3.endExecute()
+end sub
+
+Sub Aufgaben_Nach_ID_Loeschen
+	LoescheVonBisID(&quot;Aufgaben&quot;)
+	iIDLetzterEintrag(&quot;Aufgaben&quot;)
+	MsgBox &quot;Makro NachIDLoeschen beendet&quot;
+End Sub
+
+Sub Markierte_Aufgaben_Loeschen
+	LoescheMarkierteAufgaben(&quot;Aufgaben&quot;)
+	iIDLetzterEintrag(&quot;Aufgaben&quot;)
+	MsgBox &quot;Makro MarkierteAufgabenLoeschen beendet&quot;	
+End Sub
+
+Sub Alle_Auswahlen_Loeschen
+	LoescheAlleAufgaben(&quot;GespeicherteAuswahlen&quot;)
+	iIDLetzterEintrag(&quot;GespeicherteAuswahlen&quot;)
+	MsgBox &quot;Alle Auswahlen geloescht&quot;
+End Sub
+
+Sub AuswahlenMitAufg00Loeschen
+	AuswahlReiniger()
+	MsgBox &quot;Makro AuswahlenMitAufg00Loeschen beendet&quot;
+End Sub
+</script:module>

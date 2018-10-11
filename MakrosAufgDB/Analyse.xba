@@ -1,0 +1,162 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE script:module PUBLIC "-//OpenOffice.org//DTD OfficeDocument 1.0//EN" "module.dtd">
+<script:module xmlns:script="http://openoffice.org/2000/script" script:name="Analyse" script:language="StarBasic">REM  *****  BASIC  *****
+
+Sub Main
+
+End Sub
+
+Sub arraystest
+	&apos;1DArrays:
+	&apos;Initialisierung (3 Einträge)
+	Dim a1D(2) As String
+	&apos;Einträge setzen
+	a1D(0) = &quot;a&quot;
+	a1D(1) = &quot;b&quot;
+	a1D(2) = &quot;c&quot;
+	
+	Print a1D(0) + &quot; &quot; + a1D(1) + &quot; &quot; + a1D(2)
+	Print ubound(a1D)
+	
+	&apos;2D-Arrays:
+	&apos;Initialisierung
+	Dim a2D(2,3)
+	&apos;Einträge setzen
+	a2D(0,0) = &quot;a00&quot;
+	a2D(1,0) = &quot;a10&quot;
+	a2D(2,0) = &quot;a20&quot;
+	a2D(0,1) = &quot;a01&quot;
+	a2D(1,1) = &quot;a11&quot;
+	a2D(2,1) = &quot;a21&quot;
+	a2D(0,2) = &quot;a02&quot;
+	a2D(1,2) = &quot;a12&quot;
+	a2D(2,2) = &quot;a22&quot;
+	a2D(0,3) = &quot;a03&quot;
+	a2D(1,3) = &quot;a13&quot;
+	a2D(2,3) = &quot;a23&quot;
+	
+	Print &quot;Höchster Zeilenindex: &quot; + ubound(a2D(),1) &amp; &quot;, d.h. eine Zeile mehr&quot;
+	Print &quot;Anzahl Spalten: &quot; + ubound(a2D(),2)&amp; &quot;, d.h. eine Spalte mehr&quot;
+End Sub
+
+
+Sub DoppeltePermanenteIDSuchen
+	&apos;Letzte Änderung: 14.10.16, Erasmus Bieri
+	&apos;Zusatz 17.02.17: Entsprechende Aufgaben lassen sich auch auswählen,
+	&apos;sofern Variable iDoppelteAufgaben auf 1 gesetzt wird
+
+	&apos;Dieser Makro bestimmt die permanenten IDs, welche doppelt vorkommen.
+	&apos;Das Ergebnis wird im Ordner, welcher die Datei &quot;aufgdbphys.odb&quot; enthält,
+	&apos;unter dem Namen &quot;doppeltePermaneteIDs.dat&quot; gespeichert.
+
+	&apos;Ruft folgende Funktionen auf:
+	&apos; -&gt; afIDUndPermanenteIDAusTabelleAufgabenInArraySchreiben()
+	Dim iDoppelteAufgaben As Integer
+	iDoppelteAufgaben = 1
+	
+	Dim DatabaseContext, DataSource, Connection, Statement, ResultSet As Object	
+	&apos;DatenbankKontext erstellen
+    DatabaseContext = createUnoService(&quot;com.sun.star.sdb.DatabaseContext&quot;)
+    &apos;Datenbank kontaktieren
+    DataSource = DatabaseContext.getByName(&quot;aufgdbphys&quot;)
+    &apos;Testen, ob Passwort benötigt wird
+    If Not DataSource.IsPasswordRequired Then
+    	Connection = DataSource.GetConnection(&quot;&quot;,&quot;&quot;)
+    Else	
+    	InteractionHandler = createUnoService(&quot;com.sun.star.sdb.InteractionHandler&quot;)
+    	Connection = DataSource.ConnectWithCompletion(InteractionHandler)
+    End If
+    Statement = Connection.createStatement()
+	
+	Dim aArrayMitDoppeltVorkommendenIDs(0)
+	aIDPermanenteID = afIDUndPermanenteIDAusTabelleAufgabenInArraySchreiben()
+	Print ubound(aIDPermanenteID(),1) &amp; &quot; &quot; &amp; ubound(aIDPermanenteID(),2)
+	for i = 0 to ubound(aIDPermanenteID(),2)
+		for j = i+1 to ubound(aIDPermanenteID(),2)
+			if aIDPermanenteID(1,i) = aIDPermanenteID(1,j) then
+				Redim Preserve aArrayMitDoppeltVorkommendenIDs(ubound(aArrayMitDoppeltVorkommendenIDs) + 1)
+				aArrayMitDoppeltVorkommendenIDs(ubound(aArrayMitDoppeltVorkommendenIDs)) = aIDPermanenteID(1,i)
+			end if
+		next j
+	next i
+	
+	sPrint = &quot;&quot;
+	for i = 0 to ubound(aArrayMitDoppeltVorkommendenIDs)
+		&apos;print aArrayMitDoppeltVorkommendenIDs(i)
+		sPrint = sPrint &amp; aArrayMitDoppeltVorkommendenIDs(i) &amp; chr(13)
+	next i
+	
+	&apos;Ergebnis in Datei schreiben:
+	sWorkingDirectory = sfWorkingDirectory(&quot;aufgdbphys.odb&quot;)
+	&apos;print sWorkingDirectory
+	oSFA = createUnoService(&quot;com.sun.star.ucb.SimpleFileAccess&quot;)
+	oOutputStream = createUnoService(&quot;com.sun.star.io.TextOutputStream&quot;)
+	oDatei = oSFA.OpenFileReadWrite(sWorkingDirectory &amp; &quot;doppeltePermaneteIDs.dat&quot;)
+	Print &quot;Ausgabe in Datei: &quot; &amp; sWorkingDirectory &amp; &quot;doppeltePermaneteIDs.dat&quot;
+	oOutputStream.SetOutputStream(oDatei.getOutputStream)
+	oOutputStream.writeString(sPrint)
+	oOutputStream.closeOutput()
+	
+	if iDoppelteAufgaben = 1 then
+		for i = 0 to ubound(aArrayMitDoppeltVorkommendenIDs)
+		&apos;for i = 0 to 3 
+			if Len(Trim(aArrayMitDoppeltVorkommendenIDs(i))) &gt; 0 then
+				sSQL = &quot;UPDATE &quot;&quot;Aufgaben&quot;&quot; SET &quot;&quot;Aufgaben&quot;&quot;.&quot;&quot;Auswahl&quot;&quot; = &apos;true&apos; WHERE (&quot;&quot;Aufgaben&quot;&quot;.&quot;&quot;PermanenteID&quot;&quot; = &apos;&quot; &amp; aArrayMitDoppeltVorkommendenIDs(i) &amp; &quot;&apos;) &quot;
+	 			&apos;MsgBox sSQL
+	 			Statement.executeUpdate(sSQL)
+	 		end if
+		next i
+	end if
+	
+	Print &quot;Makro beendet.&quot;
+End Sub
+
+
+Function afIDUndPermanenteIDAusTabelleAufgabenInArraySchreiben()
+	sTabellenname = &quot;Aufgaben&quot;
+	&apos;Letzte Änderung: 14.10.16, Erasmus Bieri
+
+	&apos;Diese Funktion lässt sich sinnvoll nur auf die Tabelle &quot;Aufgaben&quot; anwenden.
+	&apos;Aus dieser liest er die Spalten 1 (ID) und 22 (permanente ID) aus und gibt
+	&apos;diese Werte in einem Array zurück.
+
+	Dim DatabaseContext As Object
+	Dim DataSource As Object
+	Dim Connection As Object
+	Dim InteractionHandler as Object
+	Dim Statement As Object
+	DatabaseContext = createUnoService(&quot;com.sun.star.sdb.DatabaseContext&quot;)
+	DataSource = DatabaseContext.getByName(&quot;aufgdbphys&quot;)
+    If Not DataSource.IsPasswordRequired Then
+       Connection = DataSource.GetConnection(&quot;&quot;,&quot;&quot;)
+    Else
+       InteractionHandler = createUnoService(&quot;com.sun.star.sdb.InteractionHandler&quot;)
+       Connection = DataSource.ConnectWithCompletion(InteractionHandler)
+    End If
+    Statement = Connection.createStatement()
+	
+	sSelect = &quot;SELECT * FROM &quot;&quot;&quot; &amp; sTabellenname &amp; &quot;&quot;&quot;&quot;
+	&apos;MsgBox sSelect
+	ResultSet = Statement.executeQuery(sSelect)	
+	
+	j = 0
+	If Not IsNull(ResultSet) Then
+   		While ResultSet.next
+   			&apos;for i = 1 to ResultSet.columns.count
+				Redim Preserve aDatenTabelle(1,j)
+				aDatenTabelle(0,j) = ResultSet.getString(1)
+				aDatenTabelle(1,j) = ResultSet.getString(22)
+			&apos;next
+			
+			&apos;if j mod 550 = 0 then
+			&apos;	print aDatenTabelle(0,j) &amp; &quot; &quot; &amp; aDatenTabelle(1,j)
+			&apos;end if
+			
+			j = j + 1
+		Wend
+	End If
+	
+	afIDUndPermanenteIDAusTabelleAufgabenInArraySchreiben = aDatenTabelle
+	
+End Function
+</script:module>
