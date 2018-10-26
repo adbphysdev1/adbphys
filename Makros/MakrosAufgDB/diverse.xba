@@ -291,6 +291,7 @@ Sub PermanenteIDsetzen
     &apos;Abfrage erstellen
     Statement = Connection.createStatement()
     StatementUpdate = Connection.createStatement()
+    StatementPunkte = Connection.createStatement()
 	ResultSet = Statement.executeQuery(&quot;SELECT * FROM `Aufgaben`&quot;)
 
 	&apos;Höchste ID des betreffenden Autors bestimmen:
@@ -310,6 +311,11 @@ Sub PermanenteIDsetzen
 		sSQL = &quot;UPDATE &quot;&quot;Aufgaben&quot;&quot; SET &quot;&quot;Aufgaben&quot;&quot;.&quot;&quot;PermanenteID&quot;&quot; = &apos;&quot; &amp; iIDAutorInEinstellungen &amp;&quot;-&quot; &amp; iHoechsteID + i + 1 &amp; &quot;&apos; WHERE (&quot;&quot;Aufgaben&quot;&quot;.&quot;&quot;AufgID&quot;&quot; = &quot; &amp; aArrayIDsNichtPermanent(i) &amp; &quot;) &quot;
 		&apos;print sSQL
 		StatementUpdate.executeUpdate(sSQL)
+&apos;Neu vom 26.9.18 (Ot): Neuer Eintrag in Punkte-Tabelle
+		sSQL = &quot;INSERT INTO &quot;&quot;Punkte&quot;&quot; VALUES ( &apos;&quot; &amp; iIDAutorInEinstellungen &amp;&quot;-&quot; &amp; iHoechsteID + i + 1 &amp; &quot;&apos; , &apos;4&apos; )&quot;
+		StatementPunkte.executeUpdate(sSQL)
+		DatenbankAktualisieren
+&apos;Ende des neuen Teils	
 	next i
 	MsgBox &quot;Alle Aufgaben des Autors &quot; &amp; iIDAutorInEinstellungen &amp; &quot; haben eine permanente ID erhalten.&quot; &amp; chr(13) &amp; &quot;Evtl. Datenbank aktualisieren. ENDE&quot;
 
@@ -890,7 +896,8 @@ Sub AuswahlPruefungAuslesen
  	&apos;DatenbankAktualisieren()
 	
 	&apos; Subroutine schreiben mit EIngabe (ID) und Aktivierung der entsprechenden Aufgabe 	
-	MsgBox &quot;Die Aufgaben wurden ausgewählt.&quot; 
+&apos;	MsgBox &quot;Die Aufgaben wurden ausgewählt.&quot; 
+	PositionenAusfuellen
 End Sub
 
 Function afStringInArrayUmwandeln(sString as String)

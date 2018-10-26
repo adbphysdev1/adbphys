@@ -765,7 +765,11 @@ Sub PositionenAusfuellen
    	If not isNull(ResultSet1) then
    	i = 0
    	Do While ResultSet1.next()
- 		sSQL = &quot;INSERT INTO &quot;&quot;Position&quot;&quot; (&quot;&quot;PermanenteID&quot;&quot;, &quot;&quot;PosID&quot;&quot;, &quot;&quot;AufgPos&quot;&quot;, &quot;&quot;AufgText&quot;&quot;) VALUES (&apos;&quot;&amp;ResultSet1.getString(1)&amp;&quot;&apos;,&quot;&amp; i &amp; &quot;,&quot; &amp; i &amp; &quot;, &apos;&quot; &amp; Replace(Left(Resultset1.getString(3), 30), &quot;\&quot;&quot;&quot;, &quot;&quot;) &amp; &quot;&apos;)&quot;
+   	&apos;Beginn neu ab 30.9.18 (Ot) Sicherstellen, dass es keine Apostrophprobleme gibt
+   		sText =  Left(Resultset1.getString(3), 50)
+   		sText = Replace(sText,&quot;&apos;&quot;,&quot;&apos;&apos;&quot;)
+ 		sSQL = &quot;INSERT INTO &quot;&quot;Position&quot;&quot; (&quot;&quot;PermanenteID&quot;&quot;, &quot;&quot;PosID&quot;&quot;, &quot;&quot;AufgPos&quot;&quot;, &quot;&quot;AufgText&quot;&quot;) VALUES (&apos;&quot;&amp;ResultSet1.getString(1)&amp;&quot;&apos;,&quot;&amp; i &amp; &quot;,&quot; &amp; i &amp; &quot;, &apos;&quot; &amp; sText &amp; &quot;&apos;)&quot;
+	&apos;Ende neu ab 30.9.18
         Statement1.executeUpdate(sSQL)
 	    i = i+1
 	loop
@@ -926,5 +930,4 @@ Sub IDVarianten_durch_PermanenteID_ersetzen
 		loop 
    end if
 End Sub
-
 </script:module>

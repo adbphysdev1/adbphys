@@ -1,5 +1,11 @@
 Change Log:
 
+2018.10.11:
+NEU (ot)
+Module Exam:
+- Punktevergabe individuell möglich
+- Default Titel Prüfung bei keine Eingabe
+
 2018.09.21:
 NEU (ot):
 - Formular angepasst, um das Style-Formular zu umgehen

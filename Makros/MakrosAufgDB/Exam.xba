@@ -112,7 +112,7 @@ Sub TexDateiErstellenAuswahlExam &apos;Angepasst 18.9.18
 	&apos;---------------
 	Dim DatabaseContext, DataSource, Connection, InteractionHandler, Statement, ResultSet As Object
 	Dim iZaehler01,iZaehler02 As Integer
-	Dim sID, sAufgabe As String 
+	Dim sID, sAufgabe, sPunkte As String 
 	
     &apos;DatenbankKontext erstellen
     DatabaseContext = createUnoService(&quot;com.sun.star.sdb.DatabaseContext&quot;)
@@ -147,7 +147,7 @@ Sub TexDateiErstellenAuswahlExam &apos;Angepasst 18.9.18
    	Dim sArrayDaten(iZaehler01 - 1,6) As String
    	
     &apos;ResultSet = Statement.executeQuery(&quot;SELECT `Aufgaben`.`AufgID` AS `AufgID`, `Aufgaben`.`Fachgebiet` AS `Fachgebiet`, `Aufgaben`.`Author` AS `Author`, `Aufgaben`.`Schwierigkeitsgrad` AS `Schwierigkeitsgrad`, `Aufgaben`.`LetzteAenderung` AS `LetzteAenderung`, `Aufgaben`.`AufgabenText` AS `AufgabenText`, `Aufgaben`.`LinkZuBild` AS `LinkZuBild`, `Aufgaben`.`MC2` AS `MC2`, `Aufgaben`.`MC3` AS `MC3`, `Aufgaben`.`MC4` AS `MC4`, `Aufgaben`.`MC5` AS `MC5`, `Aufgaben`.`MC6` AS `MC6`, `Aufgaben`.`Loesung` AS `Loesung`, `Aufgaben`.`Auswahl` AS `Auswahl`, `Aufgaben`.`Position` AS `Position`, `Aufgaben`.`LoesungJN` AS `LoesungJN`, `Aufgaben`.`IDVarianten` AS `IDVarianten`, `Aufgaben`.`Kurzloesung` AS `Kurzloesung`, `Aufgaben`.`KurzloesungJN` AS `KurzloesungJN` FROM `Aufgaben` `Aufgaben` WHERE ( `Aufgaben`.`Auswahl` = True )&quot;)
-    ResultSet = Statement.executeQuery(&quot;SELECT `Aufgaben`.`AufgID` AS `AufgID`, `Aufgaben`.`Fachgebiet` AS `Fachgebiet`, `Aufgaben`.`Author` AS `Author`, `Aufgaben`.`Schwierigkeitsgrad` AS `Schwierigkeitsgrad`, `Aufgaben`.`LetzteAenderung` AS `LetzteAenderung`, `Aufgaben`.`AufgabenText` AS `AufgabenText`, `Aufgaben`.`LinkZuBild` AS `LinkZuBild`, `Aufgaben`.`MC2` AS `MC2`, `Aufgaben`.`MC3` AS `MC3`, `Aufgaben`.`MC4` AS `MC4`, `Aufgaben`.`MC5` AS `MC5`, `Aufgaben`.`MC6` AS `MC6`, `Aufgaben`.`Loesung` AS `Loesung`, `Aufgaben`.`Auswahl` AS `Auswahl`, `Aufgaben`.`Position` AS `Position`, `Aufgaben`.`LoesungJN` AS `LoesungJN`, `Aufgaben`.`IDVarianten` AS `IDVarianten`, `Aufgaben`.`Kurzloesung` AS `Kurzloesung`, `Aufgaben`.`KurzloesungJN` AS `KurzloesungJN`,`Aufgaben`.`PermanenteID` AS `PermanenteID` ,`Aufgaben`.`Punkte` AS `Punkte` FROM `Aufgaben` `Aufgaben` WHERE ( `Aufgaben`.`Auswahl` = True ) ORDER BY `Aufgaben`.`Position`, `Aufgaben`.`Fachgebiet`, `Aufgaben`.`Schwierigkeitsgrad`&quot;)   
+    ResultSet = Statement.executeQuery(&quot;SELECT &quot;&quot;Aufgaben&quot;&quot;.&quot;&quot;AufgID&quot;&quot; AS &quot;&quot;AufgID&quot;&quot;, &quot;&quot;Aufgaben&quot;&quot;.&quot;&quot;Fachgebiet&quot;&quot; AS &quot;&quot;Fachgebiet&quot;&quot;, &quot;&quot;Aufgaben&quot;&quot;.&quot;&quot;Author&quot;&quot; AS &quot;&quot;Author&quot;&quot;, &quot;&quot;Aufgaben&quot;&quot;.&quot;&quot;Schwierigkeitsgrad&quot;&quot; AS &quot;&quot;Schwierigkeitsgrad&quot;&quot;, &quot;&quot;Aufgaben&quot;&quot;.&quot;&quot;LetzteAenderung&quot;&quot; AS &quot;&quot;LetzteAenderung&quot;&quot;, &quot;&quot;Aufgaben&quot;&quot;.&quot;&quot;AufgabenText&quot;&quot; AS &quot;&quot;AufgabenText&quot;&quot;, &quot;&quot;Aufgaben&quot;&quot;.&quot;&quot;LinkZuBild&quot;&quot; AS &quot;&quot;LinkZuBild&quot;&quot;, &quot;&quot;Aufgaben&quot;&quot;.&quot;&quot;MC2&quot;&quot; AS &quot;&quot;MC2&quot;&quot;, &quot;&quot;Aufgaben&quot;&quot;.&quot;&quot;MC3&quot;&quot; AS &quot;&quot;MC3&quot;&quot;, &quot;&quot;Aufgaben&quot;&quot;.&quot;&quot;MC4&quot;&quot; AS &quot;&quot;MC4&quot;&quot;, &quot;&quot;Aufgaben&quot;&quot;.&quot;&quot;MC5&quot;&quot; AS &quot;&quot;MC5&quot;&quot;, &quot;&quot;Aufgaben&quot;&quot;.&quot;&quot;MC6&quot;&quot; AS &quot;&quot;MC6&quot;&quot;, &quot;&quot;Aufgaben&quot;&quot;.&quot;&quot;Loesung&quot;&quot; AS &quot;&quot;Loesung&quot;&quot;, &quot;&quot;Aufgaben&quot;&quot;.&quot;&quot;Auswahl&quot;&quot; AS &quot;&quot;Auswahl&quot;&quot;, &quot;&quot;Aufgaben&quot;&quot;.&quot;&quot;Position&quot;&quot; AS &quot;&quot;Position&quot;&quot;, &quot;&quot;Aufgaben&quot;&quot;.&quot;&quot;LoesungJN&quot;&quot; AS &quot;&quot;LoesungJN&quot;&quot;, &quot;&quot;Aufgaben&quot;&quot;.&quot;&quot;IDVarianten&quot;&quot; AS &quot;&quot;IDVarianten&quot;&quot;, &quot;&quot;Aufgaben&quot;&quot;.&quot;&quot;Kurzloesung&quot;&quot; AS &quot;&quot;Kurzloesung&quot;&quot;, &quot;&quot;Aufgaben&quot;&quot;.&quot;&quot;KurzloesungJN&quot;&quot; AS &quot;&quot;KurzloesungJN&quot;&quot;,&quot;&quot;Aufgaben&quot;&quot;.&quot;&quot;PermanenteID&quot;&quot; AS &quot;&quot;PermanenteID&quot;&quot; ,&quot;&quot;Punkte&quot;&quot;.&quot;&quot;Punktzahl&quot;&quot; AS &quot;&quot;Punktzahl&quot;&quot; FROM &quot;&quot;Aufgaben&quot;&quot; INNER JOIN &quot;&quot;Punkte&quot;&quot; ON &quot;&quot;Aufgaben&quot;&quot;.&quot;&quot;PermanenteID&quot;&quot; = &quot;&quot;Punkte&quot;&quot;.&quot;&quot;AufgID&quot;&quot; WHERE ( &quot;&quot;Aufgaben&quot;&quot;.&quot;&quot;Auswahl&quot;&quot; = True ) ORDER BY &quot;&quot;Aufgaben&quot;&quot;.&quot;&quot;Position&quot;&quot;, &quot;&quot;Aufgaben&quot;&quot;.&quot;&quot;Fachgebiet&quot;&quot;, &quot;&quot;Aufgaben&quot;&quot;.&quot;&quot;Schwierigkeitsgrad&quot;&quot;&quot;)   
    	iZaehler02 = 0
    	If Not IsNull(ResultSet) Then
    		While ResultSet.next
@@ -180,7 +180,7 @@ Sub TexDateiErstellenAuswahlExam &apos;Angepasst 18.9.18
 			sKurzLoesung = Replace(sKurzLoesung, &quot;Ü&quot;, &quot;\&quot;&quot;U&quot;)
 			
 			sPermanenteID = ResultSet.getString(20)
-			iPunkte = ResultSet.getInt(21)
+			sPunkte = ResultSet.getString(21)
 
 			&apos;MsgBox sID &amp; chr(13) &amp; sAufgabe
 			&apos;In Array schreiben:
@@ -189,7 +189,7 @@ Sub TexDateiErstellenAuswahlExam &apos;Angepasst 18.9.18
 			sArrayDaten(iZaehler02 - 1,3) = sLoesung
 			sArrayDaten(iZaehler02 - 1,4) = sKurzLoesung
 			sArrayDaten(iZaehler02 - 1,5) = sPermanenteID
-			sArrayDaten(iZaehler02 - 1,6) = iPunkte
+			sArrayDaten(iZaehler02 - 1,6) = sPunkte
 		Wend
    	End If
    	
@@ -219,9 +219,43 @@ Sub TexDateiErstellenAuswahlExam &apos;Angepasst 18.9.18
 	&apos;Datei erstellen_
 	
 	&apos;Titel, Klasse und Datum abfragen
+	&apos;27.9.18: Latex-Fehler abgefangen, wenn man nichts eintippt
 	sTitel = InputBox(&quot;Titel der Prüfung&quot;)
+	If sTitel = &quot;&quot; Then
+		If oEnglish.State Then
+			sTitel = &quot;Title&quot;
+		Else
+			sTitel = &quot;Titel&quot;
+		EndIf
+	Else
+			&apos;Umlaute ersetzen (unicode vs. ascii-Problematik)
+			sTitel = Replace(sTitel, &quot;ö&quot;, &quot;\&quot;&quot;o&quot;)
+			sTitel = Replace(sTitel, &quot;Ö&quot;, &quot;\&quot;&quot;O&quot;)
+			sTitel = Replace(sTitel, &quot;ä&quot;, &quot;\&quot;&quot;a&quot;)
+			sTitel = Replace(sTitel, &quot;Ä&quot;, &quot;\&quot;&quot;A&quot;)
+			sTitel = Replace(sTitel, &quot;ü&quot;, &quot;\&quot;&quot;u&quot;)
+			sTitel = Replace(sTitel, &quot;Ü&quot;, &quot;\&quot;&quot;U&quot;)	
+	End If
 	sDatum = InputBox(&quot;Datum&quot;)
+	If sDatum = &quot;&quot; Then
+		sDatum = DATE()
+	End If
 	sKlasse = InputBox(&quot;Klasse&quot;)
+	If sKlasse = &quot;&quot; Then
+		If oEnglish.State Then
+			sKlasse = &quot;Class&quot;
+		Else
+			sKlasse = &quot;Klasse&quot;
+		EndIf
+	Else
+		&apos;Umlaute ersetzen (unicode vs. ascii-Problematik)
+		sKlasse = Replace(sKlasse, &quot;ö&quot;, &quot;\&quot;&quot;o&quot;)
+		sKlasse = Replace(sKlasse, &quot;Ö&quot;, &quot;\&quot;&quot;O&quot;)
+		sKlasse = Replace(sKlasse, &quot;ä&quot;, &quot;\&quot;&quot;a&quot;)
+		sKlasse = Replace(sKlasse, &quot;Ä&quot;, &quot;\&quot;&quot;A&quot;)
+		sKlasse = Replace(sKlasse, &quot;ü&quot;, &quot;\&quot;&quot;u&quot;)
+		sKlasse = Replace(sKlasse, &quot;Ü&quot;, &quot;\&quot;&quot;U&quot;)	
+	End If
 	
 	&apos; Header mit der Klasse beginnen
 	If oLsgJN.State + oKurzLsgJN.State = 0 Then
@@ -254,7 +288,7 @@ Sub TexDateiErstellenAuswahlExam &apos;Angepasst 18.9.18
 	   	If oEnglish.State = 1 then
 	   		sLsg = &quot;Solutions: &quot;
 	   	else
-	   		sLsg = &quot;Lösungen: &quot;
+	   		sLsg = &quot;L\&quot;&quot;osungen: &quot;
 	   	endif 
 	   		
 	   	for i = 0 to iZaehler02 - 1
@@ -287,5 +321,52 @@ Sub TexDateiErstellenAuswahlExam &apos;Angepasst 18.9.18
 	PdfAnzeigen(sWorkingDirectory &amp; sTexDateienVerzeichnis, sTexDatei)
 	PdflatexHilfsdateienLoeschen(sWorkingDirectory &amp; sTexDateienVerzeichnis, sTexDatei)
 End Sub
+
+Sub PunkteAendern
+&apos; Erstellt am 27.9.18: Erlaubt es die Punktzahl einer Aufgabe zu aendern. Diese ist
+&apos; in der Tabelle Punkte gespeichert, damit die Bepunktung nicht aendert, wenn die DB
+&apos; zusammengezogen wird. Das Feld &quot;Punktzahl&quot; auf dem Formular liegt in einem SubForm zu
+&apos; MainForm, welches ueber einen InnerJoin die Punktzahl der aktuellen Aufgabe angibt.
+	saktuelleID = sfAusgabeID()
+	If saktuelleID = &quot;&quot; Then
+		AufgabeSpeichern
+	EndIf
+	Dim DatabaseContext, DataSource, Connection, InteractionHandler, Statement, ResultSet As Object
+	Dim iZaehler01,iZaehler02 As Integer
+	Dim sID, sAufgabe As String 
+	
+    &apos;DatenbankKontext erstellen
+    DatabaseContext = createUnoService(&quot;com.sun.star.sdb.DatabaseContext&quot;)
+    &apos;Datenbank kontaktieren
+    DataSource = DatabaseContext.getByName(&quot;aufgdbphys&quot;)
+    &apos;Testen, ob Passwort benötigt wird
+    If Not DataSource.IsPasswordRequired Then
+    	Connection = DataSource.GetConnection(&quot;&quot;,&quot;&quot;)
+    Else	
+    	InteractionHandler = createUnoService(&quot;com.sun.star.sdb.InteractionHandler&quot;)
+    	Connection = DataSource.ConnectWithCompletion(InteractionHandler)
+    End If
+    &apos;Abfrage erstellen
+    Statement = Connection.createStatement()
+   ResultSet = Statement.executeQuery(&quot;SELECT &quot;&quot;Aufgaben&quot;&quot;.&quot;&quot;PermanenteID&quot;&quot; AS &quot;&quot;PermanenteID&quot;&quot;, &quot;&quot;Aufgaben&quot;&quot;.&quot;&quot;AufgID&quot;&quot; AS &quot;&quot;AufgID&quot;&quot;  FROM &quot;&quot;Aufgaben&quot;&quot; WHERE ( &quot;&quot;AufgID&quot;&quot; = &quot; &amp; saktuelleID &amp; &quot;)&quot;)   
+	If Not IsNull(ResultSet) Then
+   		While ResultSet.next
+	   		sPermanenteID = ResultSet.getString(1)
+	   		If sPermanenteID = &quot;&quot; THEN
+				MsgBox &quot;Bitte zuerst perm. ID setzen&quot;
+	   		Else
+		   		sPunktzahl = InputBox(&quot;Geben Sie bitte die neue Punktzahl ein: &quot;)
+		   		If sPunktzahl = &quot;&quot; Then 
+			   		Exit Sub
+		   		End if
+				Statement = Connection.createStatement()
+			 	sUpdate = &quot;UPDATE &quot;&quot;Punkte&quot;&quot; SET &quot;&quot;Punktzahl&quot;&quot; = &apos;&quot; &amp; sPunktzahl &amp; &quot;&apos; WHERE &quot;&quot;AufgID&quot;&quot; = &apos;&quot; &amp; sPermanenteID &amp; &quot;&apos;&quot;
+			 	Statement.executeUpdate(sUpdate)
+		 		DatenbankAktualisieren
+	 		EndIf
+   		Wend
+   	EndIf	
+End Sub
+
 
 </script:module>

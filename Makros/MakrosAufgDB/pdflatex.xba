@@ -106,22 +106,26 @@ Sub PdfAnzeigen(sPfadZurTexDatei, sTexDatei As String)
 	oShell = createUnoService(&quot;com.sun.star.system.SystemShellExecute&quot;)
 	
 	sUrlPdfDatei = convertfromurl(sPfadZurTexDatei) &amp; &quot;/&quot; &amp; sTexDatei &amp; &quot;.pdf&quot;
+	sUrlTexDatei = convertfromurl(sPfadZurTexDatei) &amp; &quot;/&quot; &amp; sTexDatei &amp; &quot;.tex&quot;
 
 	&apos; Anzeigen
 	if afSystemeinstellungen(1) = 1 then
 		if FileExists(sUrlPdfDatei) then
 			&apos;shell(&quot;evince &quot; &amp; sUrlPdfDatei)
-			oShell.execute(ConvertToUrl(sUrlPdfDatei), &quot;&quot;, 0)
+&apos;			oShell.execute(ConvertToUrl(sUrlTexDatei), &quot;&quot;, 0)
+			oShell.execute(ConvertToUrl(sUrlPdfDatei), &quot;&quot;, 0)			
 		end if
 	elseif afSystemeinstellungen(1) = 2 then
 		if FileExists(sUrlPdfDatei) then
 			&apos;shell(&quot;open &quot; &amp; sUrlPdfDatei)
-			oShell.execute(ConvertToUrl(sUrlPdfDatei), &quot;&quot;, 0)
+&apos;			oShell.execute(ConvertToUrl(sUrlTexDatei), &quot;&quot;, 0)
+			oShell.execute(ConvertToUrl(sUrlPdfDatei), &quot;&quot;, 0)			
 		end if
 	&apos;neu START 9.8.13
 	elseif afSystemeinstellungen(1) = 3 then
 		if FileExists(sUrlPdfDatei) then
 			&apos;shell(&quot;open &quot; &amp; sUrlPdfDatei)
+&apos;			oShell.execute(ConvertToUrl(sUrlTexDatei), &quot;&quot;, 0)
 			oShell.execute(ConvertToUrl(sUrlPdfDatei), &quot;&quot;, 0)
 		end if
 	&apos;neu END 9.8.13

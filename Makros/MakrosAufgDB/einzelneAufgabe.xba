@@ -163,7 +163,7 @@ Function sfErstelleTexHeader
 	sfErstelleTexHeader = sNeu
 End Function
 
-Sub TexDateiErstellenAuswahl
+Sub TexDateiErstellenAuswahl &apos;Angepasst 18.9.18
 	AufgabeSpeichern()
 	&apos;---------------
 	&apos;In einem späteren Schritt sHeader und sFooter als Werte übergeben, welche aus einer separaten Tabelle ausgelesen werden...
@@ -181,10 +181,31 @@ Sub TexDateiErstellenAuswahl
 	oForm = ThisComponent.drawpage.getForms.GetByName(&quot;MainForm&quot;)
 	oLsgJN = oForm.getbyName(&quot;LoesungenJN&quot;)
 	oKurzLsgJN = oForm.getbyName(&quot;KurzLoesungenJN&quot;)
+	oEnglish = oForm.getbyName(&quot;English&quot;)
+	oLsgSchluss = oForm.getbyName(&quot;LsgAmSchluss&quot;)
+	oPunkteZeigen = oForm.getbyName(&quot;PunkteZeigen&quot;)
+	oPunkteTabelle = oForm.getbyName(&quot;PunkteTabelle&quot;)
+	oPlatzNachAufgabe = oForm.getbyName(&quot;PlatzNachAufgabe&quot;)
 	
+
 	sTexDatei = &quot;auswahl_aufgaben&quot;
-	sTexHeader = &quot;headerfooter/header2&quot;
-	sTexFooter = &quot;headerfooter/footer&quot;
+	If oEnglish.State = 1 Then
+		sTexHeader = &quot;headerfooter/examheaderen&quot;
+	else
+		sTexHeader = &quot;headerfooter/examheaderde&quot;		
+	EndIf
+	
+	If oPunkteTabelle.State = 1 Then
+		sTexFooter = &quot;headerfooter/examfootermit&quot;	
+	else
+		If oLsgSchluss.State = 1 Then
+			sTexFooter = &quot;headerfooter/examfooterkompakt&quot;
+		else
+			sTexFooter = &quot;headerfooter/examfooterohne&quot;	
+		EndIf
+	EndIf
+	
+	
 	sAufgabenDateiName = sWorkingDirectory &amp; sTexDateienVerzeichnis &amp; &quot;/&quot; &amp; sTexDatei &amp; &quot;.tex&quot;            &apos; Define file name
 	sHeaderDateiName = sWorkingDirectory &amp; sTexDateienVerzeichnis &amp; &quot;/&quot; &amp; sTexHeader &amp; &quot;.txt&quot;            &apos; Define file name
 	sFooterDateiName = sWorkingDirectory &amp; sTexDateienVerzeichnis &amp; &quot;/&quot; &amp; sTexFooter &amp; &quot;.txt&quot; &apos; Define file name
@@ -223,10 +244,10 @@ Sub TexDateiErstellenAuswahl
    		Exit Sub
    	End if	
    	&apos;Array Dimensionieren:
-   	Dim sArrayDaten(iZaehler01 - 1,5) As String
+   	Dim sArrayDaten(iZaehler01 - 1,6) As String
    	
     &apos;ResultSet = Statement.executeQuery(&quot;SELECT `Aufgaben`.`AufgID` AS `AufgID`, `Aufgaben`.`Fachgebiet` AS `Fachgebiet`, `Aufgaben`.`Author` AS `Author`, `Aufgaben`.`Schwierigkeitsgrad` AS `Schwierigkeitsgrad`, `Aufgaben`.`LetzteAenderung` AS `LetzteAenderung`, `Aufgaben`.`AufgabenText` AS `AufgabenText`, `Aufgaben`.`LinkZuBild` AS `LinkZuBild`, `Aufgaben`.`MC2` AS `MC2`, `Aufgaben`.`MC3` AS `MC3`, `Aufgaben`.`MC4` AS `MC4`, `Aufgaben`.`MC5` AS `MC5`, `Aufgaben`.`MC6` AS `MC6`, `Aufgaben`.`Loesung` AS `Loesung`, `Aufgaben`.`Auswahl` AS `Auswahl`, `Aufgaben`.`Position` AS `Position`, `Aufgaben`.`LoesungJN` AS `LoesungJN`, `Aufgaben`.`IDVarianten` AS `IDVarianten`, `Aufgaben`.`Kurzloesung` AS `Kurzloesung`, `Aufgaben`.`KurzloesungJN` AS `KurzloesungJN` FROM `Aufgaben` `Aufgaben` WHERE ( `Aufgaben`.`Auswahl` = True )&quot;)
-    ResultSet = Statement.executeQuery(&quot;SELECT `Aufgaben`.`AufgID` AS `AufgID`, `Aufgaben`.`Fachgebiet` AS `Fachgebiet`, `Aufgaben`.`Author` AS `Author`, `Aufgaben`.`Schwierigkeitsgrad` AS `Schwierigkeitsgrad`, `Aufgaben`.`LetzteAenderung` AS `LetzteAenderung`, `Aufgaben`.`AufgabenText` AS `AufgabenText`, `Aufgaben`.`LinkZuBild` AS `LinkZuBild`, `Aufgaben`.`MC2` AS `MC2`, `Aufgaben`.`MC3` AS `MC3`, `Aufgaben`.`MC4` AS `MC4`, `Aufgaben`.`MC5` AS `MC5`, `Aufgaben`.`MC6` AS `MC6`, `Aufgaben`.`Loesung` AS `Loesung`, `Aufgaben`.`Auswahl` AS `Auswahl`, `Aufgaben`.`Position` AS `Position`, `Aufgaben`.`LoesungJN` AS `LoesungJN`, `Aufgaben`.`IDVarianten` AS `IDVarianten`, `Aufgaben`.`Kurzloesung` AS `Kurzloesung`, `Aufgaben`.`KurzloesungJN` AS `KurzloesungJN`,`Aufgaben`.`PermanenteID` AS `PermanenteID` FROM `Aufgaben` `Aufgaben` WHERE ( `Aufgaben`.`Auswahl` = True ) ORDER BY `Aufgaben`.`Position`, `Aufgaben`.`Fachgebiet`, `Aufgaben`.`Schwierigkeitsgrad`&quot;)   
+    ResultSet = Statement.executeQuery(&quot;SELECT `Aufgaben`.`AufgID` AS `AufgID`, `Aufgaben`.`Fachgebiet` AS `Fachgebiet`, `Aufgaben`.`Author` AS `Author`, `Aufgaben`.`Schwierigkeitsgrad` AS `Schwierigkeitsgrad`, `Aufgaben`.`LetzteAenderung` AS `LetzteAenderung`, `Aufgaben`.`AufgabenText` AS `AufgabenText`, `Aufgaben`.`LinkZuBild` AS `LinkZuBild`, `Aufgaben`.`MC2` AS `MC2`, `Aufgaben`.`MC3` AS `MC3`, `Aufgaben`.`MC4` AS `MC4`, `Aufgaben`.`MC5` AS `MC5`, `Aufgaben`.`MC6` AS `MC6`, `Aufgaben`.`Loesung` AS `Loesung`, `Aufgaben`.`Auswahl` AS `Auswahl`, `Aufgaben`.`Position` AS `Position`, `Aufgaben`.`LoesungJN` AS `LoesungJN`, `Aufgaben`.`IDVarianten` AS `IDVarianten`, `Aufgaben`.`Kurzloesung` AS `Kurzloesung`, `Aufgaben`.`KurzloesungJN` AS `KurzloesungJN`,`Aufgaben`.`PermanenteID` AS `PermanenteID` ,`Aufgaben`.`Punkte` AS `Punkte` FROM `Aufgaben` `Aufgaben` WHERE ( `Aufgaben`.`Auswahl` = True ) ORDER BY `Aufgaben`.`Position`, `Aufgaben`.`Fachgebiet`, `Aufgaben`.`Schwierigkeitsgrad`&quot;)   
    	iZaehler02 = 0
    	If Not IsNull(ResultSet) Then
    		While ResultSet.next
@@ -259,6 +280,7 @@ Sub TexDateiErstellenAuswahl
 			sKurzLoesung = Replace(sKurzLoesung, &quot;Ü&quot;, &quot;\&quot;&quot;U&quot;)
 			
 			sPermanenteID = ResultSet.getString(20)
+			iPunkte = ResultSet.getInt(21)
 
 			&apos;MsgBox sID &amp; chr(13) &amp; sAufgabe
 			&apos;In Array schreiben:
@@ -267,6 +289,7 @@ Sub TexDateiErstellenAuswahl
 			sArrayDaten(iZaehler02 - 1,3) = sLoesung
 			sArrayDaten(iZaehler02 - 1,4) = sKurzLoesung
 			sArrayDaten(iZaehler02 - 1,5) = sPermanenteID
+			sArrayDaten(iZaehler02 - 1,6) = iPunkte
 		Wend
    	End If
    	
@@ -295,8 +318,13 @@ Sub TexDateiErstellenAuswahl
    	   
 	&apos;Datei erstellen_
 	&apos; Latexdatei beginnen
+	If oLsgJN.State + oKurzLsgJN.State = 0 Then
+		TexHeader = TexHeader &amp; &quot;\documentclass[noanswers, 10pt, addpoints]{exam}&quot;
+	else
+		TexHeader = TexHeader &amp; &quot;\documentclass[answers, 10pt, addpoints]{exam}&quot;
+	EndIf
 	&apos;Headerdatei in String auslesen
-	TexHeader = sfDateiInhalt(sHeaderDateiName,iHeaderDateiNummer)
+	TexHeader = TexHeader &amp; sfDateiInhalt(sHeaderDateiName,iHeaderDateiNummer)
 	
 	
 	&apos;Footerdatei in String auslesen
@@ -305,24 +333,36 @@ Sub TexDateiErstellenAuswahl
 	&apos;oKurzLsgJN
 	
     Open sAufgabenDateiName For Output As #iAufgabenDateiNummer
-	   	Print #iAufgabenDateiNummer, TexHeader &amp; chr(13) &amp; chr(13)  
+	   	Print #iAufgabenDateiNummer, TexHeader &amp; chr(13) &amp; chr(13) 
+	   	If oEnglish.State = 1 then
+	   		sLsg = &quot;Solutions: &quot;
+	   	else
+	   		sLsg = &quot;Lösungen: &quot;
+	   	endif 
+	   		
 	   	for i = 0 to iZaehler02 - 1
 	   		&apos;String mit korrektem Pfad
+	   		If oPunkteZeigen.State = 1 then 
+	   			sPunktzahl = &quot;[&quot; &amp; sArrayDaten(i,6) &amp; &quot;]&quot;
+	   		else 
+	   			sPunktzahl = &quot; &quot;
+	   		endif	
 	   			if oLsgJN.State = 1 then
 	   				if oKurzLsgJN.State = 1 then
-	   					Print #iAufgabenDateiNummer, &quot;\item &quot; &amp; sArrayDaten(i,5) &amp; chr(13) &amp; chr(13) &amp; sArrayDaten(i,2) &amp; chr(13) &amp; chr(13)  &amp; &quot;\textbf{L\&quot;&quot;osung:}\\&quot; &amp; chr(13) &amp; sArrayDaten(i,3) &amp; chr(13) &amp; chr(13) &amp; chr(13)  &amp; &quot;\textbf{Kurzl\&quot;&quot;osung:}\\&quot; &amp; chr(13) &amp; sArrayDaten(i,4) &amp; chr(13)&apos;MsgBox &quot;Lösungen werden angezeigt&quot;
+	   					Print #iAufgabenDateiNummer, &quot;\question&quot; &amp; sPunktzahl &amp; sArrayDaten(i,2) &amp; &quot;\begin{solutionorgrid}[\stretch{&quot; &amp; oPlatzNachAufgabe.State &amp; &quot;}]&quot; &amp; chr(13) &amp; sArrayDaten(i,4) &amp; chr(13) &amp; chr(13)  &amp; sArrayDaten(i,3)&amp; chr(13) &amp; &quot;\end{solutionorgrid}&quot; &amp; chr(13) &amp; chr(13) &apos;MsgBox &quot;Lösungen werden angezeigt&quot;
 	   				else
-						Print #iAufgabenDateiNummer, &quot;\item &quot; &amp; sArrayDaten(i,5) &amp; chr(13) &amp; chr(13) &amp; sArrayDaten(i,2) &amp; chr(13) &amp; chr(13)  &amp; &quot;\textbf{L\&quot;&quot;osung:}\\&quot; &amp; chr(13) &amp; sArrayDaten(i,3) &amp; chr(13)&apos;MsgBox &quot;Lösungen werden angezeigt&quot;
+						Print #iAufgabenDateiNummer, &quot;\question&quot; &amp; sPunktzahl &amp; sArrayDaten(i,2) &amp; chr(13)  &amp; &quot;\begin{solutionorgrid}[\stretch{&quot; &amp; oPlatzNachAufgabe.State &amp; &quot;}]&quot; &amp; chr(13) &amp; sArrayDaten(i,3) &amp; chr(13)&amp; &quot;\end{solutionorgrid}&quot; &amp; chr(13) &amp; chr(13)&apos;MsgBox &quot;Lösungen werden angezeigt&quot;
 					end if	
 				else
-					if oKurzLsgJN.State = 1 then
-						Print #iAufgabenDateiNummer, &quot;\item &quot; &amp; sArrayDaten(i,5) &amp; chr(13) &amp; chr(13) &amp; sArrayDaten(i,2) &amp; chr(13) &amp; chr(13)  &amp; &quot;\textbf{Kurzl\&quot;&quot;osung:}\\&quot; &amp; chr(13) &amp; sArrayDaten(i,4) &amp; chr(13)&apos;MsgBox &quot;Lösungen werden angezeigt&quot;
-					else
-						Print #iAufgabenDateiNummer, &quot;\item &quot; &amp; sArrayDaten(i,5) &amp; chr(13) &amp; chr(13) &amp; sArrayDaten(i,2) &amp; chr(13) &amp; chr(13)
-					end if	
+						Print #iAufgabenDateiNummer,&quot;\question&quot; &amp; sPunktzahl &amp; sArrayDaten(i,2) &amp; chr(13)  &amp; &quot;\begin{solutionorgrid}[\stretch{&quot; &amp; oPlatzNachAufgabe.State &amp; &quot;}]&quot; &amp; chr(13) &amp; sArrayDaten(i,4) &amp; chr(13) &amp; &quot;\end{solutionorgrid}&quot; &amp; chr(13) &amp; chr(13)&apos;MsgBox &quot;Lösungen werden angezeigt&quot;
 				end if
+			sLsg = sLsg &amp; i+1 &amp; &quot;. &quot; &amp; sArrayDaten(i,4) &amp; &quot;; &quot;
    		next i
-   		Print #iAufgabenDateiNummer, chr(13) &amp; chr(13) &amp; TexFooter     &apos; Save line
+		If oLsgSchluss.State = 1 Then
+	   		Print #iAufgabenDateiNummer, chr(13) &amp; chr(13) &amp; &quot;\end{questions}&quot; &amp; chr(13) &amp; sLsg &amp; TexFooter     &apos; Save line
+		Else
+   			Print #iAufgabenDateiNummer, chr(13) &amp; chr(13) &amp; TexFooter     &apos; Save line	
+		EndIf
 	Close #iAufgabenDateiNummer
 	
 	PdflatexKompilieren(sWorkingDirectory &amp; sTexDateienVerzeichnis, sTexDatei)

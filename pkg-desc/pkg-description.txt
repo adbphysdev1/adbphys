@@ -1,5 +1,0 @@
-Copyright (c) 2010-2018 Erasmus Bieri, Michael Oettli, Fachschaft Physik Kantonsschule Rychenberg Winterthur 
-
-Makros zur Physikaufgabendatenbank, Stand Oktober 2018.
-
-Change Log befindet sich im Verzeichnis pkg-desc/changelog.txt
