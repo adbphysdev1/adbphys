@@ -472,7 +472,15 @@ Sub KopierenUndUmbenennenOrdner(sAlterURL,sNeuerURL)
 				&apos;msgbox FileNameoutofPath(sOrdnerinhalt(i))
 				&apos;msgbox DirectoryNameoutofPath(sOrdnerinhalt(i),&quot;/&quot;)
 				&apos;msgbox &quot;alt: &quot; &amp; sOrdnerinhalt(i) &amp; chr(13) &amp; &quot;neu: &quot; &amp; sNeuerURL &amp; &quot;/&quot; &amp; FileNameoutofPath(sOrdnerinhalt(i))
-				oSFA.copy(sOrdnerinhalt(i),sNeuerURL &amp; &quot;/&quot; &amp; FileNameoutofPath(sOrdnerinhalt(i)))
+				&apos;msgbox &quot;alt: &quot; &amp; sOrdnerinhalt(i) &amp; chr(13) &amp; &quot;neu: &quot; &amp; sNeuerURL &amp; FileNameoutofPath(sOrdnerinhalt(i))
+				&apos; --- Aenderung 18.11.2018
+				&apos; Problem: Je nach Betriebssystem hat das Pfadende einen /
+				if Right(sNeuerURL, &quot;1&quot;) = &quot;/&quot; Then
+					oSFA.copy(sOrdnerinhalt(i),sNeuerURL &amp; FileNameoutofPath(sOrdnerinhalt(i)))
+				else
+					oSFA.copy(sOrdnerinhalt(i),sNeuerURL &amp; &quot;/&quot; &amp; FileNameoutofPath(sOrdnerinhalt(i)))
+				end if
+				&apos; Aenderung 18.11.2018 ---
 			next
 		End If
 	end if

@@ -1,5 +1,11 @@
 Change Log:
 
+2018.11.18:
+ABGEÄNDERT (bi):
+Modul diverse:
+- Sub KopierenUndUmbenennenOrdner:
+    Je nach Betriebsystem hat das Pfadende einen /
+
 2018.10.11:
 NEU (ot)
 Module Exam:
