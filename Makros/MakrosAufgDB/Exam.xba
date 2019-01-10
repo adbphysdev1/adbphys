@@ -322,11 +322,41 @@ Sub TexDateiErstellenAuswahlExam &apos;Angepasst 18.9.18
 	PdflatexHilfsdateienLoeschen(sWorkingDirectory &amp; sTexDateienVerzeichnis, sTexDatei)
 End Sub
 
+Sub Punktzahl_Update
+&apos;8.1.19 (Ot): Ueberprueft, ob alle Aufgaben mit permanenter ID auch in der Punktetabelle vorhanden sind und ergänzt sie sonst&apos;
+	Dim DatabaseContext, DataSource, Connection, InteractionHandler, Statement, ResultSet As Object
+	
+   &apos;DatenbankKontext erstellen
+   DatabaseContext = createUnoService(&quot;com.sun.star.sdb.DatabaseContext&quot;)
+   &apos;Datenbank kontaktieren
+   DataSource = DatabaseContext.getByName(&quot;aufgdbphys&quot;)
+   &apos;Testen, ob Passwort benötigt wird
+   If Not DataSource.IsPasswordRequired Then
+   	Connection = DataSource.GetConnection(&quot;&quot;,&quot;&quot;)
+   Else	
+   	InteractionHandler = createUnoService(&quot;com.sun.star.sdb.InteractionHandler&quot;)
+   	Connection = DataSource.ConnectWithCompletion(InteractionHandler)
+   End If
+   &apos;Abfrage erstellen
+   Statement = Connection.createStatement()
+	sUpdate = &quot;INSERT INTO &quot;&quot;Punkte&quot;&quot; (&quot;&quot;AufgID&quot;&quot;) (SELECT &quot;&quot;PermanenteID&quot;&quot; FROM &quot;&quot;Aufgaben&quot;&quot; WHERE &quot;&quot;PermanenteID&quot;&quot; NOT IN	(SELECT &quot;&quot;AufgID&quot;&quot; FROM &quot;&quot;Punkte&quot;&quot;))&quot;
+	Statement.executeUpdate(sUpdate)
+	sUpdate = &quot;UPDATE &quot;&quot;Punkte&quot;&quot; SET &quot;&quot;Punktzahl&quot;&quot; = 4 WHERE &quot;&quot;Punktzahl&quot;&quot; IS NULL&quot;
+	Statement.executeUpdate(sUpdate)
+End Sub
+
 Sub PunkteAendern
 &apos; Erstellt am 27.9.18: Erlaubt es die Punktzahl einer Aufgabe zu aendern. Diese ist
 &apos; in der Tabelle Punkte gespeichert, damit die Bepunktung nicht aendert, wenn die DB
 &apos; zusammengezogen wird. Das Feld &quot;Punktzahl&quot; auf dem Formular liegt in einem SubForm zu
 &apos; MainForm, welches ueber einen InnerJoin die Punktzahl der aktuellen Aufgabe angibt.
+
+	&apos;Falls Aufgabe gerade geändert wurde:
+	AufgabeSpeichern
+	
+	&apos;Haben alle Aufgaben mit permandenter ID einen Eintrag in der Punktetabelle?
+	Punktzahl_Update()
+
 	saktuelleID = sfAusgabeID()
 	If saktuelleID = &quot;&quot; Then
 		AufgabeSpeichern

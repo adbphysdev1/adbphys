@@ -1,5 +1,11 @@
 Change Log:
 
+2019.01.10:
+NEU (ot)
+Module Exam:
+- Sub PunkteAendern
+- Menüeintrag entfernt "PDF aus aktuell ausgewählten Aufgaben erstellen"
+
 2018.11.18:
 ABGEÄNDERT (bi):
 Modul diverse:

@@ -14,28 +14,6 @@
 					<value>Makros AufgDB</value>
 				</prop>
 				<node oor:name="Submenu">
-				<node oor:name="m001" oor:op="replace">
-					<prop oor:name="Context" oor:type="xs:string">
-						<value></value>
-					</prop>
-					<prop oor:name="URL" oor:type="xs:string">
-						<value>vnd.sun.star.script:MakrosAufgDB.einzelneAufgabe.TexDateiErstellenAuswahl?language=Basic&amp;location=application</value>
-					</prop>
-					<prop oor:name="Title" oor:type="xs:string">
-						<value>PDF aus aktuell ausgewählten Aufgaben erstellen</value>
-					</prop>
-					<prop oor:name="Target" oor:type="xs:string">
-						<value>_self</value>
-					</prop>
-				</node>
-				<node oor:name="m002" oor:op="replace">
-					<prop oor:name="Context" oor:type="xs:string">
-						<value></value>
-					</prop>
-					<prop oor:name="URL" oor:type="xs:string">
-						<value>private:separator</value>
-					</prop>
-				</node>
 				<node oor:name="m003" oor:op="replace">
 					<prop oor:name="Context" oor:type="xs:string">
 						<value></value>
